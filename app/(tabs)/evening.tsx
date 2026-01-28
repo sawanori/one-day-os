@@ -16,14 +16,14 @@ export default function EveningScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>EVENING LAYER</Text>
-        <Text style={styles.subheaderText}>Quest Completion & Reflection</Text>
+        <Text style={styles.headerText}>イブニングレイヤー</Text>
+        <Text style={styles.subheaderText}>クエスト完了と振り返り</Text>
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* Quest Completion Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>DAILY QUESTS</Text>
+          <Text style={styles.sectionTitle}>今日のクエスト</Text>
 
           {/* Quest 1 */}
           <Pressable
@@ -34,7 +34,7 @@ export default function EveningScreen() {
               {quest1Completed && <Text style={styles.checkmark}>X</Text>}
             </View>
             <Text style={styles.questText}>
-              Quest 1: [Placeholder Quest]
+              クエスト1: [プレースホルダー]
             </Text>
           </Pressable>
 
@@ -47,7 +47,7 @@ export default function EveningScreen() {
               {quest2Completed && <Text style={styles.checkmark}>X</Text>}
             </View>
             <Text style={styles.questText}>
-              Quest 2: [Placeholder Quest]
+              クエスト2: [プレースホルダー]
             </Text>
           </Pressable>
         </View>
@@ -56,7 +56,7 @@ export default function EveningScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>停滞の理由</Text>
           <Text style={styles.sectionSubtitle}>
-            If quests were not completed, why?
+            クエストが未完了の場合、その理由は？
           </Text>
 
           <TextInput
@@ -65,7 +65,7 @@ export default function EveningScreen() {
             numberOfLines={6}
             value={stagnationReason}
             onChangeText={setStagnationReason}
-            placeholder="Enter reason for incomplete quests..."
+            placeholder="未完了の理由を入力..."
             placeholderTextColor="#666666"
           />
         </View>
@@ -81,7 +81,7 @@ export default function EveningScreen() {
             console.log('Submit pressed', { quest1Completed, quest2Completed, stagnationReason });
           }}
         >
-          <Text style={styles.submitButtonText}>COMPLETE DAY</Text>
+          <Text style={styles.submitButtonText}>本日完了</Text>
         </Pressable>
       </ScrollView>
     </View>

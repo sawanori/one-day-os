@@ -35,7 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="morning"
         options={{
-          title: 'MORNING',
+          title: 'モーニング',
           tabBarLabel: ({ focused }) => (
             <Text
               style={{
@@ -45,7 +45,7 @@ export default function TabsLayout() {
                 color: focused ? theme.colors.foreground : '#666666',
               }}
             >
-              MORNING
+              モーニング
             </Text>
           ),
         }}
@@ -53,7 +53,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'CORE',
+          title: 'コア',
           tabBarLabel: ({ focused }) => (
             <Text
               style={{
@@ -63,7 +63,7 @@ export default function TabsLayout() {
                 color: focused ? theme.colors.foreground : '#666666',
               }}
             >
-              CORE
+              コア
             </Text>
           ),
         }}
@@ -71,7 +71,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="evening"
         options={{
-          title: 'EVENING',
+          title: 'イブニング',
           tabBarLabel: ({ focused }) => (
             <Text
               style={{
@@ -81,7 +81,7 @@ export default function TabsLayout() {
                 color: focused ? theme.colors.foreground : '#666666',
               }}
             >
-              EVENING
+              イブニング
             </Text>
           ),
         }}

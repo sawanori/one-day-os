@@ -15,15 +15,15 @@ export default function CoreScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>CORE LAYER</Text>
-        <Text style={styles.subheaderText}>Identity Statement</Text>
+        <Text style={styles.headerText}>コアレイヤー</Text>
+        <Text style={styles.subheaderText}>アイデンティティ宣言</Text>
       </View>
 
       {/* Central Identity Display */}
       <View style={styles.identityContainer}>
         {/* IH Display with Glitch Effect */}
         <View style={styles.ihDisplay}>
-          <Text style={styles.ihLabel}>IDENTITY HEALTH</Text>
+          <Text style={styles.ihLabel}>アイデンティティ・ヘルス</Text>
           <GlitchText ih={currentIH} variant="title">
             IH {currentIH}
           </GlitchText>
@@ -46,19 +46,19 @@ export default function CoreScreen() {
 
         {/* 3-Layer Lens Placeholder */}
         <View style={styles.lensContainer}>
-          <Text style={styles.lensTitle}>3-LAYER LENS</Text>
+          <Text style={styles.lensTitle}>三層レンズ</Text>
           <View style={styles.lensButtons}>
             <View style={styles.lensButton}>
               <Text style={styles.lensButtonText}>0.5x</Text>
-              <Text style={styles.lensButtonLabel}>Micro</Text>
+              <Text style={styles.lensButtonLabel}>ミクロ（今日）</Text>
             </View>
             <View style={[styles.lensButton, styles.lensButtonActive]}>
               <Text style={[styles.lensButtonText, styles.lensButtonTextActive]}>1.0x</Text>
-              <Text style={[styles.lensButtonLabel, styles.lensButtonLabelActive]}>Current</Text>
+              <Text style={[styles.lensButtonLabel, styles.lensButtonLabelActive]}>現在（今）</Text>
             </View>
             <View style={styles.lensButton}>
               <Text style={styles.lensButtonText}>2.0x</Text>
-              <Text style={styles.lensButtonLabel}>Macro</Text>
+              <Text style={styles.lensButtonLabel}>マクロ（1年）</Text>
             </View>
           </View>
         </View>

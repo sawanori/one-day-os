@@ -9,9 +9,9 @@ export default function NotFoundScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>404</Text>
-      <Text style={styles.message}>Screen not found</Text>
+      <Text style={styles.message}>画面が見つかりません</Text>
       <Link href="/" style={styles.link}>
-        <Text style={styles.linkText}>Go to Home</Text>
+        <Text style={styles.linkText}>ホームへ戻る</Text>
       </Link>
     </View>
   );

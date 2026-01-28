@@ -11,8 +11,8 @@ export default function MorningScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>MORNING LAYER</Text>
-        <Text style={styles.subheaderText}>Anti-Vision Display</Text>
+        <Text style={styles.headerText}>モーニングレイヤー</Text>
+        <Text style={styles.subheaderText}>アンチビジョン表示</Text>
       </View>
 
       {/* Anti-Vision Display Area */}
@@ -20,11 +20,11 @@ export default function MorningScreen() {
         <Text style={styles.antiVisionTitle}>この未来を拒絶する</Text>
         <Text style={styles.antiVisionText}>
           {/* Placeholder for anti-vision text scroll */}
-          [Anti-Vision Text Scroll Placeholder]
+          [アンチビジョンのスクロールテキスト]
           {'\n\n'}
-          Here you will see scrolling text of futures you reject.
+          あなたが拒絶する未来がここにスクロール表示されます
           {'\n\n'}
-          Example:
+          例:
           {'\n'}
           - 他人の期待に振り回される人生
           {'\n'}

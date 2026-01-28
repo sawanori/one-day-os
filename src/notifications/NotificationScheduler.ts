@@ -31,14 +31,14 @@ export class NotificationScheduler {
       [
         {
           identifier: 'YES',
-          buttonTitle: 'YES',
+          buttonTitle: 'はい',
           options: {
             opensAppToForeground: true,
           },
         },
         {
           identifier: 'NO',
-          buttonTitle: 'NO',
+          buttonTitle: 'いいえ',
           options: {
             opensAppToForeground: true,
           },
@@ -101,6 +101,7 @@ export class NotificationScheduler {
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title: question,
+          body: '5分以内に回答。無応答でIH -20%',
           categoryIdentifier: CATEGORY_IDENTIFIER,
         },
         trigger: {

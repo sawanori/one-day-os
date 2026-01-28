@@ -126,12 +126,12 @@ export function OnboardingFlow() {
   const renderWelcome = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.title}>ONE DAY OS</Text>
-      <Text style={styles.heading}>WELCOME</Text>
+      <Text style={styles.heading}>ようこそ</Text>
       <Text style={styles.description}>
-        A system to rebuild your life, one day at a time. Define your worst fear, claim your identity, and execute daily quests.
+        あなたの人生を一日で再構築するシステム。最悪の未来を定義し、アイデンティティを宣言し、日々のクエストを実行せよ。
       </Text>
       <Pressable testID="begin-button" style={styles.button} onPress={handleWelcomePress}>
-        <Text style={styles.buttonText}>BEGIN</Text>
+        <Text style={styles.buttonText}>開始</Text>
       </Pressable>
     </View>
   );
@@ -140,7 +140,7 @@ export function OnboardingFlow() {
     const isValid = antiVisionText.trim().length > 0;
     return (
       <View style={styles.stepContainer}>
-        <Text style={styles.heading}>ANTI-VISION</Text>
+        <Text style={styles.heading}>アンチビジョン</Text>
         <Text style={styles.prompt}>5年後の最悪の火曜日を想像してください</Text>
         <TextInput
           testID="anti-vision-input"
@@ -174,10 +174,10 @@ export function OnboardingFlow() {
     const isValid = identityText.trim().length > 0;
     return (
       <View style={styles.stepContainer}>
-        <Text style={styles.heading}>IDENTITY</Text>
+        <Text style={styles.heading}>アイデンティティ</Text>
         <Text style={styles.prompt}>あなたはどんな人間ですか？</Text>
         <View style={styles.identityContainer}>
-          <Text style={styles.identityPrefix}>I am a person who...</Text>
+          <Text style={styles.identityPrefix}>私は〜な人間だ</Text>
           <TextInput
             testID="identity-input"
             style={styles.textInput}
@@ -209,7 +209,7 @@ export function OnboardingFlow() {
     const isValid = missionText.trim().length > 0;
     return (
       <View style={styles.stepContainer}>
-        <Text style={styles.heading}>MISSION</Text>
+        <Text style={styles.heading}>使命</Text>
         <Text style={styles.prompt}>今年の最重要ミッションは？</Text>
         <TextInput
           testID="mission-input"
@@ -243,12 +243,12 @@ export function OnboardingFlow() {
     const isValid = quest1Text.trim().length > 0 && quest2Text.trim().length > 0;
     return (
       <View style={styles.stepContainer}>
-        <Text style={styles.heading}>QUESTS</Text>
+        <Text style={styles.heading}>クエスト</Text>
         <Text style={styles.prompt}>毎日達成するクエストを2つ設定</Text>
         <TextInput
           testID="quest1-input"
           style={styles.textInput}
-          placeholder="Quest 1"
+          placeholder="クエスト1"
           placeholderTextColor={theme.colors.foreground + '80'}
           value={quest1Text}
           onChangeText={setQuest1Text}
@@ -256,7 +256,7 @@ export function OnboardingFlow() {
         <TextInput
           testID="quest2-input"
           style={[styles.textInput, styles.textInputSpacing]}
-          placeholder="Quest 2"
+          placeholder="クエスト2"
           placeholderTextColor={theme.colors.foreground + '80'}
           value={quest2Text}
           onChangeText={setQuest2Text}
@@ -312,7 +312,7 @@ export function OnboardingFlow() {
     console.log('[render] Rendering error state');
     return (
       <View style={styles.container} testID="onboarding-container">
-        <Text style={styles.heading}>Error: {error.message}</Text>
+        <Text style={styles.heading}>エラー: {error.message}</Text>
       </View>
     );
   }
