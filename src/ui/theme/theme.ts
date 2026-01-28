@@ -10,6 +10,8 @@
  * - High contrast (WCAG AAA compliant)
  */
 
+import { Platform } from 'react-native';
+
 interface GlitchLevel {
   intensity: number;
 }
@@ -36,7 +38,7 @@ interface ColorsWithIH extends Colors {
 interface Theme {
   colors: ColorsWithIH;
   typography: {
-    fontFamily: string;
+    fontFamily: string | undefined;
     fontSize: {
       title: number;
       heading: number;
@@ -130,8 +132,12 @@ const brutalistTheme: Theme = {
   // TYPOGRAPHY - Monospace Only
   // ============================================================================
   typography: {
-    // Brutalist monospace font stack
-    fontFamily: '"Courier New", Courier, monospace',
+    // Brutalist monospace font stack with Japanese support
+    fontFamily: Platform.select({
+      ios: '"Courier New", "Hiragino Sans", "Hiragino Kaku Gothic ProN", monospace',
+      android: '"Courier New", "Noto Sans Mono CJK JP", "Droid Sans Mono", monospace',
+      default: '"Courier New", Courier, monospace',
+    }),
 
     // Hierarchical font sizes (in pixels)
     fontSize: {
