@@ -108,7 +108,7 @@ export class IdentityEngine {
    * Set current Identity Health value (for testing and internal use)
    */
   public async setCurrentIH(value: number): Promise<void> {
-    const previousIH = this.currentIH;
+    const _previousIH = this.currentIH; // Reserved for future auditing
     this.currentIH = this.clampIH(value);
     await this.persistIH();
 

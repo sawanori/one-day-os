@@ -34,13 +34,14 @@ type DespairExitCallback = () => void;
 export class DespairModeManager {
   private static instance: DespairModeManager | null = null;
 
-  private db: SQLite.SQLiteDatabase;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private _db: SQLite.SQLiteDatabase; // Reserved for future use
   private wipeManager: WipeManager;
   private despairEnterCallbacks: DespairEnterCallback[] = [];
   private despairExitCallbacks: DespairExitCallback[] = [];
 
   constructor(db: SQLite.SQLiteDatabase, wipeManager: WipeManager) {
-    this.db = db;
+    this._db = db;
     this.wipeManager = wipeManager;
   }
 

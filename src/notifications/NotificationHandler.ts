@@ -155,7 +155,7 @@ export class NotificationHandler {
    * Track when a notification is fired
    */
   public async recordNotificationFired(
-    notificationId: string,
+    _notificationId: string, // Reserved for future use
     scheduledTime: Date
   ): Promise<void> {
     this.ensureInitialized();
@@ -177,7 +177,7 @@ export class NotificationHandler {
     this.ensureInitialized();
 
     const now = Date.now();
-    const timeoutThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS;
+    const _timeoutThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS; // Reserved for future validation
 
     // Get all unanswered notifications
     const pending = await this.db!.getAllAsync<NotificationRecord>(

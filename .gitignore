@@ -46,3 +46,7 @@ coverage/
 # Debug logs
 *.log
 firebase-debug.log
+
+# Backup files
+*.backup
+npm-list-*.txt
