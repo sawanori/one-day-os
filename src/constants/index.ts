@@ -33,11 +33,12 @@ export const NOTIFICATION_SCHEDULE = {
 
 // Five Questions for Notifications
 export const FIVE_QUESTIONS = [
-  "Who are you?",
-  "What are you doing?",
-  "Why are you doing this?",
-  "Is this aligned with your identity?",
-  "What will you do next?",
+  "あなたは誰か？",
+  "あなたは何をしているか？",
+  "なぜそれをしているのか？",
+  "それはあなたのアイデンティティと一致しているか？",
+  "次に何をするか？",
+  "何を避けようとしているか？",
 ] as const;
 
 // Phase Time Ranges

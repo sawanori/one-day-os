@@ -4,15 +4,7 @@
  */
 
 import * as Notifications from 'expo-notifications';
-
-// Notification schedule matching test expectations
-const FIVE_QUESTIONS = [
-  { hour: 11, minute: 0, question: '何を避けようとしているか？' },
-  { hour: 13, minute: 30, question: '観察者は君を「何を望んでいる人間」と結論づけるか？' },
-  { hour: 15, minute: 15, question: '嫌いな人生か、欲しい人生か？' },
-  { hour: 17, minute: 0, question: '重要でないふりをしている「最重要のこと」は？' },
-  { hour: 19, minute: 30, question: '今日の行動は本当の欲求か、自己防衛か？' },
-] as const;
+import { FIVE_QUESTIONS, NOTIFICATION_SCHEDULE } from '@/constants';
 
 const CATEGORY_IDENTIFIER = 'IDENTITY_QUESTION';
 
@@ -92,7 +84,7 @@ export class NotificationScheduler {
   }
 
   /**
-   * Schedule all 5 daily notifications
+   * Schedule all 6 daily notifications
    * @returns Array of notification IDs
    */
   async scheduleDailyNotifications(): Promise<string[]> {
@@ -101,8 +93,11 @@ export class NotificationScheduler {
 
     const notificationIds: string[] = [];
 
-    // Schedule each of the 5 daily notifications
-    for (const { hour, minute, question } of FIVE_QUESTIONS) {
+    // Schedule each of the 6 daily notifications
+    for (let i = 0; i < NOTIFICATION_SCHEDULE.TIMES.length; i++) {
+      const { hour, minute } = NOTIFICATION_SCHEDULE.TIMES[i];
+      const question = FIVE_QUESTIONS[i];
+
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title: question,
