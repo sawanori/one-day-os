@@ -19,6 +19,17 @@ export default function CoreScreen() {
         <Text style={styles.subheaderText}>アイデンティティ宣言</Text>
       </View>
 
+      {/* Explanatory Text */}
+      <View style={styles.explanationContainer}>
+        <GlitchText ih={100} variant="caption" intensity="NONE">
+          説明:
+        </GlitchText>
+        <Text style={styles.explanationText}>
+          「あなたのアイデンティティを確認する場所。{'\n'}
+          三層レンズで今日・今・1年後を見据える。」
+        </Text>
+      </View>
+
       {/* Central Identity Display */}
       <View style={styles.identityContainer}>
         {/* IH Display with Glitch Effect */}
@@ -27,6 +38,15 @@ export default function CoreScreen() {
           <GlitchText ih={currentIH} variant="title">
             IH {currentIH}
           </GlitchText>
+
+          {/* IH Explanation */}
+          <View style={styles.ihExplanationContainer}>
+            <Text style={styles.ihExplanationLabel}>IHとは:</Text>
+            <Text style={[styles.ihExplanationText, { color: currentIH > 80 ? '#00FF00' : currentIH > 50 ? '#FFFF00' : currentIH > 20 ? '#FFA500' : '#FF0000' }]}>
+              あなたの生命力。通知無視やクエスト未完了でペナルティ。{'\n'}
+              0%到達で全データ消去。
+            </Text>
+          </View>
         </View>
 
         {/* Identity Statement */}
@@ -79,6 +99,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: theme.colors.foreground,
   },
+  explanationContainer: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.foreground,
+  },
+  explanationText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    marginTop: theme.spacing.xs,
+    lineHeight: theme.typography.fontSize.caption * theme.typography.lineHeight.relaxed,
+  },
   headerText: {
     fontFamily: theme.typography.fontFamily,
     fontSize: theme.typography.fontSize.heading,
@@ -105,6 +138,26 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.fontSize.caption,
     color: theme.colors.foreground,
     marginBottom: theme.spacing.sm,
+  },
+  ihExplanationContainer: {
+    marginTop: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.foreground,
+    width: '100%',
+  },
+  ihExplanationLabel: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    marginBottom: theme.spacing.xs,
+    textAlign: 'center',
+  },
+  ihExplanationText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    textAlign: 'center',
+    lineHeight: theme.typography.fontSize.caption * theme.typography.lineHeight.relaxed,
   },
   statementContainer: {
     alignItems: 'center',

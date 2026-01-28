@@ -6,6 +6,8 @@
 import { View, Text, StyleSheet, Pressable, TextInput, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { theme } from '../../src/ui/theme/theme';
+import { PhaseGuard } from '../../src/ui/components/PhaseGuard';
+import { GlitchText } from '../../src/ui/components/GlitchText';
 
 export default function EveningScreen() {
   const [quest1Completed, setQuest1Completed] = useState(false);
@@ -13,12 +15,30 @@ export default function EveningScreen() {
   const [stagnationReason, setStagnationReason] = useState('');
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>イブニングレイヤー</Text>
-        <Text style={styles.subheaderText}>クエスト完了と振り返り</Text>
-      </View>
+    <PhaseGuard phase="EVENING">
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerText}>イブニングレイヤー</Text>
+          <Text style={styles.subheaderText}>クエスト完了と振り返り</Text>
+        </View>
+
+        {/* Explanatory Text */}
+        <View style={styles.explanationContainer}>
+          <GlitchText ih={100} variant="caption" intensity="NONE">
+            説明:
+          </GlitchText>
+          <Text style={styles.explanationText}>
+            「18:00-24:00のみアクセス可能。{'\n'}
+            クエストを完了し、5つの質問に答えよ。」
+          </Text>
+          <Text style={styles.operationLabel}>操作:</Text>
+          <Text style={styles.operationText}>
+            「1. 全てのクエストをチェック{'\n'}
+            2. 未完了の理由を記入（該当する場合）{'\n'}
+            3. 「本日完了」をタップして一日を締めくくる」
+          </Text>
+        </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
         {/* Quest Completion Section */}
@@ -85,6 +105,7 @@ export default function EveningScreen() {
         </Pressable>
       </ScrollView>
     </View>
+    </PhaseGuard>
   );
 }
 
@@ -111,6 +132,33 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily,
     fontSize: theme.typography.fontSize.body,
     color: theme.colors.foreground,
+  },
+  explanationContainer: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.foreground,
+  },
+  explanationText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    marginTop: theme.spacing.xs,
+    marginBottom: theme.spacing.md,
+    lineHeight: theme.typography.fontSize.caption * theme.typography.lineHeight.relaxed,
+  },
+  operationLabel: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    marginTop: theme.spacing.sm,
+  },
+  operationText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    marginTop: theme.spacing.xs,
+    lineHeight: theme.typography.fontSize.caption * theme.typography.lineHeight.relaxed,
   },
   content: {
     flex: 1,

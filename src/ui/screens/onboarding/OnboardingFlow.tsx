@@ -141,6 +141,20 @@ export function OnboardingFlow() {
     return (
       <View style={styles.stepContainer}>
         <Text style={styles.heading}>アンチビジョン</Text>
+
+        {/* Explanation */}
+        <View style={styles.explanationBox}>
+          <Text style={styles.explanationTitle}>これは何か:</Text>
+          <Text style={styles.explanationText}>
+            あなたが絶対に避けたい最悪の未来。{'\n'}
+            これを明確化することで、逃げられない現実を作る。
+          </Text>
+          <Text style={styles.exampleTitle}>例:</Text>
+          <Text style={styles.exampleText}>
+            「40歳で貯金ゼロ、無職、孤独死」
+          </Text>
+        </View>
+
         <Text style={styles.prompt}>5年後の最悪の火曜日を想像してください</Text>
         <TextInput
           testID="anti-vision-input"
@@ -175,6 +189,20 @@ export function OnboardingFlow() {
     return (
       <View style={styles.stepContainer}>
         <Text style={styles.heading}>アイデンティティ</Text>
+
+        {/* Explanation */}
+        <View style={styles.explanationBox}>
+          <Text style={styles.explanationTitle}>これは何か:</Text>
+          <Text style={styles.explanationText}>
+            あなたが何者であるかの宣言。{'\n'}
+            この宣言に従って行動し続けることがIHを維持する鍵。
+          </Text>
+          <Text style={styles.exampleTitle}>例:</Text>
+          <Text style={styles.exampleText}>
+            「私は毎日成長し続ける人間だ」
+          </Text>
+        </View>
+
         <Text style={styles.prompt}>あなたはどんな人間ですか？</Text>
         <View style={styles.identityContainer}>
           <Text style={styles.identityPrefix}>私は〜な人間だ</Text>
@@ -210,6 +238,20 @@ export function OnboardingFlow() {
     return (
       <View style={styles.stepContainer}>
         <Text style={styles.heading}>使命</Text>
+
+        {/* Explanation */}
+        <View style={styles.explanationBox}>
+          <Text style={styles.explanationTitle}>これは何か:</Text>
+          <Text style={styles.explanationText}>
+            今から1年後に達成する目標。{'\n'}
+            アンチビジョンから逃げるための具体的なゴール。
+          </Text>
+          <Text style={styles.exampleTitle}>例:</Text>
+          <Text style={styles.exampleText}>
+            「1年後、年収600万円のエンジニアになる」
+          </Text>
+        </View>
+
         <Text style={styles.prompt}>今年の最重要ミッションは？</Text>
         <TextInput
           testID="mission-input"
@@ -244,6 +286,21 @@ export function OnboardingFlow() {
     return (
       <View style={styles.stepContainer}>
         <Text style={styles.heading}>クエスト</Text>
+
+        {/* Explanation */}
+        <View style={styles.explanationBox}>
+          <Text style={styles.explanationTitle}>これは何か:</Text>
+          <Text style={styles.explanationText}>
+            今日一日で達成すべき具体的なタスク。{'\n'}
+            2つのクエストを設定してください。
+          </Text>
+          <Text style={styles.exampleTitle}>例:</Text>
+          <Text style={styles.exampleText}>
+            「朝6時に起きる」{'\n'}
+            「コーディング3時間」
+          </Text>
+        </View>
+
         <Text style={styles.prompt}>毎日達成するクエストを2つ設定</Text>
         <TextInput
           testID="quest1-input"
@@ -435,5 +492,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: theme.spacing.md,
+  },
+  explanationBox: {
+    borderWidth: 2,
+    borderColor: theme.colors.foreground,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
+    backgroundColor: theme.colors.background,
+  },
+  explanationTitle: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing.xs,
+  },
+  explanationText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    lineHeight: theme.typography.fontSize.caption * theme.typography.lineHeight.relaxed,
+    marginBottom: theme.spacing.md,
+  },
+  exampleTitle: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    fontWeight: theme.typography.fontWeight.bold,
+    marginBottom: theme.spacing.xs,
+  },
+  exampleText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.accent,
+    lineHeight: theme.typography.fontSize.caption * theme.typography.lineHeight.relaxed,
   },
 });
