@@ -21,13 +21,14 @@ jest.mock('expo-notifications', () => ({
   setNotificationCategoryAsync: jest.fn(),
 }));
 
-// Notification schedule based on idea.md
+// Notification schedule based on updated constants/index.ts
 const EXPECTED_NOTIFICATION_TIMES = [
-  { hour: 11, minute: 0, question: '何を避けようとしているか？' },
-  { hour: 13, minute: 30, question: '観察者は君を「何を望んでいる人間」と結論づけるか？' },
-  { hour: 15, minute: 15, question: '嫌いな人生か、欲しい人生か？' },
-  { hour: 17, minute: 0, question: '重要でないふりをしている「最重要のこと」は？' },
-  { hour: 19, minute: 30, question: '今日の行動は本当の欲求か、自己防衛か？' },
+  { hour: 6, minute: 0, question: 'あなたは誰か？' },
+  { hour: 9, minute: 0, question: 'あなたは何をしているか？' },
+  { hour: 12, minute: 0, question: 'なぜそれをしているのか？' },
+  { hour: 15, minute: 0, question: 'それはあなたのアイデンティティと一致しているか？' },
+  { hour: 18, minute: 0, question: '次に何をするか？' },
+  { hour: 21, minute: 0, question: '何を避けようとしているか？' },
 ] as const;
 
 describe('NotificationScheduler', () => {
@@ -55,70 +56,80 @@ describe('NotificationScheduler', () => {
   });
 
   describe('スケジュール設定テスト', () => {
-    test('5つの通知が正しい時間にスケジュールされる', async () => {
+    test('6つの通知が正しい時間にスケジュールされる', async () => {
       const notificationIds = await scheduler.scheduleDailyNotifications();
 
       // Should schedule exactly 5 notifications
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
-      expect(notificationIds).toHaveLength(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
+      expect(notificationIds).toHaveLength(6);
       expect(notificationIds.every(id => typeof id === 'string')).toBe(true);
     });
 
-    test('11:00の通知が正しく設定される', async () => {
+    test('6:00の通知が正しく設定される', async () => {
       await scheduler.scheduleDailyNotifications();
 
       const firstCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0];
-      expect(firstCall.content.title).toBe('何を避けようとしているか？');
-      expect(firstCall.trigger.hour).toBe(11);
+      expect(firstCall.content.title).toBe('あなたは誰か？');
+      expect(firstCall.trigger.hour).toBe(6);
       expect(firstCall.trigger.minute).toBe(0);
       expect(firstCall.trigger.repeats).toBe(true);
     });
 
-    test('13:30の通知が正しく設定される', async () => {
+    test('9:00の通知が正しく設定される', async () => {
       await scheduler.scheduleDailyNotifications();
 
       const secondCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[1][0];
-      expect(secondCall.content.title).toBe('観察者は君を「何を望んでいる人間」と結論づけるか？');
-      expect(secondCall.trigger.hour).toBe(13);
-      expect(secondCall.trigger.minute).toBe(30);
+      expect(secondCall.content.title).toBe('あなたは何をしているか？');
+      expect(secondCall.trigger.hour).toBe(9);
+      expect(secondCall.trigger.minute).toBe(0);
       expect(secondCall.trigger.repeats).toBe(true);
     });
 
-    test('15:15の通知が正しく設定される', async () => {
+    test('12:00の通知が正しく設定される', async () => {
       await scheduler.scheduleDailyNotifications();
 
       const thirdCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[2][0];
-      expect(thirdCall.content.title).toBe('嫌いな人生か、欲しい人生か？');
-      expect(thirdCall.trigger.hour).toBe(15);
-      expect(thirdCall.trigger.minute).toBe(15);
+      expect(thirdCall.content.title).toBe('なぜそれをしているのか？');
+      expect(thirdCall.trigger.hour).toBe(12);
+      expect(thirdCall.trigger.minute).toBe(0);
       expect(thirdCall.trigger.repeats).toBe(true);
     });
 
-    test('17:00の通知が正しく設定される', async () => {
+    test('15:00の通知が正しく設定される', async () => {
       await scheduler.scheduleDailyNotifications();
 
       const fourthCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[3][0];
-      expect(fourthCall.content.title).toBe('重要でないふりをしている「最重要のこと」は？');
-      expect(fourthCall.trigger.hour).toBe(17);
+      expect(fourthCall.content.title).toBe('それはあなたのアイデンティティと一致しているか？');
+      expect(fourthCall.trigger.hour).toBe(15);
       expect(fourthCall.trigger.minute).toBe(0);
       expect(fourthCall.trigger.repeats).toBe(true);
     });
 
-    test('19:30の通知が正しく設定される', async () => {
+    test('18:00の通知が正しく設定される', async () => {
       await scheduler.scheduleDailyNotifications();
 
       const fifthCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[4][0];
-      expect(fifthCall.content.title).toBe('今日の行動は本当の欲求か、自己防衛か？');
-      expect(fifthCall.trigger.hour).toBe(19);
-      expect(fifthCall.trigger.minute).toBe(30);
+      expect(fifthCall.content.title).toBe('次に何をするか？');
+      expect(fifthCall.trigger.hour).toBe(18);
+      expect(fifthCall.trigger.minute).toBe(0);
       expect(fifthCall.trigger.repeats).toBe(true);
+    });
+
+    test('21:00の通知が正しく設定される', async () => {
+      await scheduler.scheduleDailyNotifications();
+
+      const sixthCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[5][0];
+      expect(sixthCall.content.title).toBe('何を避けようとしているか？');
+      expect(sixthCall.trigger.hour).toBe(21);
+      expect(sixthCall.trigger.minute).toBe(0);
+      expect(sixthCall.trigger.repeats).toBe(true);
     });
 
     test('各通知に正しい質問テキストが設定される', async () => {
       await scheduler.scheduleDailyNotifications();
 
       const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
-      expect(calls).toHaveLength(5);
+      expect(calls).toHaveLength(6);
 
       EXPECTED_NOTIFICATION_TIMES.forEach((expected, index) => {
         const call = calls[index][0];
@@ -162,7 +173,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       expect(Notifications.requestPermissionsAsync).toHaveBeenCalled();
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
     });
 
     test('権限が拒否された場合、エラーを返す', async () => {
@@ -199,8 +210,8 @@ describe('NotificationScheduler', () => {
 
       const result = await scheduler.scheduleDailyNotifications();
 
-      expect(result).toHaveLength(5);
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
+      expect(result).toHaveLength(6);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
     });
 
     test('権限が初回で許可されている場合、権限要求をスキップする', async () => {
@@ -211,7 +222,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled();
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
     });
   });
 
@@ -226,15 +237,15 @@ describe('NotificationScheduler', () => {
       const notificationIds = await scheduler.rescheduleDailyNotifications();
 
       expect(Notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalled();
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
-      expect(notificationIds).toHaveLength(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
+      expect(notificationIds).toHaveLength(6);
     });
 
-    test('再スケジュール後も5つの通知が正しくスケジュールされる', async () => {
+    test('再スケジュール後も6つの通知が正しくスケジュールされる', async () => {
       await scheduler.rescheduleDailyNotifications();
 
       const calls = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls;
-      expect(calls).toHaveLength(5);
+      expect(calls).toHaveLength(6);
 
       EXPECTED_NOTIFICATION_TIMES.forEach((expected, index) => {
         const call = calls[index][0];
@@ -247,7 +258,7 @@ describe('NotificationScheduler', () => {
     test('タイムゾーン変更時に正しく再スケジュールされる', async () => {
       // First schedule
       await scheduler.scheduleDailyNotifications();
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
 
       jest.clearAllMocks();
 
@@ -255,7 +266,7 @@ describe('NotificationScheduler', () => {
       await scheduler.rescheduleDailyNotifications();
 
       expect(Notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalledTimes(1);
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
     });
 
     test('再スケジュールが複数回実行されても正しく動作する', async () => {
@@ -264,8 +275,8 @@ describe('NotificationScheduler', () => {
       await scheduler.rescheduleDailyNotifications();
 
       expect(Notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalledTimes(3);
-      // Last call should have scheduled 5 notifications
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(15); // 3 times * 5
+      // Last call should have scheduled 6 notifications
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(18); // 3 times * 6
     });
   });
 
@@ -281,7 +292,7 @@ describe('NotificationScheduler', () => {
       await scheduler.cancelAllNotifications();
 
       expect(Notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalledTimes(1);
-      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(5);
+      expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(6);
     });
 
     test('特定の通知のみキャンセルできる', async () => {
@@ -333,14 +344,14 @@ describe('NotificationScheduler', () => {
         [
           {
             identifier: 'YES',
-            buttonTitle: 'YES',
+            buttonTitle: 'はい',
             options: {
               opensAppToForeground: true,
             },
           },
           {
             identifier: 'NO',
-            buttonTitle: 'NO',
+            buttonTitle: 'いいえ',
             options: {
               opensAppToForeground: true,
             },
@@ -493,10 +504,11 @@ describe('NotificationScheduler', () => {
         { identifier: 'notif-3', content: {}, trigger: {} },
         { identifier: 'notif-4', content: {}, trigger: {} },
         { identifier: 'notif-5', content: {}, trigger: {} },
+        { identifier: 'notif-6', content: {}, trigger: {} },
       ]);
 
       const result = await scheduler.getScheduledNotifications();
-      expect(result).toHaveLength(5);
+      expect(result).toHaveLength(6);
     });
   });
 

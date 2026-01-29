@@ -15,11 +15,18 @@ export const FileDeleteAnimation = ({ files }: FileDeleteAnimationProps) => {
   const [visibleFiles, setVisibleFiles] = useState<string[]>([]);
 
   useEffect(() => {
+    const timeouts: NodeJS.Timeout[] = [];
+
     files.forEach((file, index) => {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setVisibleFiles(prev => [...prev, file]);
       }, index * 500); // 500msごとに1つずつ表示
+      timeouts.push(timeout);
     });
+
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
   }, [files]);
 
   return (
@@ -35,6 +42,9 @@ const FileDeleteLine = ({ filename }: { filename: string }) => {
   const [opacity] = useState(new Animated.Value(0));
 
   useEffect(() => {
+    let fadeOutTimeout: NodeJS.Timeout | null = null;
+    let isMounted = true;
+
     // Fade in
     Animated.timing(opacity, {
       toValue: 1,
@@ -42,14 +52,21 @@ const FileDeleteLine = ({ filename }: { filename: string }) => {
       useNativeDriver: true,
     }).start(() => {
       // 1秒後にFade out
-      setTimeout(() => {
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
+      fadeOutTimeout = setTimeout(() => {
+        if (isMounted) {
+          Animated.timing(opacity, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }).start();
+        }
       }, 1000);
     });
+
+    return () => {
+      isMounted = false;
+      if (fadeOutTimeout) clearTimeout(fadeOutTimeout);
+    };
   }, []);
 
   return (

@@ -148,7 +148,7 @@ describe('Brutalist Design System - Theme', () => {
 
     test('should use monospace font family', () => {
       expect(theme.typography.fontFamily).toBeDefined();
-      const fontFamily = theme.typography.fontFamily.toLowerCase();
+      const fontFamily = theme.typography.fontFamily?.toLowerCase() || '';
 
       // Check for common monospace fonts
       const hasMonospace =

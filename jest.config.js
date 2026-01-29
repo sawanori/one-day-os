@@ -1,5 +1,5 @@
 module.exports = {
-  preset: 'react-native',
+  preset: 'jest-expo',
   resetMocks: false,
   clearMocks: false,
   restoreMocks: false,

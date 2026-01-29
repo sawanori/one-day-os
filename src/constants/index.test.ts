@@ -33,13 +33,17 @@ describe('Constants', () => {
   });
 
   describe('FIVE_QUESTIONS', () => {
-    it('should have exactly 5 questions', () => {
-      expect(FIVE_QUESTIONS).toHaveLength(5);
+    it('should have exactly 6 questions', () => {
+      expect(FIVE_QUESTIONS).toHaveLength(6);
     });
 
-    it('should contain identity-focused questions', () => {
-      expect(FIVE_QUESTIONS).toContain('Who are you?');
-      expect(FIVE_QUESTIONS).toContain('Is this aligned with your identity?');
+    it('should contain identity-focused questions in Japanese', () => {
+      expect(FIVE_QUESTIONS).toContain('あなたは誰か？');
+      expect(FIVE_QUESTIONS).toContain('それはあなたのアイデンティティと一致しているか？');
+    });
+
+    it('should match the notification schedule length', () => {
+      expect(FIVE_QUESTIONS).toHaveLength(NOTIFICATION_SCHEDULE.TIMES.length);
     });
   });
 });

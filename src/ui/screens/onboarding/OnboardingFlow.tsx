@@ -13,6 +13,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { OnboardingManager, OnboardingStep } from '../../../core/onboarding/OnboardingManager';
+import { updateAppState } from '../../../database/db';
 import { theme } from '../../theme/theme';
 
 export function OnboardingFlow() {
@@ -103,6 +104,15 @@ export function OnboardingFlow() {
 
       const isComplete = await manager.isOnboardingComplete();
       if (isComplete) {
+        // Update app state to 'active' before navigating
+        try {
+          await updateAppState('active');
+        } catch (error) {
+          console.error('Failed to update app state:', error);
+          // Continue with navigation even if app_state update fails
+          // On next app start, isOnboardingComplete() will be true
+          // and user will be redirected to main app automatically
+        }
         router.replace('/(tabs)');
       }
     } catch (error) {

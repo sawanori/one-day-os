@@ -66,6 +66,25 @@ npm run ios
 npm test
 ```
 
+### Platform Support
+
+**⚠️ THIS APP IS MOBILE-ONLY (Android/iOS) ⚠️**
+
+Web version is intentionally disabled because:
+- Core features require native mobile capabilities (local SQLite, no backup, precise notifications)
+- Data permanence and wipe mechanism cannot be properly enforced on web browsers
+- Identity Health system requires strict notification timing (not reliable in browsers)
+
+#### Supported Platforms
+✅ **Android** (API 24+)
+✅ **iOS** (13+)
+❌ **Web** (Not Supported)
+
+#### Important Notes
+- Do NOT run `npm run web` (command removed)
+- Do NOT press `w` during `expo start` (web disabled in app.json)
+- `react-native-web` remains installed as a dependency (required by expo-router)
+
 ## Core Features (Planned)
 
 ### Identity Health (IH) System

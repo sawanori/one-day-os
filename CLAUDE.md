@@ -131,7 +131,6 @@ This is a **life-force accountability system** that tracks Identity Health (IH) 
 npm start              # Start Expo dev server
 npm run android        # Run on Android
 npm run ios           # Run on iOS
-npm run web           # Run web version
 
 # Testing
 npm test              # Run all Jest tests
@@ -139,6 +138,20 @@ npm test              # Run all Jest tests
 # Module alias: @/* resolves to ./src/*
 # Example: import { IdentityEngine } from '@/core/identity/IdentityEngine'
 ```
+
+### Platform Support
+
+**MOBILE-ONLY (Android/iOS)**
+
+Web version is disabled via:
+- `"platforms": ["ios", "android"]` in app.json
+- Platform detection in app/_layout.tsx
+- Removed `npm run web` script
+
+**Do not attempt to run web version:**
+- Do not use `npm run web`
+- Do not press `w` during expo start
+- `react-native-web` remains installed (expo-router dependency)
 
 ### Architecture Overview
 

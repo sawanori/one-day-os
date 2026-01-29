@@ -4,11 +4,52 @@
  */
 
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { theme } from '../../src/ui/theme/theme';
 import { PhaseGuard } from '../../src/ui/components/PhaseGuard';
 import { GlitchText } from '../../src/ui/components/GlitchText';
+import { OnboardingManager } from '../../src/core/onboarding/OnboardingManager';
+import { IdentityEngine } from '../../src/core/identity/IdentityEngine';
 
 export default function MorningScreen() {
+  const [antiVision, setAntiVision] = useState<string>('');
+  const [quests, setQuests] = useState<[string, string]>(['', '']);
+  const [currentIH, setCurrentIH] = useState<number>(100);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      const loadData = async () => {
+        try {
+          const manager = await OnboardingManager.getInstance();
+          const engine = await IdentityEngine.getInstance();
+
+          if (!isMounted) return;
+
+          const antiVisionData = await manager.getAntiVision();
+          const questsData = await manager.getQuests();
+          const ihData = await engine.getCurrentIH();
+
+          setAntiVision(antiVisionData || '');
+          setQuests(questsData || ['', '']);
+          setCurrentIH(ihData);
+        } catch (error) {
+          console.error('Error loading morning layer data:', error);
+        } finally {
+          if (isMounted) setIsLoading(false);
+        }
+      };
+
+      loadData();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [])
+  );
   return (
     <PhaseGuard phase="MORNING">
       <View style={styles.container}>
@@ -20,7 +61,7 @@ export default function MorningScreen() {
 
         {/* Explanatory Text */}
         <View style={styles.explanationContainer}>
-          <GlitchText ih={100} variant="caption" intensity="NONE">
+          <GlitchText ih={currentIH} variant="caption">
             説明:
           </GlitchText>
           <Text style={styles.explanationText}>
@@ -37,20 +78,32 @@ export default function MorningScreen() {
       <ScrollView style={styles.antiVisionContainer} contentContainerStyle={styles.antiVisionContent}>
         <Text style={styles.antiVisionTitle}>この未来を拒絶する</Text>
         <Text style={styles.antiVisionText}>
-          {/* Placeholder for anti-vision text scroll */}
-          [アンチビジョンのスクロールテキスト]
-          {'\n\n'}
-          あなたが拒絶する未来がここにスクロール表示されます
-          {'\n\n'}
-          例:
-          {'\n'}
-          - 他人の期待に振り回される人生
-          {'\n'}
-          - 決断できずに流される日々
-          {'\n'}
-          - 本質を見失った仕事
+          {isLoading ? '[読み込み中...]' : antiVision || '[未設定]'}
         </Text>
       </ScrollView>
+
+      {/* Quests Display Section */}
+      <View style={styles.questsSection}>
+        <Text style={styles.questsSectionTitle}>今日のクエスト</Text>
+        <Text style={styles.questsSectionSubtitle}>
+          (完了はイブニングレイヤーで)
+        </Text>
+
+        {isLoading ? (
+          <Text style={styles.questText}>[読み込み中...]</Text>
+        ) : (
+          <>
+            <View style={styles.questItem}>
+              <Text style={styles.questNumber}>1.</Text>
+              <Text style={styles.questText}>{quests[0] || '[未設定]'}</Text>
+            </View>
+            <View style={styles.questItem}>
+              <Text style={styles.questNumber}>2.</Text>
+              <Text style={styles.questText}>{quests[1] || '[未設定]'}</Text>
+            </View>
+          </>
+        )}
+      </View>
 
       {/* Rejection Button */}
       <View style={styles.buttonContainer}>
@@ -164,5 +217,48 @@ const styles = StyleSheet.create({
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.background,
     textAlign: 'center',
+  },
+  questsSection: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
+    borderTopWidth: 2,
+    borderTopColor: theme.colors.foreground,
+    borderBottomWidth: 2,
+    borderBottomColor: theme.colors.foreground,
+  },
+  questsSectionTitle: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.heading,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.foreground,
+    marginBottom: theme.spacing.xs,
+  },
+  questsSectionSubtitle: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.caption,
+    color: theme.colors.foreground,
+    marginBottom: theme.spacing.md,
+  },
+  questItem: {
+    flexDirection: 'row',
+    marginBottom: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.foreground,
+  },
+  questNumber: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.body,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.accent,
+    marginRight: theme.spacing.sm,
+    minWidth: 24,
+  },
+  questText: {
+    fontFamily: theme.typography.fontFamily,
+    fontSize: theme.typography.fontSize.body,
+    color: theme.colors.foreground,
+    flex: 1,
+    lineHeight: theme.typography.fontSize.body * theme.typography.lineHeight.normal,
   },
 });

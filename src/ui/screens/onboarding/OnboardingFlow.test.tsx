@@ -79,9 +79,9 @@ describe('OnboardingFlow Component', () => {
         await new Promise(resolve => setTimeout(resolve, 50));
       });
 
-      // Now the welcome screen should be visible
+      // Now the welcome screen should be visible (Japanese: ようこそ)
       await waitFor(() => {
-        const welcome = queryByText(/welcome/i);
+        const welcome = queryByText(/ようこそ/i);
         expect(welcome).toBeTruthy();
       }, { timeout: 5000 });
     });
@@ -98,8 +98,8 @@ describe('OnboardingFlow Component', () => {
       const { getByText } = render(<OnboardingFlow />);
 
       await waitFor(() => {
-        // Check for description text
-        const description = getByText(/rebuild.*life/i);
+        // Check for description text (Japanese)
+        const description = getByText(/一日で再構築|人生/i);
         expect(description).toBeTruthy();
       });
     });
@@ -145,7 +145,7 @@ describe('OnboardingFlow Component', () => {
       const { getByText } = render(<OnboardingFlow />);
 
       await waitFor(() => {
-        expect(getByText(/anti.*vision/i)).toBeTruthy();
+        expect(getByText(/アンチビジョン/i)).toBeTruthy();
       });
     });
 
@@ -261,12 +261,13 @@ describe('OnboardingFlow Component', () => {
       });
     });
 
-    test('"I am a person who..." のプレフィックスが表示される', async () => {
-      const { getByText } = render(<OnboardingFlow />);
+    test('"私は" のプレフィックスが表示される', async () => {
+      const { getAllByText } = render(<OnboardingFlow />);
 
       await waitFor(() => {
-        const prefix = getByText(/I am a person who/i);
-        expect(prefix).toBeTruthy();
+        const elements = getAllByText(/私は/i);
+        // Should find at least one element with "私は"
+        expect(elements.length).toBeGreaterThan(0);
       });
     });
 
@@ -335,7 +336,7 @@ describe('OnboardingFlow Component', () => {
       const { getByText } = render(<OnboardingFlow />);
 
       await waitFor(() => {
-        expect(getByText('MISSION')).toBeTruthy();
+        expect(getByText('使命')).toBeTruthy();
       });
     });
 
@@ -647,7 +648,7 @@ describe('OnboardingFlow Component', () => {
       const { getByText } = render(<OnboardingFlow />);
 
       await waitFor(() => {
-        const button = getByText(/start|begin|next|complete|続ける|次へ|完了/i);
+        const button = getByText(/開始|戻る|次へ|完了/i);
         const style = button.parent?.props.style;
 
         let borderRadius;

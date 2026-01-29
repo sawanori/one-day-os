@@ -4,12 +4,60 @@
  */
 
 import { View, Text, StyleSheet } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { theme } from '../../src/ui/theme/theme';
 import { GlitchText } from '../../src/ui/components/GlitchText';
+import { OnboardingManager } from '../../src/core/onboarding/OnboardingManager';
+import { IdentityEngine } from '../../src/core/identity/IdentityEngine';
 
 export default function CoreScreen() {
-  // TODO: Get actual IH value from PhaseManager
-  const currentIH = 75; // Placeholder
+  // State for loaded data
+  const [antiVision, setAntiVision] = useState<string>('');
+  const [identityStatement, setIdentityStatement] = useState<string>('');
+  const [oneYearMission, setOneYearMission] = useState<string>('');
+  const [currentIH, setCurrentIH] = useState<number>(100);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Load data from database when screen is focused
+  // useFocusEffect ensures data is refreshed when returning to this tab
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      const loadData = async () => {
+        try {
+          const manager = await OnboardingManager.getInstance();
+          const engine = await IdentityEngine.getInstance();
+
+          // Check if component is still mounted before updating state
+          if (!isMounted) return;
+
+          // Load identity data
+          const antiVisionData = await manager.getAntiVision();
+          const identityData = await manager.getIdentity();
+          const missionData = await manager.getMission();
+          const ihData = await engine.getCurrentIH();
+
+          setAntiVision(antiVisionData || '');
+          setIdentityStatement(identityData || '');
+          setOneYearMission(missionData || '');
+          setCurrentIH(ihData);
+        } catch (error) {
+          console.error('Error loading identity data:', error);
+        } finally {
+          if (isMounted) setIsLoading(false);
+        }
+      };
+
+      loadData();
+
+      // Cleanup function to prevent state updates after unmount
+      return () => {
+        isMounted = false;
+      };
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -21,7 +69,7 @@ export default function CoreScreen() {
 
       {/* Explanatory Text */}
       <View style={styles.explanationContainer}>
-        <GlitchText ih={100} variant="caption" intensity="NONE">
+        <GlitchText ih={100} variant="caption">
           説明:
         </GlitchText>
         <Text style={styles.explanationText}>
@@ -56,15 +104,12 @@ export default function CoreScreen() {
           </GlitchText>
           <View style={styles.statementBox}>
             <Text style={styles.statementText}>
-              {/* Placeholder for identity statement */}
-              [Identity Statement Placeholder]
-              {'\n\n'}
-              "決断する人間だ"
+              {isLoading ? '[読み込み中...]' : identityStatement || '[未設定]'}
             </Text>
           </View>
         </View>
 
-        {/* 3-Layer Lens Placeholder */}
+        {/* 三層レンズ - 将来実装: antiVision(ミクロ), identityStatement(現在), oneYearMission(マクロ) */}
         <View style={styles.lensContainer}>
           <Text style={styles.lensTitle}>三層レンズ</Text>
           <View style={styles.lensButtons}>

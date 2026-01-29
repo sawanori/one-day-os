@@ -1,48 +1,56 @@
-/**
- * One Day OS - Database Schema
- * Type definitions for database tables
- */
 
-export interface Identity {
-  id: 1; // Always 1 (single row table)
-  anti_vision: string;
-  identity_statement: string;
-  one_year_mission: string;
-  identity_health: number; // 0-100
-  created_at: string; // ISO datetime
-  updated_at: string; // ISO datetime
-}
+import * as SQLite from 'expo-sqlite';
 
-export interface Quest {
-  id: number;
-  quest_text: string;
-  is_completed: number; // SQLite boolean (0 or 1)
-  created_at: string; // ISO datetime
-  completed_at: string | null; // ISO datetime
-}
+export const dbResult = SQLite.openDatabaseSync('onedayos_master.db');
 
-export interface Notification {
-  id: number;
-  scheduled_time: string; // ISO datetime
-  responded_at: string | null; // ISO datetime
-  timeout_at: string; // ISO datetime (scheduled_time + 5 minutes)
-  is_missed: number; // SQLite boolean (0 or 1)
-  created_at: string; // ISO datetime
-}
+export const initDatabase = async () => {
+  await dbResult.execAsync(`
+    PRAGMA journal_mode = WAL;
 
-export interface DailyState {
-  id: 1; // Always 1 (single row table)
-  current_date: string; // YYYY-MM-DD
-  last_reset_at: string; // ISO datetime
-}
+    -- Identity Health & Global Status
+    CREATE TABLE IF NOT EXISTS user_status (
+      id INTEGER PRIMARY KEY NOT NULL,
+      identity_health INTEGER DEFAULT 100, -- 0-100
+      current_lens REAL DEFAULT 1.0, -- 0.5, 1.0, 2.0
+      survival_streak INTEGER DEFAULT 0,
+      is_dead INTEGER DEFAULT 0
+    );
 
-export interface AppState {
-  id: 1; // Always 1 (single row table)
-  state: 'onboarding' | 'active' | 'despair';
-  updated_at: string; // ISO datetime
-}
+    -- The "Anti-Vision" (Fear Fuel)
+    CREATE TABLE IF NOT EXISTS anti_vision (
+      id INTEGER PRIMARY KEY NOT NULL,
+      title TEXT NOT NULL, -- e.g. "5 Years Later: Stagnation"
+      content TEXT NOT NULL,
+      reflection_date TEXT NOT NULL
+    );
 
-// Helper types for insert operations (without auto-generated fields)
-export type InsertIdentity = Omit<Identity, 'id' | 'identity_health'>;
-export type InsertQuest = Omit<Quest, 'id' | 'is_completed' | 'completed_at'>;
-export type InsertNotification = Omit<Notification, 'id' | 'responded_at' | 'is_missed'>;
+    -- The "New Identity" (3-Year Ideal)
+    CREATE TABLE IF NOT EXISTS identity_core (
+      id INTEGER PRIMARY KEY NOT NULL,
+      statement TEXT NOT NULL, -- "I am a person who..."
+      ideal_tuesday_scenario TEXT,
+      weekly_one_thing TEXT
+    );
+
+    -- Quests (Daily Actions)
+    CREATE TABLE IF NOT EXISTS quests (
+      id INTEGER PRIMARY KEY NOT NULL,
+      date TEXT NOT NULL,
+      title TEXT NOT NULL,
+      status TEXT CHECK(status IN ('pending', 'success', 'failed')) DEFAULT 'pending',
+      type TEXT CHECK(type IN ('boss', 'minion', 'quest')) DEFAULT 'quest'
+    );
+
+    -- The 5 Daily Judgments
+    CREATE TABLE IF NOT EXISTS daily_judgments (
+      id INTEGER PRIMARY KEY NOT NULL,
+      date TEXT NOT NULL,
+      time_slot TEXT NOT NULL, -- "11:00", "13:30", etc.
+      question TEXT NOT NULL,
+      response TEXT CHECK(response IN ('yes', 'no', 'ignored', 'pending')) DEFAULT 'pending'
+    );
+
+    -- Initialize user_status if empty
+    INSERT OR IGNORE INTO user_status (id, identity_health) VALUES (1, 100);
+  `);
+};

@@ -25,7 +25,7 @@ export default function EveningScreen() {
 
         {/* Explanatory Text */}
         <View style={styles.explanationContainer}>
-          <GlitchText ih={100} variant="caption" intensity="NONE">
+          <GlitchText ih={100} variant="caption">
             説明:
           </GlitchText>
           <Text style={styles.explanationText}>

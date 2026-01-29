@@ -546,8 +546,10 @@ describe('NotificationHandler', () => {
 
   describe('境界値テスト', () => {
     test('タイムアウト閾値ちょうどの通知は処理されない', async () => {
-      const now = Date.now();
-      const exactThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS;
+      const fixedNow = 1000000000000; // Fixed timestamp
+      jest.spyOn(Date, 'now').mockReturnValue(fixedNow);
+
+      const exactThreshold = fixedNow - NOTIFICATION_SCHEDULE.TIMEOUT_MS;
 
       mockDb.getAllAsync.mockResolvedValue([
         {
@@ -560,11 +562,15 @@ describe('NotificationHandler', () => {
       await handler.checkTimeoutsOnResume();
 
       expect(mockEngine.applyNotificationResponse).not.toHaveBeenCalled();
+
+      jest.restoreAllMocks();
     });
 
     test('タイムアウト閾値+1msの通知は処理される', async () => {
-      const now = Date.now();
-      const justPastThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS - 1;
+      const fixedNow = 1000000000000; // Fixed timestamp
+      jest.spyOn(Date, 'now').mockReturnValue(fixedNow);
+
+      const justPastThreshold = fixedNow - NOTIFICATION_SCHEDULE.TIMEOUT_MS - 1;
 
       mockDb.getAllAsync.mockResolvedValue([
         {
@@ -577,10 +583,15 @@ describe('NotificationHandler', () => {
       await handler.checkTimeoutsOnResume();
 
       expect(mockEngine.applyNotificationResponse).toHaveBeenCalledWith('IGNORED');
+
+      jest.restoreAllMocks();
     });
 
     test('未来の通知は処理されない', async () => {
-      const futureTime = new Date(Date.now() + 60000); // 1 minute in future
+      const fixedNow = 1000000000000; // Fixed timestamp
+      jest.spyOn(Date, 'now').mockReturnValue(fixedNow);
+
+      const futureTime = new Date(fixedNow + 60000); // 1 minute in future
 
       mockDb.getAllAsync.mockResolvedValue([
         {
@@ -593,6 +604,8 @@ describe('NotificationHandler', () => {
       await handler.checkTimeoutsOnResume();
 
       expect(mockEngine.applyNotificationResponse).not.toHaveBeenCalled();
+
+      jest.restoreAllMocks();
     });
   });
 

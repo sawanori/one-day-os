@@ -3,6 +3,7 @@
     "name": "One Day OS",
     "slug": "one-day-os",
     "version": "1.0.0",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
