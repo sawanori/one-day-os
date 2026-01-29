@@ -19,7 +19,7 @@ export const FEATURES = {
   GLITCH_DYNAMIC_OFFSET: true,         // 動的グリッチ（Phase 1.2）✅
 
   // Phase 2: Anti-Vision Bleed
-  ANTI_VISION_BLEED: false,            // Anti-Vision Bleed（Phase 2.1）
+  ANTI_VISION_BLEED: true,             // Anti-Vision Bleed（Phase 2）✅
 
   // Phase 3: Death Animation
   DEATH_ANIMATION: false,              // Death Screen Animation（Phase 3）
