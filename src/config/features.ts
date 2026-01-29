@@ -25,7 +25,7 @@ export const FEATURES = {
   DEATH_ANIMATION: true,               // Death Screen Animation（Phase 3）✅
 
   // Phase 4: Lens Zoom
-  LENS_ZOOM_GESTURE: false,            // Lens Zoom（Phase 4.2）
+  LENS_ZOOM_GESTURE: true,             // Lens Zoom（Phase 4）✅
   LENS_BUTTON_ANIMATION: false,        // Button Animation（Phase 4.3）
 
   // Phase 5: Notification Actions
