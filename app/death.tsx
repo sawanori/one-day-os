@@ -5,7 +5,15 @@ import { ThemedText } from '../src/ui/components/ThemedText';
 import { Colors } from '../src/ui/theme/colors';
 import { WipeAnimation } from '../src/core/WipeAnimation';
 import { IdentityEngine } from '../src/core/IdentityEngine';
+import { FileDeleteAnimation } from '../src/ui/effects/FileDeleteAnimation';
 import { useRouter } from 'expo-router';
+
+const FILES_TO_DELETE = [
+    'quests.db',
+    'anti_vision.db',
+    'identity_core.db',
+    'daily_judgments.db',
+];
 
 export default function DeathScreen() {
     const router = useRouter();
@@ -77,9 +85,7 @@ export default function DeathScreen() {
                         ]}
                     />
                 </View>
-                <ThemedText style={styles.fileText}>Deleting: src/identity_core.db...</ThemedText>
-                <ThemedText style={styles.fileText}>Deleting: src/anti_vision.db...</ThemedText>
-                <ThemedText style={styles.fileText}>Deleting: src/future_self.db...</ThemedText>
+                <FileDeleteAnimation files={FILES_TO_DELETE} />
             </View>
         );
     }
@@ -131,12 +137,6 @@ const styles = StyleSheet.create({
     progressFill: {
         height: '100%',
         backgroundColor: Colors.dark.error,
-    },
-    fileText: {
-        color: '#333',
-        fontFamily: 'Courier New',
-        fontSize: 10,
-        marginBottom: 4,
     },
     voidContainer: {
         flex: 1,

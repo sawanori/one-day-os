@@ -112,13 +112,15 @@ describe('Death Screen - Stage Management', () => {
     });
   });
 
-  it('should show file deletion text in wiping stage', async () => {
+  it('should show file deletion animation in wiping stage', async () => {
     const { getByText } = render(<DeathScreen />);
 
+    // Advance to wiping stage
     jest.advanceTimersByTime(2000);
 
+    // Files should start appearing
     await waitFor(() => {
-      expect(getByText(/Deleting:.*identity_core/i)).toBeDefined();
+      expect(getByText(/DELETE:.*quests\.db/i)).toBeDefined();
     });
   });
 });
