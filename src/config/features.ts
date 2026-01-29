@@ -29,7 +29,7 @@ export const FEATURES = {
   LENS_BUTTON_ANIMATION: false,        // Button Animation（Phase 4.3）
 
   // Phase 5: Notification Actions
-  NOTIFICATION_ACTIONS: false,         // Interactive Notifications（Phase 5.1）
+  NOTIFICATION_ACTIONS: true,          // Interactive Notifications（Phase 5）✅
 
   // Phase 6: IdentityEngine v2
   IDENTITY_ENGINE_V2: false,           // IdentityEngine v2（Phase 6.1）
