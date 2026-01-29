@@ -69,8 +69,8 @@ export const StressContainer = ({ children }: { children: React.ReactNode }) => 
     const noiseOpacity = Math.max(0, (100 - health) / 200);
 
     return (
-        <View style={styles.wrapper}>
-            <Animated.View style={[styles.container, { transform: jitter.getTranslateTransform() }]}>
+        <View style={styles.wrapper} pointerEvents="box-none">
+            <Animated.View style={[styles.container, { transform: jitter.getTranslateTransform() }]} pointerEvents="box-none">
                 {children}
             </Animated.View>
             <AntiVisionBleed antiVision={antiVision} health={health} />
