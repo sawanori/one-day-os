@@ -22,7 +22,7 @@ export const FEATURES = {
   ANTI_VISION_BLEED: true,             // Anti-Vision Bleed（Phase 2）✅
 
   // Phase 3: Death Animation
-  DEATH_ANIMATION: false,              // Death Screen Animation（Phase 3）
+  DEATH_ANIMATION: true,               // Death Screen Animation（Phase 3）✅
 
   // Phase 4: Lens Zoom
   LENS_ZOOM_GESTURE: false,            // Lens Zoom（Phase 4.2）
