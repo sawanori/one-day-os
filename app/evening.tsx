@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '../src/ui/components/ThemedText';
 import { Colors } from '../src/ui/theme/colors';
 import { IdentityEngine } from '../src/core/IdentityEngine';
+import { StressContainer } from '../src/ui/layout/StressContainer';
 
 export default function EveningAudit() {
     const router = useRouter();
@@ -23,59 +24,61 @@ export default function EveningAudit() {
     };
 
     return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
-                <ThemedText type="subtitle" style={styles.header}>EVENING AUDIT</ThemedText>
+        <StressContainer>
+            <View style={styles.container}>
+                <ScrollView contentContainerStyle={styles.content}>
+                    <ThemedText type="subtitle" style={styles.header}>EVENING AUDIT</ThemedText>
 
-                {step === 0 && (
-                    <View>
-                        <ThemedText style={styles.prompt}>
-                            Name the "Enemy" required to be defeated today.
-                        </ThemedText>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Procrastination? Fear? Ego?"
-                            placeholderTextColor="#666"
-                            value={enemyName}
-                            onChangeText={setEnemyName}
-                        />
-                        <TouchableOpacity style={styles.btn} onPress={() => setStep(1)}>
-                            <ThemedText style={styles.btnText}>NEXT</ThemedText>
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {step === 1 && (
-                    <View>
-                        <ThemedText style={styles.prompt}>
-                            Did you kill {enemyName || 'the enemy'}? Or did it own you?
-                        </ThemedText>
-
-                        <View style={styles.row}>
-                            <TouchableOpacity
-                                style={[styles.choiceBtn, styles.lossBtn]}
-                                onPress={() => setWin(false)}
-                            >
-                                <ThemedText style={styles.btnText}>LOST (WEAKNESS)</ThemedText>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.choiceBtn, styles.winBtn]}
-                                onPress={() => setWin(true)}
-                            >
-                                <ThemedText style={styles.btnText}>YES (VICTORY)</ThemedText>
+                    {step === 0 && (
+                        <View>
+                            <ThemedText style={styles.prompt}>
+                                Name the "Enemy" required to be defeated today.
+                            </ThemedText>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Procrastination? Fear? Ego?"
+                                placeholderTextColor="#666"
+                                value={enemyName}
+                                onChangeText={setEnemyName}
+                            />
+                            <TouchableOpacity style={styles.btn} onPress={() => setStep(1)}>
+                                <ThemedText style={styles.btnText}>NEXT</ThemedText>
                             </TouchableOpacity>
                         </View>
+                    )}
 
-                        {win !== null && (
-                            <TouchableOpacity style={styles.btn} onPress={handleFinish}>
-                                <ThemedText style={styles.btnText}>SUBMIT TO O.S.</ThemedText>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-                )}
-            </ScrollView>
-        </View>
+                    {step === 1 && (
+                        <View>
+                            <ThemedText style={styles.prompt}>
+                                Did you kill {enemyName || 'the enemy'}? Or did it own you?
+                            </ThemedText>
+
+                            <View style={styles.row}>
+                                <TouchableOpacity
+                                    style={[styles.choiceBtn, styles.lossBtn]}
+                                    onPress={() => setWin(false)}
+                                >
+                                    <ThemedText style={styles.btnText}>LOST (WEAKNESS)</ThemedText>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.choiceBtn, styles.winBtn]}
+                                    onPress={() => setWin(true)}
+                                >
+                                    <ThemedText style={styles.btnText}>YES (VICTORY)</ThemedText>
+                                </TouchableOpacity>
+                            </View>
+
+                            {win !== null && (
+                                <TouchableOpacity style={styles.btn} onPress={handleFinish}>
+                                    <ThemedText style={styles.btnText}>SUBMIT TO O.S.</ThemedText>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
+                </ScrollView>
+            </View>
+        </StressContainer>
     );
 }
 

@@ -2,23 +2,39 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { ThemedText } from '../components/ThemedText';
+import { GlitchText } from '../effects/GlitchText';
 import { Colors } from '../theme/colors';
 import { getDB } from '../../database/client';
+import { IdentityEngine } from '../../core/IdentityEngine';
 
 export function MissionLens() {
     const [mission, setMission] = useState<string>('Destroy old patterns.');
     const [antiVision, setAntiVision] = useState<string>('Stagnation. Regret. Wasted Potential.');
+    const [health, setHealth] = useState(100);
 
     useEffect(() => {
-        // Load data from DB
-        // In a real implementation, fetch from 'identity_core' and 'anti_vision'
+        const checkHealth = async () => {
+            const status = await IdentityEngine.checkHealth();
+            setHealth(status.health);
+        };
+        checkHealth();
+
+        const interval = setInterval(checkHealth, 2000);
+        return () => clearInterval(interval);
     }, []);
+
+    // Calculate glitch severity based on health
+    const glitchSeverity = Math.max(0, (100 - health) / 100);
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
             <View style={styles.section}>
                 <ThemedText type="subtitle" style={styles.label}>LENS: 0.5x [1 YEAR]</ThemedText>
-                <ThemedText type="title" style={styles.missionText}>{mission}</ThemedText>
+                <GlitchText
+                    text={mission}
+                    style={styles.missionText}
+                    severity={glitchSeverity}
+                />
             </View>
 
             <View style={[styles.section, styles.antiVisionContainer]}>

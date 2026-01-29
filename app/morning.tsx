@@ -6,6 +6,7 @@ import { ThemedText } from '../src/ui/components/ThemedText';
 import { Colors } from '../src/ui/theme/colors';
 import { IdentityEngine } from '../src/core/IdentityEngine';
 import { getDB } from '../src/database/client';
+import { StressContainer } from '../src/ui/layout/StressContainer';
 
 export default function MorningExcavation() {
     const router = useRouter();
@@ -170,21 +171,23 @@ export default function MorningExcavation() {
     }, [step]);
 
     return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
-                {renderStep()}
-            </ScrollView>
+        <StressContainer>
+            <View style={styles.container}>
+                <ScrollView contentContainerStyle={styles.content}>
+                    {renderStep()}
+                </ScrollView>
 
-            <TouchableOpacity
-                style={[styles.button, (step === 0 && !canProceed) && styles.disabledButton]}
-                onPress={handleNext}
-                disabled={step === 0 && !canProceed}
-            >
-                <ThemedText style={styles.buttonText}>
-                    {step === 0 && !canProceed ? "WAIT..." : step === 5 ? "START DAY" : "NEXT"}
-                </ThemedText>
-            </TouchableOpacity>
-        </View>
+                <TouchableOpacity
+                    style={[styles.button, (step === 0 && !canProceed) && styles.disabledButton]}
+                    onPress={handleNext}
+                    disabled={step === 0 && !canProceed}
+                >
+                    <ThemedText style={styles.buttonText}>
+                        {step === 0 && !canProceed ? "WAIT..." : step === 5 ? "START DAY" : "NEXT"}
+                    </ThemedText>
+                </TouchableOpacity>
+            </View>
+        </StressContainer>
     );
 }
 

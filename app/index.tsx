@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, Animated } from 'react-native';
 import { MissionLens } from '../src/ui/lenses/MissionLens';
 import { IdentityLens } from '../src/ui/lenses/IdentityLens';
 import { QuestLens } from '../src/ui/lenses/QuestLens';
@@ -8,14 +8,29 @@ import { Colors } from '../src/ui/theme/colors';
 import { ThemedText } from '../src/ui/components/ThemedText';
 import { IdentityEngine } from '../src/core/IdentityEngine';
 import { HapticEngine } from '../src/core/HapticEngine';
+import { StressContainer } from '../src/ui/layout/StressContainer';
+import { useLensGesture } from '../src/ui/lenses/useLensGesture';
+import { isFeatureEnabled } from '../src/config/features';
 
 export default function Home() {
   const [lens, setLens] = useState<0.5 | 1.0 | 2.0>(1.0);
   const [health, setHealth] = useState(100);
 
+  // Lens Zoom Gesture (Phase 4)
+  const { panResponder, scale } = useLensGesture((newLens) => {
+    updateLens(newLens);
+  });
+
   // Check health periodically
   useEffect(() => {
-    IdentityEngine.checkHealth().then(status => setHealth(status.health));
+    const checkHealth = async () => {
+      const status = await IdentityEngine.checkHealth();
+      setHealth(status.health);
+    };
+    checkHealth();
+
+    const interval = setInterval(checkHealth, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   // Update lens state wrapper to trigger haptics
@@ -35,47 +50,60 @@ export default function Home() {
     }
   };
 
+  const ContentView = isFeatureEnabled('LENS_ZOOM_GESTURE') ? (
+    <Animated.View
+      style={[styles.content, { transform: [{ scale }] }]}
+      {...panResponder.panHandlers}
+    >
+      {renderLens()}
+    </Animated.View>
+  ) : (
+    <View style={styles.content}>
+      {renderLens()}
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <StressContainer>
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <ThemedText style={styles.appName}>ONE DAY OS</ThemedText>
-        <View style={styles.healthContainer}>
-          <ThemedText style={[styles.healthText, { color: health < 30 ? Colors.dark.error : Colors.dark.success }]}>
-            IH: {health}%
-          </ThemedText>
+        {/* Header */}
+        <View style={styles.header}>
+          <ThemedText style={styles.appName}>ONE DAY OS</ThemedText>
+          <View style={styles.healthContainer}>
+            <ThemedText style={[styles.healthText, { color: health < 30 ? Colors.dark.error : Colors.dark.success }]}>
+              IH: {health}%
+            </ThemedText>
+          </View>
         </View>
-      </View>
 
-      {/* Main Lens Content */}
-      <View style={styles.content}>
-        {renderLens()}
-      </View>
+        {/* Main Lens Content with Gesture Support */}
+        {ContentView}
 
-      {/* Lens Selector Buttons */}
-      <View style={styles.lensSelector}>
-        <TouchableOpacity
-          style={[styles.lensButton, lens === 0.5 && styles.lensButtonActive]}
-          onPress={() => updateLens(0.5)}
-        >
-          <ThemedText style={styles.lensButtonText}>0.5x</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.lensButton, lens === 1.0 && styles.lensButtonActive]}
-          onPress={() => updateLens(1.0)}
-        >
-          <ThemedText style={styles.lensButtonText}>1.0x</ThemedText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.lensButton, lens === 2.0 && styles.lensButtonActive]}
-          onPress={() => updateLens(2.0)}
-        >
-          <ThemedText style={styles.lensButtonText}>2.0x</ThemedText>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+        {/* Lens Selector Buttons */}
+        <View style={styles.lensSelector}>
+          <TouchableOpacity
+            style={[styles.lensButton, lens === 0.5 && styles.lensButtonActive]}
+            onPress={() => updateLens(0.5)}
+          >
+            <ThemedText style={styles.lensButtonText}>0.5x</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.lensButton, lens === 1.0 && styles.lensButtonActive]}
+            onPress={() => updateLens(1.0)}
+          >
+            <ThemedText style={styles.lensButtonText}>1.0x</ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.lensButton, lens === 2.0 && styles.lensButtonActive]}
+            onPress={() => updateLens(2.0)}
+          >
+            <ThemedText style={styles.lensButtonText}>2.0x</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </StressContainer>
   );
 }
 

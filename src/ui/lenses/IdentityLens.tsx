@@ -1,11 +1,28 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '../components/ThemedText';
+import { GlitchText } from '../effects/GlitchText';
 import { Colors } from '../theme/colors';
+import { IdentityEngine } from '../../core/IdentityEngine';
 
 export function IdentityLens() {
     const [identity, setIdentity] = useState<string>('I am a person who executes without hesitation.');
+    const [health, setHealth] = useState(100);
+
+    useEffect(() => {
+        const checkHealth = async () => {
+            const status = await IdentityEngine.checkHealth();
+            setHealth(status.health);
+        };
+        checkHealth();
+
+        const interval = setInterval(checkHealth, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Calculate glitch severity based on health (0-100 -> 0-1)
+    const glitchSeverity = Math.max(0, (100 - health) / 100);
 
     return (
         <View style={styles.container}>
@@ -13,7 +30,11 @@ export function IdentityLens() {
 
             <View style={styles.card}>
                 <ThemedText style={styles.prefix}>I AM A PERSON WHO...</ThemedText>
-                <ThemedText style={styles.statement}>{identity.replace('I am a person who ', '')}</ThemedText>
+                <GlitchText
+                    text={identity.replace('I am a person who ', '')}
+                    style={styles.statement}
+                    severity={glitchSeverity}
+                />
             </View>
 
             <ThemedText style={styles.subtext}>
