@@ -118,7 +118,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
-    zIndex: 10,
+    zIndex: 1000, // Above NoiseOverlay and AntiVisionBleed
+    backgroundColor: Colors.dark.background,
   },
   appName: {
     fontSize: 14,
@@ -147,6 +148,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: '#333',
+    zIndex: 1000, // Above NoiseOverlay (999) and AntiVisionBleed (500)
+    backgroundColor: Colors.dark.background,
   },
   lensButton: {
     paddingVertical: 12,
