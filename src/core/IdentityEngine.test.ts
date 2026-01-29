@@ -125,4 +125,33 @@ describe('IdentityEngine - SQL Injection Prevention', () => {
       expect(killUserSpy).toHaveBeenCalled();
     });
   });
+
+  describe('getAntiVision', () => {
+    it('should return anti-vision content from DB', async () => {
+      mockDB.getFirstAsync.mockResolvedValue({ content: 'Test Anti-Vision Content' });
+
+      const result = await IdentityEngine.getAntiVision();
+
+      expect(result).toBe('Test Anti-Vision Content');
+      expect(mockDB.getFirstAsync).toHaveBeenCalledWith(
+        'SELECT content FROM anti_vision WHERE id = 1'
+      );
+    });
+
+    it('should return empty string when no anti-vision exists', async () => {
+      mockDB.getFirstAsync.mockResolvedValue(null);
+
+      const result = await IdentityEngine.getAntiVision();
+
+      expect(result).toBe('');
+    });
+
+    it('should return empty string when content is undefined', async () => {
+      mockDB.getFirstAsync.mockResolvedValue({});
+
+      const result = await IdentityEngine.getAntiVision();
+
+      expect(result).toBe('');
+    });
+  });
 });

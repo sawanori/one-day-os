@@ -91,5 +91,17 @@ export const IdentityEngine = {
                 [0, 50]
             );
         });
+    },
+
+    /**
+     * Get current Anti-Vision content
+     * Used for Anti-Vision Bleed effect
+     */
+    async getAntiVision(): Promise<string> {
+        const db = getDB();
+        const result = await db.getFirstAsync<{ content: string }>(
+            'SELECT content FROM anti_vision WHERE id = 1'
+        );
+        return result?.content || '';
     }
 };
