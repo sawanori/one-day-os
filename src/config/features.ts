@@ -32,7 +32,7 @@ export const FEATURES = {
   NOTIFICATION_ACTIONS: true,          // Interactive Notifications（Phase 5）✅
 
   // Phase 6: IdentityEngine v2
-  IDENTITY_ENGINE_V2: false,           // IdentityEngine v2（Phase 6.1）
+  IDENTITY_ENGINE_V2: true,            // IdentityEngine v2（Phase 6）✅
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;
