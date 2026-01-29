@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, Animated } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar, Animated, Alert } from 'react-native';
 import { MissionLens } from '../src/ui/lenses/MissionLens';
 import { IdentityLens } from '../src/ui/lenses/IdentityLens';
 import { QuestLens } from '../src/ui/lenses/QuestLens';
@@ -11,10 +11,12 @@ import { HapticEngine } from '../src/core/HapticEngine';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 import { useLensGesture } from '../src/ui/lenses/useLensGesture';
 import { isFeatureEnabled } from '../src/config/features';
+import { getDB } from '../src/database/client';
 
 export default function Home() {
   const [lens, setLens] = useState<0.5 | 1.0 | 2.0>(1.0);
   const [health, setHealth] = useState(100);
+  const [showDebug, setShowDebug] = useState(__DEV__); // Show debug in dev mode only
 
   // Lens Zoom Gesture (Phase 4)
   const { panResponder, scale } = useLensGesture((newLens) => {
@@ -38,6 +40,25 @@ export default function Home() {
     if (newLens !== lens) {
       setLens(newLens);
       HapticEngine.snapLens();
+    }
+  };
+
+  // Debug: Set Identity Health
+  const setIH = async (targetHealth: number) => {
+    try {
+      const db = getDB();
+      await db.runAsync(
+        'UPDATE user_status SET identity_health = ? WHERE id = 1',
+        [targetHealth]
+      );
+
+      // Force refresh
+      const status = await IdentityEngine.checkHealth();
+      setHealth(status.health);
+
+      Alert.alert('Debug', `IH set to ${targetHealth}%`);
+    } catch (error) {
+      Alert.alert('Error', `Failed to update IH: ${error}`);
     }
   };
 
@@ -80,6 +101,30 @@ export default function Home() {
 
         {/* Main Lens Content with Gesture Support */}
         {ContentView}
+
+        {/* Debug Panel (Dev Mode Only) */}
+        {showDebug && (
+          <View style={styles.debugPanel}>
+            <ThemedText style={styles.debugLabel}>🛠 DEBUG: Set IH</ThemedText>
+            <View style={styles.debugRow}>
+              <TouchableOpacity style={styles.debugBtn} onPress={() => setIH(100)}>
+                <ThemedText style={styles.debugBtnText}>100%</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.debugBtn} onPress={() => setIH(70)}>
+                <ThemedText style={styles.debugBtnText}>70%</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.debugBtn} onPress={() => setIH(50)}>
+                <ThemedText style={styles.debugBtnText}>50%</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.debugBtn} onPress={() => setIH(30)}>
+                <ThemedText style={styles.debugBtnText}>30%</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.debugBtn} onPress={() => setIH(10)}>
+                <ThemedText style={styles.debugBtnText}>10%</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* Lens Selector Buttons */}
         <View style={styles.lensSelector}>
@@ -163,5 +208,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     letterSpacing: 1,
-  }
+  },
+  debugPanel: {
+    backgroundColor: '#1a1a1a',
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#ff0000',
+  },
+  debugLabel: {
+    fontSize: 10,
+    color: '#ff0000',
+    marginBottom: 8,
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  debugRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 8,
+  },
+  debugBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    backgroundColor: '#ff0000',
+    alignItems: 'center',
+  },
+  debugBtnText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#000',
+  },
 });
