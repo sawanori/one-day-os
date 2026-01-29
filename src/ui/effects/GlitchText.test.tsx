@@ -16,7 +16,7 @@ describe('GlitchText - Dynamic Offset', () => {
   });
 
   it('should render plain text when severity is 0', () => {
-    const { getByText, queryByTestID } = render(
+    const { getByText } = render(
       <GlitchText text="Test" severity={0} />
     );
 

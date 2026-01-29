@@ -64,46 +64,46 @@ export default function Home() {
   );
 
   return (
-    <StressContainer>
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
 
-        {/* Header */}
-        <View style={styles.header}>
-          <ThemedText style={styles.appName}>ONE DAY OS</ThemedText>
-          <View style={styles.healthContainer}>
-            <ThemedText style={[styles.healthText, { color: health < 30 ? Colors.dark.error : Colors.dark.success }]}>
-              IH: {health}%
-            </ThemedText>
-          </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <ThemedText style={styles.appName}>ONE DAY OS</ThemedText>
+        <View style={styles.healthContainer}>
+          <ThemedText style={[styles.healthText, { color: health < 30 ? Colors.dark.error : Colors.dark.success }]}>
+            IH: {health}%
+          </ThemedText>
         </View>
+      </View>
 
-        {/* Main Lens Content with Gesture Support */}
+      {/* Main Lens Content with Gesture Support and Stress Effects */}
+      <StressContainer>
         {ContentView}
+      </StressContainer>
 
-        {/* Lens Selector Buttons */}
-        <View style={styles.lensSelector}>
-          <TouchableOpacity
-            style={[styles.lensButton, lens === 0.5 && styles.lensButtonActive]}
-            onPress={() => updateLens(0.5)}
-          >
-            <ThemedText style={styles.lensButtonText}>0.5x</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.lensButton, lens === 1.0 && styles.lensButtonActive]}
-            onPress={() => updateLens(1.0)}
-          >
-            <ThemedText style={styles.lensButtonText}>1.0x</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.lensButton, lens === 2.0 && styles.lensButtonActive]}
-            onPress={() => updateLens(2.0)}
-          >
-            <ThemedText style={styles.lensButtonText}>2.0x</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </StressContainer>
+      {/* Lens Selector Buttons */}
+      <View style={styles.lensSelector}>
+        <TouchableOpacity
+          style={[styles.lensButton, lens === 0.5 && styles.lensButtonActive]}
+          onPress={() => updateLens(0.5)}
+        >
+          <ThemedText style={styles.lensButtonText}>0.5x</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.lensButton, lens === 1.0 && styles.lensButtonActive]}
+          onPress={() => updateLens(1.0)}
+        >
+          <ThemedText style={styles.lensButtonText}>1.0x</ThemedText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.lensButton, lens === 2.0 && styles.lensButtonActive]}
+          onPress={() => updateLens(2.0)}
+        >
+          <ThemedText style={styles.lensButtonText}>2.0x</ThemedText>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -118,8 +118,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
-    zIndex: 1000, // Above NoiseOverlay and AntiVisionBleed
-    backgroundColor: Colors.dark.background,
   },
   appName: {
     fontSize: 14,
@@ -148,8 +146,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: '#333',
-    zIndex: 1000, // Above NoiseOverlay (999) and AntiVisionBleed (500)
-    backgroundColor: Colors.dark.background,
   },
   lensButton: {
     paddingVertical: 12,

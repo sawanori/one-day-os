@@ -66,9 +66,6 @@ describe('Feature Flags', () => {
       // TypeScript compile-time check
       const validKey: FeatureFlag = 'NOISE_OVERLAY_TEXTURE';
       expect(isFeatureEnabled(validKey)).toBe(true);
-
-      // @ts-expect-error - Invalid key should not compile
-      // isFeatureEnabled('INVALID_KEY');
     });
   });
 });

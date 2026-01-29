@@ -51,7 +51,7 @@ describe('useLensGesture', () => {
         scale.setValue(2.0);
         const releaseHandler = panResponder.panHandlers.onResponderRelease;
         if (releaseHandler) {
-          releaseHandler({} as any, {} as any);
+          releaseHandler({} as any);
         }
       }, []);
 
@@ -73,7 +73,7 @@ describe('useLensGesture', () => {
         scale.setValue(0.5);
         const releaseHandler = panResponder.panHandlers.onResponderRelease;
         if (releaseHandler) {
-          releaseHandler({} as any, {} as any);
+          releaseHandler({} as any);
         }
       }, []);
 
@@ -95,7 +95,7 @@ describe('useLensGesture', () => {
         scale.setValue(1.2);
         const releaseHandler = panResponder.panHandlers.onResponderRelease;
         if (releaseHandler) {
-          releaseHandler({} as any, {} as any);
+          releaseHandler({} as any);
         }
       }, []);
 
@@ -115,7 +115,7 @@ describe('useLensGesture', () => {
         scale.setValue(2.0);
         const releaseHandler = panResponder.panHandlers.onResponderRelease;
         if (releaseHandler) {
-          releaseHandler({} as any, {} as any);
+          releaseHandler({} as any);
         }
       }, []);
 

@@ -39,10 +39,10 @@ describe('NoiseOverlay', () => {
   });
 
   it('should have pointerEvents="none" to not block touches', () => {
-    const { getByTestId } = render(<NoiseOverlay opacity={0.5} />);
-    const overlay = getByTestId('noise-overlay');
+    const { root } = render(<NoiseOverlay opacity={0.5} />);
 
-    expect(overlay.props.pointerEvents).toBe('none');
+    // Check that the container View has pointerEvents="none"
+    expect(root.findByProps({ pointerEvents: 'none' })).toBeDefined();
   });
 
   it('should render with ImageBackground when feature enabled', () => {

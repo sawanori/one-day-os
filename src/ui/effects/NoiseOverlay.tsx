@@ -33,13 +33,14 @@ export const NoiseOverlay = ({ opacity }: NoiseOverlayProps) => {
 
   // New: Noise texture overlay
   return (
-    <ImageBackground
-      testID="noise-overlay"
-      source={require('../../../assets/noise.png')}
-      style={baseStyle}
-      resizeMode="repeat"
-      pointerEvents="none"
-    />
+    <View style={styles.container} pointerEvents="none">
+      <ImageBackground
+        testID="noise-overlay"
+        source={require('../../../assets/noise.png')}
+        style={[StyleSheet.absoluteFill, { opacity }]}
+        resizeMode="repeat"
+      />
+    </View>
   );
 };
 
