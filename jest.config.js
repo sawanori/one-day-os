@@ -17,6 +17,7 @@ module.exports = {
   testMatch: [
     '**/__tests__/**/*.test.ts?(x)',
     '**/src/**/*.test.ts?(x)',
+    '**/app/**/*.test.ts?(x)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
