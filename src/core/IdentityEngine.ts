@@ -1,6 +1,7 @@
 
 import { getDB } from '../database/client';
 import { runInTransaction } from '../database/transaction';
+import { initDatabase } from '../database/schema';
 
 export const IdentityEngine = {
     /**
@@ -81,15 +82,26 @@ export const IdentityEngine = {
     /**
      * "Identity Insurance" Purchase (Monetization)
      * Revives the user if they are dead or near death.
+     * Recreates tables that were dropped during killUser()
      */
     async useInsurance() {
         return runInTransaction(async () => {
             const db = getDB();
             // In a real app, verify purchase here.
+
+            // user_statusを復活状態に更新
             await db.runAsync(
                 'UPDATE user_status SET is_dead = ?, identity_health = ? WHERE id = 1',
                 [0, 50]
             );
+
+            // DROP TABLEされたテーブルを再作成
+            await initDatabase();
+
+            // Note: initDatabase()はCREATE TABLE IF NOT EXISTSなので
+            // 既存のuser_statusは上書きされず、新しいテーブルだけが作成される
+
+            console.log('✅ Identity Insurance used: User resurrected at 50% IH');
         });
     },
 

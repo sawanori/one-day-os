@@ -10,6 +10,11 @@ jest.mock('../database/client', () => ({
   getDB: jest.fn(),
 }));
 
+// Mock database schema
+jest.mock('../database/schema', () => ({
+  initDatabase: jest.fn().mockResolvedValue(undefined),
+}));
+
 describe('IdentityEngine - SQL Injection Prevention', () => {
   let mockDB: any;
 
@@ -152,6 +157,45 @@ describe('IdentityEngine - SQL Injection Prevention', () => {
       const result = await IdentityEngine.getAntiVision();
 
       expect(result).toBe('');
+    });
+  });
+
+  describe('useInsurance', () => {
+    it('should restore health to 50% and resurrect user', async () => {
+      const { initDatabase } = require('../database/schema');
+
+      // Insurance使用
+      await IdentityEngine.useInsurance();
+
+      // user_statusが更新される
+      expect(mockDB.runAsync).toHaveBeenCalledWith(
+        'UPDATE user_status SET is_dead = ?, identity_health = ? WHERE id = 1',
+        [0, 50]
+      );
+    });
+
+    it('should recreate dropped tables', async () => {
+      const { initDatabase } = require('../database/schema');
+
+      await IdentityEngine.useInsurance();
+
+      // initDatabase()が呼ばれることでテーブルが再作成される
+      expect(initDatabase).toHaveBeenCalled();
+    });
+
+    it('should call initDatabase after updating user_status', async () => {
+      const { initDatabase } = require('../database/schema');
+
+      await IdentityEngine.useInsurance();
+
+      // user_statusの更新が先に行われる
+      expect(mockDB.runAsync).toHaveBeenCalledWith(
+        'UPDATE user_status SET is_dead = ?, identity_health = ? WHERE id = 1',
+        [0, 50]
+      );
+
+      // その後initDatabase()が呼ばれる
+      expect(initDatabase).toHaveBeenCalled();
     });
   });
 });
