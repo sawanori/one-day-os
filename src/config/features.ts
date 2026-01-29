@@ -15,8 +15,8 @@
  */
 export const FEATURES = {
   // Phase 1: Asset Preparation
-  NOISE_OVERLAY_TEXTURE: false,        // ノイズテクスチャ（Phase 1.1）
-  GLITCH_DYNAMIC_OFFSET: false,        // 動的グリッチ（Phase 1.2）
+  NOISE_OVERLAY_TEXTURE: true,         // ノイズテクスチャ（Phase 1.1）✅
+  GLITCH_DYNAMIC_OFFSET: true,         // 動的グリッチ（Phase 1.2）✅
 
   // Phase 2: Anti-Vision Bleed
   ANTI_VISION_BLEED: false,            // Anti-Vision Bleed（Phase 2.1）
