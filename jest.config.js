@@ -12,7 +12,6 @@ module.exports = {
     '!src/**/*.test.{ts,tsx}',
     '!src/**/*.d.ts',
   ],
-  setupFiles: ['<rootDir>/jest.setup.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.after.js'],
   testMatch: [
     '**/__tests__/**/*.test.ts?(x)',
