@@ -4,7 +4,8 @@
  */
 
 import * as Notifications from 'expo-notifications';
-import { FIVE_QUESTIONS, NOTIFICATION_SCHEDULE } from '@/constants';
+import type { CalendarTriggerInput } from 'expo-notifications';
+import { REFLECTION_QUESTIONS, NOTIFICATION_SCHEDULE } from '../constants';
 
 const CATEGORY_IDENTIFIER = 'IDENTITY_QUESTION';
 
@@ -96,7 +97,7 @@ export class NotificationScheduler {
     // Schedule each of the 6 daily notifications
     for (let i = 0; i < NOTIFICATION_SCHEDULE.TIMES.length; i++) {
       const { hour, minute } = NOTIFICATION_SCHEDULE.TIMES[i];
-      const question = FIVE_QUESTIONS[i];
+      const question = REFLECTION_QUESTIONS[i];
 
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
@@ -105,10 +106,11 @@ export class NotificationScheduler {
           categoryIdentifier: CATEGORY_IDENTIFIER,
         },
         trigger: {
+          type: 'calendar',
           hour,
           minute,
           repeats: true,
-        } as any, // Type assertion needed due to mock limitations
+        } as CalendarTriggerInput
       });
 
       notificationIds.push(notificationId);

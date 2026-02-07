@@ -50,3 +50,6 @@ firebase-debug.log
 # Backup files
 *.backup
 npm-list-*.txt
+
+# Serena MCP
+.serena/

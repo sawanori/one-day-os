@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Animated, StyleSheet, Platform } from 'react-native';
 import { Text } from 'react-native';
-import { Colors } from '../theme/colors';
+import { theme } from '../theme/theme';
 
 interface FileDeleteAnimationProps {
   files: string[];

@@ -2,23 +2,27 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, BackHandler, TouchableOpacity, Animated } from 'react-native';
 import { ThemedText } from '../src/ui/components/ThemedText';
-import { Colors } from '../src/ui/theme/colors';
-import { WipeAnimation } from '../src/core/WipeAnimation';
-import { IdentityEngine } from '../src/core/IdentityEngine';
+import { theme } from '../src/ui/theme/theme';
+import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { FileDeleteAnimation } from '../src/ui/effects/FileDeleteAnimation';
+import { DespairModeManager } from '../src/core/despair/DespairModeManager';
+import { WipeManager } from '../src/core/identity/WipeManager';
+import { getDB } from '../src/database/client';
 import { useRouter } from 'expo-router';
 
 const FILES_TO_DELETE = [
+    'identity.db',
     'quests.db',
-    'anti_vision.db',
-    'identity_core.db',
-    'daily_judgments.db',
+    'notifications.db',
+    'daily_state.db',
 ];
 
 export default function DeathScreen() {
     const router = useRouter();
     const [stage, setStage] = useState<'sentencing' | 'wiping' | 'void'>('sentencing');
     const [progress] = useState(new Animated.Value(0));
+    const [isLocked, setIsLocked] = useState(true);
+    const [remainingHours, setRemainingHours] = useState(24);
 
     // Lock back button
     useEffect(() => {
@@ -26,14 +30,46 @@ export default function DeathScreen() {
         return () => sub.remove();
     }, []);
 
+    // M6: Store timeout IDs for cleanup
+    const deathSequenceTimeouts = React.useRef<NodeJS.Timeout[]>([]);
+
     // Run the sequence
     useEffect(() => {
         runDeathSequence();
+
+        return () => {
+            deathSequenceTimeouts.current.forEach(id => clearTimeout(id));
+            deathSequenceTimeouts.current = [];
+        };
+    }, []);
+
+    // Check lockout status
+    useEffect(() => {
+        const checkLockout = async () => {
+            const db = getDB();
+            const wipeManager = new WipeManager(db);
+            const despairManager = DespairModeManager.getInstance(db, wipeManager);
+
+            const canReset = await despairManager.canResetup();
+            setIsLocked(!canReset);
+
+            if (!canReset) {
+                const remaining = await despairManager.getRemainingLockoutMs();
+                const hours = Math.ceil(remaining / (1000 * 60 * 60));
+                setRemainingHours(hours);
+            }
+        };
+
+        checkLockout();
+
+        // Update every minute
+        const interval = setInterval(checkLockout, 60000);
+        return () => clearInterval(interval);
     }, []);
 
     const runDeathSequence = async () => {
         // Stage 1: sentencing (2s)
-        setTimeout(async () => {
+        const id1 = setTimeout(async () => {
             setStage('wiping');
 
             // Start progress bar animation
@@ -43,20 +79,34 @@ export default function DeathScreen() {
                 useNativeDriver: false,
             }).start();
 
-            // Execute the Wipe
-            await WipeAnimation.executeWipe();
+            // Execute the Wipe via WipeManager
+            const db = getDB();
+            const wipeManager = new WipeManager(db);
+            await wipeManager.executeWipe('IH_ZERO', 0);
 
             // Stage 3: The Void (after wipe)
-            setTimeout(() => {
+            const id2 = setTimeout(() => {
                 setStage('void');
             }, 3000);
+            deathSequenceTimeouts.current.push(id2);
         }, 2000);
+        deathSequenceTimeouts.current.push(id1);
     };
 
     const activeResurrection = async () => {
         // "Identity Insurance" (IAP would go here)
-        await IdentityEngine.useInsurance();
+        const engine = await IdentityEngine.getInstance();
+        await engine.useInsurance();
         router.replace('/');
+    };
+
+    // DEV: Skip lockout and go to onboarding
+    const devSkipLockout = async () => {
+        const db = getDB();
+        const wipeManager = new WipeManager(db);
+        const despairManager = DespairModeManager.getInstance(db, wipeManager);
+        await despairManager.exitDespairMode();
+        router.replace('/onboarding');
     };
 
     const progressWidth = progress.interpolate({
@@ -95,11 +145,30 @@ export default function DeathScreen() {
         <View style={styles.voidContainer}>
             <ThemedText style={styles.voidText}>Welcome back to the old you.</ThemedText>
 
-            {/* Hidden Revival Button */}
-            <TouchableOpacity style={styles.reviveBtn} onPress={activeResurrection}>
-                <ThemedText style={styles.reviveText}>Wait... I have Insurance.</ThemedText>
-                <ThemedText style={styles.revivePrice}>[¥1,000]</ThemedText>
-            </TouchableOpacity>
+            {isLocked ? (
+                // Lockout Message (24 hours)
+                <View style={styles.lockoutContainer}>
+                    <ThemedText style={styles.lockoutTitle}>LOCKED</ThemedText>
+                    <ThemedText style={styles.lockoutText}>
+                        You cannot rebuild for {remainingHours} hours.
+                    </ThemedText>
+                    <ThemedText style={styles.lockoutSubtext}>
+                        This is the consequence.
+                    </ThemedText>
+                    {/* DEV: Skip lockout button */}
+                    {__DEV__ && (
+                        <TouchableOpacity style={styles.devButton} onPress={devSkipLockout}>
+                            <ThemedText style={styles.devButtonText}>[DEV] Skip Lockout</ThemedText>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            ) : (
+                // Hidden Revival Button (after 24 hours)
+                <TouchableOpacity style={styles.reviveBtn} onPress={activeResurrection}>
+                    <ThemedText style={styles.reviveText}>Wait... I have Insurance.</ThemedText>
+                    <ThemedText style={styles.revivePrice}>[¥1,000]</ThemedText>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
@@ -107,13 +176,13 @@ export default function DeathScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
     },
     textRed: {
-        color: Colors.dark.error,
+        color: theme.colors.error,
         letterSpacing: 4,
         textAlign: 'center',
         marginBottom: 20,
@@ -125,7 +194,7 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     subtext: {
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         textAlign: 'center',
     },
     progressBar: {
@@ -136,7 +205,7 @@ const styles = StyleSheet.create({
     },
     progressFill: {
         height: '100%',
-        backgroundColor: Colors.dark.error,
+        backgroundColor: theme.colors.error,
     },
     voidContainer: {
         flex: 1,
@@ -155,13 +224,51 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     reviveText: {
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         fontSize: 12,
         textDecorationLine: 'underline',
     },
     revivePrice: {
-        color: Colors.dark.accent,
+        color: theme.colors.accent,
         fontSize: 10,
         marginTop: 4,
-    }
+    },
+    lockoutContainer: {
+        alignItems: 'center',
+        padding: 20,
+    },
+    lockoutTitle: {
+        color: theme.colors.error,
+        fontSize: 24,
+        fontWeight: 'bold',
+        letterSpacing: 4,
+        marginBottom: 20,
+        fontFamily: 'Courier New',
+    },
+    lockoutText: {
+        color: theme.colors.foreground,
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 10,
+        fontFamily: 'Courier New',
+    },
+    lockoutSubtext: {
+        color: theme.colors.secondary,
+        fontSize: 12,
+        fontStyle: 'italic',
+        textAlign: 'center',
+        fontFamily: 'Courier New',
+    },
+    devButton: {
+        marginTop: 40,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#FF6600',
+        backgroundColor: 'rgba(255, 102, 0, 0.2)',
+    },
+    devButtonText: {
+        color: '#FF6600',
+        fontSize: 12,
+        fontFamily: 'Courier New',
+    },
 });

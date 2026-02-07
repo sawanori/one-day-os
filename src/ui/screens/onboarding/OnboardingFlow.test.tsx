@@ -595,7 +595,7 @@ describe('OnboardingFlow Component', () => {
       fireEvent.press(button);
 
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
+        expect(mockReplace).toHaveBeenCalledWith('/');
       });
     });
   });

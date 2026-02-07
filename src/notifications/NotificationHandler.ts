@@ -5,7 +5,9 @@
 
 import * as SQLite from 'expo-sqlite';
 import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
+import { getDB } from '../database/client';
 import { IdentityEngine } from '../core/identity/IdentityEngine';
+import { HapticEngine } from '../core/HapticEngine';
 import { NOTIFICATION_SCHEDULE } from '../constants';
 
 /**
@@ -25,7 +27,6 @@ export interface NotificationRecord {
  */
 export interface HandleResponseResult {
   success: boolean;
-  ihDelta: number;
   newIH: number;
   wipeTriggered: boolean;
   delta: number;
@@ -53,8 +54,8 @@ export class NotificationHandler {
     // Get IdentityEngine instance
     this.engine = await IdentityEngine.getInstance();
 
-    // Open database
-    this.db = await SQLite.openDatabaseAsync('onedayos.db');
+    // Get database instance
+    this.db = getDB();
 
     // Register AppState listener
     this.appStateSubscription = AppState.addEventListener('change', this.handleAppStateChange);
@@ -122,7 +123,6 @@ export class NotificationHandler {
       const currentIH = await this.engine!.getCurrentIH();
       return {
         success: true,
-        ihDelta: 0,
         newIH: currentIH,
         wipeTriggered: await this.engine!.isWipeNeeded(),
         delta: 0,
@@ -139,12 +139,16 @@ export class NotificationHandler {
     // Apply response to IdentityEngine
     const result = await this.engine!.applyNotificationResponse(response);
 
+    // Trigger aggressive punishment haptic for NO response
+    if (response === 'NO') {
+      await HapticEngine.punishmentHeartbeat();
+    }
+
     // Check if wipe is needed
     const wipeTriggered = await this.engine!.isWipeNeeded();
 
     return {
       success: true,
-      ihDelta: result.delta,
       newIH: result.newIH,
       wipeTriggered,
       delta: result.delta,
@@ -179,9 +183,9 @@ export class NotificationHandler {
     const now = Date.now();
     const _timeoutThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS; // Reserved for future validation
 
-    // Get all unanswered notifications
+    // Get all unanswered, non-processed notifications (race condition protection)
     const pending = await this.db!.getAllAsync<NotificationRecord>(
-      'SELECT * FROM notifications WHERE responded_at IS NULL'
+      'SELECT * FROM notifications WHERE responded_at IS NULL AND is_missed = 0 AND timeout_at IS NULL'
     );
 
     // Process each pending notification
@@ -191,15 +195,21 @@ export class NotificationHandler {
 
       // Check if timeout has occurred (strictly greater than threshold)
       if (elapsed > NOTIFICATION_SCHEDULE.TIMEOUT_MS) {
-        // Mark as timed out in DB
+        // Mark as timed out and missed in DB (with race condition protection)
         const timeoutTime = new Date().toISOString();
-        await this.db!.runAsync(
-          'UPDATE notifications SET timeout_at = ? WHERE id = ?',
+        const result = await this.db!.runAsync(
+          'UPDATE notifications SET timeout_at = ?, is_missed = 1 WHERE id = ? AND is_missed = 0 AND responded_at IS NULL AND timeout_at IS NULL',
           [timeoutTime, notification.id]
         );
 
-        // Apply IGNORED penalty through IdentityEngine
-        await this.engine!.applyNotificationResponse('IGNORED');
+        // Only apply penalty if the update actually changed a row (prevents double-processing)
+        if (result.changes > 0) {
+          // Apply IGNORED penalty through IdentityEngine
+          await this.engine!.applyNotificationResponse('IGNORED');
+
+          // Trigger aggressive punishment haptic for ignored notification
+          await HapticEngine.punishmentHeartbeat();
+        }
       }
     }
   }

@@ -3,7 +3,7 @@
  * Manages the 5-step onboarding flow
  */
 
-import { openDatabase } from '../../database/db';
+import { getDB, databaseInit } from '../../database/client';
 import * as SQLite from 'expo-sqlite';
 
 /**
@@ -109,7 +109,10 @@ export class OnboardingManager {
       return;
     }
 
-    this.db = await openDatabase();
+    // Ensure database tables are created first
+    await databaseInit();
+
+    this.db = getDB();
 
     // Create onboarding_state table if it doesn't exist
     await this.db.execAsync(`
@@ -175,10 +178,8 @@ export class OnboardingManager {
     const toStep = this.STEP_ORDER[nextStepIndex];
     this.currentStep = toStep;
 
-    // Persist current step (skip for welcome since it's the initial step)
-    if (step !== 'welcome') {
-      await this.persistCurrentStep();
-    }
+    // Persist current step
+    await this.persistCurrentStep();
 
     // Trigger step change callback
     this.triggerStepChange(fromStep, toStep);
@@ -497,10 +498,11 @@ export class OnboardingManager {
       throw new Error('Database not initialized');
     }
 
-    // Use execAsync for step persistence to avoid counting in runAsync metrics
-    await this.db.execAsync(
+    // Use parameterized query to prevent SQL injection
+    await this.db.runAsync(
       `INSERT OR REPLACE INTO onboarding_state (id, current_step, updated_at)
-       VALUES (1, '${this.currentStep}', datetime('now'))`
+       VALUES (1, ?, datetime('now'))`,
+      [this.currentStep]
     );
   }
 

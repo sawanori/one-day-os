@@ -6,10 +6,10 @@
  * All tests should FAIL initially until IdentityEngine.ts is implemented
  */
 
-import * as SQLite from 'expo-sqlite';
+import { getDB } from '../../database/client';
 
-// Mock expo-sqlite module
-jest.mock('expo-sqlite');
+// Mock database client
+jest.mock('../../database/client');
 
 import { IdentityEngine } from './IdentityEngine';
 import { IH_CONSTANTS } from '../../constants';
@@ -31,8 +31,8 @@ describe('IdentityEngine', () => {
     mockGetFirstAsync = jest.fn(() => Promise.resolve(null));
     mockGetAllAsync = jest.fn(() => Promise.resolve([]));
 
-    // Mock the openDatabaseAsync function
-    (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue({
+    // Mock the getDB function (synchronous)
+    (getDB as jest.Mock).mockReturnValue({
       execAsync: mockExecAsync,
       runAsync: mockRunAsync,
       getFirstAsync: mockGetFirstAsync,
@@ -93,12 +93,12 @@ describe('IdentityEngine', () => {
       expect(result.delta).toBe(-15);
     });
 
-    test('通知を無視した場合、IHが15%減少する', async () => {
+    test('通知を無視した場合、IHが20%減少する（MISSED_NOTIFICATION_PENALTY）', async () => {
       await engine.setCurrentIH(100);
       const result = await engine.applyNotificationResponse('IGNORED');
 
-      expect(result.newIH).toBe(85);
-      expect(result.delta).toBe(-15);
+      expect(result.newIH).toBe(80);
+      expect(result.delta).toBe(-20);
     });
 
     test('複数の減算が累積される', async () => {
@@ -123,41 +123,49 @@ describe('IdentityEngine', () => {
   });
 
   describe('クエストペナルティテスト', () => {
-    test('夜のクエストが両方達成の場合、IHは変化しない', async () => {
+    test('全クエスト達成の場合、IHは変化しない', async () => {
       await engine.setCurrentIH(100);
-      const result = await engine.applyQuestPenalty({ quest1: true, quest2: true });
+      const result = await engine.applyQuestPenalty({ completedCount: 2, totalCount: 2 });
 
       expect(result.delta).toBe(0);
       expect(result.newIH).toBe(100);
     });
 
-    test('quest1のみ未達成の場合、IHが20%減少する', async () => {
+    test('一部未達成の場合、IHが20%減少する', async () => {
       await engine.setCurrentIH(100);
-      const result = await engine.applyQuestPenalty({ quest1: false, quest2: true });
+      const result = await engine.applyQuestPenalty({ completedCount: 1, totalCount: 2 });
 
       expect(result.delta).toBe(-20);
       expect(result.newIH).toBe(80);
     });
 
-    test('quest2のみ未達成の場合、IHが20%減少する', async () => {
+    test('全て未達成の場合、IHが20%減少する（累積しない）', async () => {
       await engine.setCurrentIH(100);
-      const result = await engine.applyQuestPenalty({ quest1: true, quest2: false });
+      const result = await engine.applyQuestPenalty({ completedCount: 0, totalCount: 2 });
 
       expect(result.delta).toBe(-20);
       expect(result.newIH).toBe(80);
     });
 
-    test('両方未達成の場合、IHが20%減少する（累積しない）', async () => {
+    test('3つ以上のクエストでも正しく動作する', async () => {
       await engine.setCurrentIH(100);
-      const result = await engine.applyQuestPenalty({ quest1: false, quest2: false });
+      const result = await engine.applyQuestPenalty({ completedCount: 4, totalCount: 5 });
 
       expect(result.delta).toBe(-20);
       expect(result.newIH).toBe(80);
+    });
+
+    test('全5クエスト達成の場合、IHは変化しない', async () => {
+      await engine.setCurrentIH(100);
+      const result = await engine.applyQuestPenalty({ completedCount: 5, totalCount: 5 });
+
+      expect(result.delta).toBe(0);
+      expect(result.newIH).toBe(100);
     });
 
     test('IHが低い状態でクエストペナルティを適用', async () => {
       await engine.setCurrentIH(25);
-      const result = await engine.applyQuestPenalty({ quest1: false, quest2: true });
+      const result = await engine.applyQuestPenalty({ completedCount: 1, totalCount: 3 });
 
       expect(result.delta).toBe(-20);
       expect(result.newIH).toBe(5);
@@ -175,7 +183,7 @@ describe('IdentityEngine', () => {
 
     test('クエストペナルティでIHが0未満にならない', async () => {
       await engine.setCurrentIH(15);
-      const result = await engine.applyQuestPenalty({ quest1: false, quest2: false });
+      const result = await engine.applyQuestPenalty({ completedCount: 0, totalCount: 2 });
 
       expect(result.newIH).toBe(0);
       expect(result.newIH).toBeGreaterThanOrEqual(0);
@@ -241,7 +249,7 @@ describe('IdentityEngine', () => {
       engine.onWipeTrigger(wipeCallback);
 
       await engine.setCurrentIH(20);
-      await engine.applyQuestPenalty({ quest1: false, quest2: false }); // IH becomes 0
+      await engine.applyQuestPenalty({ completedCount: 0, totalCount: 2 }); // IH becomes 0
 
       expect(wipeCallback).toHaveBeenCalledWith({
         reason: 'IH_ZERO',
@@ -285,7 +293,7 @@ describe('IdentityEngine', () => {
     test('複数の操作後のIH値が正しく永続化される', async () => {
       await engine.setCurrentIH(100);
       await engine.applyNotificationResponse('NO'); // 85
-      await engine.applyQuestPenalty({ quest1: false, quest2: true }); // 65
+      await engine.applyQuestPenalty({ completedCount: 1, totalCount: 2 }); // 65
       await engine.applyNotificationResponse('YES'); // 65
 
       const newEngine = await IdentityEngine.getInstance();
@@ -375,6 +383,58 @@ describe('IdentityEngine', () => {
           timestamp: expect.any(Number),
         })
       );
+    });
+  });
+
+  describe('オンボーディング停滞ペナルティテスト', () => {
+    test('applyOnboardingStagnationPenalty()でIHが5%減少する', async () => {
+      await engine.setCurrentIH(100);
+      const result = await engine.applyOnboardingStagnationPenalty();
+
+      expect(result.previousIH).toBe(100);
+      expect(result.newIH).toBe(95);
+      expect(result.delta).toBe(-5);
+      expect(result.timestamp).toBeDefined();
+    });
+
+    test('複数回のオンボーディングペナルティが累積される', async () => {
+      await engine.setCurrentIH(100);
+      await engine.applyOnboardingStagnationPenalty(); // 95
+      await engine.applyOnboardingStagnationPenalty(); // 90
+
+      const final = await engine.getCurrentIH();
+      expect(final).toBe(90);
+    });
+
+    test('オンボーディングペナルティでIHが0未満にならない', async () => {
+      await engine.setCurrentIH(3);
+      const result = await engine.applyOnboardingStagnationPenalty();
+
+      expect(result.newIH).toBe(0);
+      expect(result.newIH).toBeGreaterThanOrEqual(0);
+    });
+
+    test('オンボーディングペナルティでIHが0になった場合にwipeトリガー', async () => {
+      const wipeCallback = jest.fn();
+      engine.onWipeTrigger(wipeCallback);
+
+      await engine.setCurrentIH(5);
+      await engine.applyOnboardingStagnationPenalty(); // IH becomes 0
+
+      expect(wipeCallback).toHaveBeenCalledWith({
+        reason: 'IH_ZERO',
+        finalIH: 0,
+        timestamp: expect.any(Number),
+      });
+    });
+
+    test('オンボーディングペナルティと通知ペナルティが累積される', async () => {
+      await engine.setCurrentIH(100);
+      await engine.applyOnboardingStagnationPenalty(); // 95
+      await engine.applyNotificationResponse('NO'); // 80
+
+      const final = await engine.getCurrentIH();
+      expect(final).toBe(80);
     });
   });
 });

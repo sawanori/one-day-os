@@ -6,10 +6,10 @@
  * All tests should FAIL initially until OnboardingManager.ts is implemented
  */
 
-import * as SQLite from 'expo-sqlite';
+import { getDB, databaseInit } from '../../database/client';
 
-// Mock expo-sqlite module
-jest.mock('expo-sqlite');
+// Mock database client module
+jest.mock('../../database/client');
 
 import { OnboardingManager } from './OnboardingManager';
 
@@ -39,13 +39,16 @@ describe('OnboardingManager', () => {
     mockGetFirstAsync = jest.fn(() => Promise.resolve(null));
     mockGetAllAsync = jest.fn(() => Promise.resolve([]));
 
-    // Mock the openDatabaseAsync function
-    (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue({
+    // Mock the getDB function (synchronous)
+    (getDB as jest.Mock).mockReturnValue({
       execAsync: mockExecAsync,
       runAsync: mockRunAsync,
       getFirstAsync: mockGetFirstAsync,
       getAllAsync: mockGetAllAsync,
     });
+
+    // Mock databaseInit to resolve immediately
+    (databaseInit as jest.Mock).mockResolvedValue(undefined);
 
     // Reset singleton instance before each test
     OnboardingManager.resetInstance();
@@ -254,7 +257,8 @@ describe('OnboardingManager', () => {
       await manager.completeStep('quests', { quests: data.quests });
 
       // Verify database operations were called
-      expect(mockRunAsync).toHaveBeenCalledTimes(4); // 4 data steps
+      // 4 data saves + 5 persistCurrentStep calls (welcome, anti-vision, identity, mission, quests)
+      expect(mockRunAsync).toHaveBeenCalledTimes(9);
     });
   });
 
@@ -564,9 +568,9 @@ describe('OnboardingManager', () => {
     });
 
     test('データベースエラー時に適切なエラーをスロー', async () => {
-      mockRunAsync.mockRejectedValueOnce(new Error('Database error'));
-
       await manager.completeStep('welcome', null);
+
+      mockRunAsync.mockRejectedValueOnce(new Error('Database error'));
 
       await expect(
         manager.completeStep('anti-vision', { antiVision: 'Test' })

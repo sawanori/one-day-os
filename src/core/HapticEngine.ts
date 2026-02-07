@@ -49,5 +49,31 @@ export const HapticEngine = {
         try {
             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         } catch (e) { }
+    },
+
+    /**
+     * Aggressive punishment vibration for "NO" or ignored notifications
+     * Creates an uncomfortable double-tap heartbeat pattern
+     */
+    async punishmentHeartbeat() {
+        if (Platform.OS === 'web') return;
+        try {
+            // First aggressive pulse
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+            // Short pause
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Second aggressive pulse
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+            // Another pause
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            // Third pulse (lighter but still present)
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        } catch (e) {
+            // Ignore haptic errors
+        }
     }
 };

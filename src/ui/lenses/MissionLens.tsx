@@ -3,9 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { ThemedText } from '../components/ThemedText';
 import { GlitchText } from '../effects/GlitchText';
-import { Colors } from '../theme/colors';
-import { getDB } from '../../database/client';
-import { IdentityEngine } from '../../core/IdentityEngine';
+import { theme } from '../theme/theme';
+import { IdentityEngine } from '../../core/identity/IdentityEngine';
 
 export function MissionLens() {
     const [mission, setMission] = useState<string>('Destroy old patterns.');
@@ -14,7 +13,8 @@ export function MissionLens() {
 
     useEffect(() => {
         const checkHealth = async () => {
-            const status = await IdentityEngine.checkHealth();
+            const engine = await IdentityEngine.getInstance();
+            const status = await engine.checkHealth();
             setHealth(status.health);
         };
         checkHealth();
@@ -29,7 +29,7 @@ export function MissionLens() {
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
             <View style={styles.section}>
-                <ThemedText type="subtitle" style={styles.label}>LENS: 0.5x [1 YEAR]</ThemedText>
+                <ThemedText type="subtitle" style={styles.label}>LENS: 0.5x [1年計画]</ThemedText>
                 <GlitchText
                     text={mission}
                     style={styles.missionText}
@@ -38,7 +38,7 @@ export function MissionLens() {
             </View>
 
             <View style={[styles.section, styles.antiVisionContainer]}>
-                <ThemedText type="subtitle" style={styles.fearLabel}>ANTI-VISION (FUEL)</ThemedText>
+                <ThemedText type="subtitle" style={styles.fearLabel}>ANTI-VISION (あなたが想定する最悪の未来)</ThemedText>
                 <ThemedText style={styles.antiVisionText}>{antiVision}</ThemedText>
             </View>
         </ScrollView>
@@ -48,7 +48,7 @@ export function MissionLens() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
     },
     content: {
         padding: 24,
@@ -59,31 +59,33 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
     label: {
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         letterSpacing: 2,
         marginBottom: 12,
         fontSize: 12,
         textTransform: 'uppercase',
+        fontFamily: theme.typography.fontFamilySerif,
     },
     missionText: {
-        color: Colors.dark.primary,
+        color: theme.colors.foreground,
         fontSize: 32,
         fontWeight: '800',
         lineHeight: 40,
     },
     antiVisionContainer: {
         borderLeftWidth: 2,
-        borderLeftColor: Colors.dark.error,
+        borderLeftColor: theme.colors.error,
         paddingLeft: 16,
     },
     fearLabel: {
-        color: Colors.dark.error,
+        color: theme.colors.error,
         fontSize: 12,
         letterSpacing: 2,
         marginBottom: 8,
+        fontFamily: theme.typography.fontFamilySerif,
     },
     antiVisionText: {
-        color: Colors.dark.text,
+        color: theme.colors.foreground,
         fontSize: 16,
         fontStyle: 'italic',
         opacity: 0.8,

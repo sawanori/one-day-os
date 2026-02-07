@@ -2,7 +2,7 @@
  * FileDeleteAnimation Tests
  */
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, waitFor, act } from '@testing-library/react-native';
 import { FileDeleteAnimation } from './FileDeleteAnimation';
 
 describe('FileDeleteAnimation', () => {
@@ -19,17 +19,23 @@ describe('FileDeleteAnimation', () => {
     const { findByText } = render(<FileDeleteAnimation files={files} />);
 
     // 最初のファイルがすぐ表示
-    jest.advanceTimersByTime(0);
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
     const file1 = await findByText('DELETE: quests.db');
     expect(file1).toBeDefined();
 
     // 500ms後に2番目
-    jest.advanceTimersByTime(500);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     const file2 = await findByText('DELETE: anti_vision.db');
     expect(file2).toBeDefined();
 
     // 1000ms後に3番目
-    jest.advanceTimersByTime(500);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     const file3 = await findByText('DELETE: identity_core.db');
     expect(file3).toBeDefined();
   });
@@ -43,7 +49,9 @@ describe('FileDeleteAnimation', () => {
     const files = ['single.db'];
     const { findByText } = render(<FileDeleteAnimation files={files} />);
 
-    jest.advanceTimersByTime(0);
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
     const file = await findByText('DELETE: single.db');
     expect(file).toBeDefined();
   });
@@ -56,11 +64,15 @@ describe('FileDeleteAnimation', () => {
     expect(queryByText('DELETE: second.db')).toBeNull();
 
     // First file appears immediately
-    jest.advanceTimersByTime(0);
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
     expect(await findByText('DELETE: first.db')).toBeDefined();
 
     // Second file appears after 500ms
-    jest.advanceTimersByTime(500);
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
     expect(await findByText('DELETE: second.db')).toBeDefined();
   });
 
@@ -68,7 +80,9 @@ describe('FileDeleteAnimation', () => {
     const files = ['test.db'];
     const { getByText } = render(<FileDeleteAnimation files={files} />);
 
-    jest.advanceTimersByTime(0);
+    await act(async () => {
+      jest.advanceTimersByTime(0);
+    });
 
     await waitFor(() => {
       const element = getByText('DELETE: test.db');

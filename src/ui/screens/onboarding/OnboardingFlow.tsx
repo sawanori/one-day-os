@@ -13,7 +13,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { OnboardingManager, OnboardingStep } from '../../../core/onboarding/OnboardingManager';
-import { updateAppState } from '../../../database/db';
+import { updateAppState } from '../../../database/client';
 import { theme } from '../../theme/theme';
 
 export function OnboardingFlow() {
@@ -36,46 +36,33 @@ export function OnboardingFlow() {
 
     const initManager = async () => {
       try {
-        console.log('[useEffect] Getting instance...');
         const mgr = await OnboardingManager.getInstance();
-        console.log('[useEffect] Got instance, mounted?', mounted);
         if (!mounted) {
-          console.log('[useEffect] Unmounted after getInstance, bailing');
           return;
         }
 
-        console.log('[useEffect] Setting manager...');
         setManager(mgr);
 
-        console.log('[useEffect] Getting current step...');
         const step = await mgr.getCurrentStep();
-        console.log('[useEffect] Got step:', step, 'mounted?', mounted);
         if (!mounted) {
-          console.log('[useEffect] Unmounted after getCurrentStep, bailing');
           return;
         }
 
-        console.log('[useEffect] Setting step...');
         setCurrentStep(step);
 
-        console.log('[useEffect] Checking if complete...');
         const isComplete = await mgr.isOnboardingComplete();
-        console.log('[useEffect] Is complete?', isComplete, 'mounted?', mounted);
         if (!mounted) {
-          console.log('[useEffect] Unmounted after isOnboardingComplete, bailing');
           return;
         }
 
         if (isComplete) {
-          console.log('[useEffect] Navigating...');
           // Navigate to main app (handled by router mock in tests)
           try {
-            router.replace('/(tabs)');
+            router.replace('/');
           } catch (routerError) {
             console.error('Router error:', routerError);
           }
         }
-        console.log('[useEffect] Init complete');
         setIsInitialized(true);
       } catch (err) {
         console.error('Error initializing manager:', err);
@@ -113,7 +100,7 @@ export function OnboardingFlow() {
           // On next app start, isOnboardingComplete() will be true
           // and user will be redirected to main app automatically
         }
-        router.replace('/(tabs)');
+        router.replace('/');
       }
     } catch (error) {
       console.error('Error completing step:', error);
@@ -348,14 +335,10 @@ export function OnboardingFlow() {
 
   // Render current step
   const renderStep = () => {
-    console.log('[renderStep] currentStep:', currentStep);
     try {
       switch (currentStep) {
         case 'welcome':
-          console.log('[renderStep] Calling renderWelcome');
-          const welcome = renderWelcome();
-          console.log('[renderStep] renderWelcome returned:', !!welcome);
-          return welcome;
+          return renderWelcome();
         case 'anti-vision':
           return renderAntiVision();
         case 'identity':
@@ -373,10 +356,7 @@ export function OnboardingFlow() {
     }
   };
 
-  console.log('[render] manager:', !!manager, 'step:', currentStep, 'error:', !!error, 'initialized:', isInitialized);
-
   if (error) {
-    console.log('[render] Rendering error state');
     return (
       <View style={styles.container} testID="onboarding-container">
         <Text style={styles.heading}>エラー: {error.message}</Text>
@@ -386,7 +366,6 @@ export function OnboardingFlow() {
 
   // Always render the current step, even before initialization completes
   // This prevents the component structure from changing dramatically
-  console.log('[render] Rendering step');
   return (
     <View style={styles.container} testID="onboarding-container">
       {renderStep()}

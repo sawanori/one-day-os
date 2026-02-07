@@ -11,26 +11,42 @@ jest.mock('../../config/features', () => ({
 }));
 
 describe('AntiVisionBleed', () => {
-  it('should not render when health >= 30', () => {
+  it('should not render when health >= 80', () => {
     const { queryByTestId } = render(
-      <AntiVisionBleed antiVision="Test" health={30} />
+      <AntiVisionBleed antiVision="Test" health={80} />
     );
     expect(queryByTestId('anti-vision-bleed')).toBeNull();
   });
 
   it('should not render when health is above threshold', () => {
     const { queryByTestId } = render(
-      <AntiVisionBleed antiVision="Test" health={50} />
+      <AntiVisionBleed antiVision="Test" health={100} />
     );
     expect(queryByTestId('anti-vision-bleed')).toBeNull();
   });
 
-  it('should render when health < 30', () => {
+  it('should render when health < 80', () => {
     const { getByTestId, getByText } = render(
-      <AntiVisionBleed antiVision="Test Anti-Vision" health={29} />
+      <AntiVisionBleed antiVision="Test Anti-Vision" health={79} />
     );
     expect(getByTestId('anti-vision-bleed')).toBeDefined();
     expect(getByText('Test Anti-Vision')).toBeDefined();
+  });
+
+  it('should render at health 50 (mid-range)', () => {
+    const { getByTestId, getByText } = render(
+      <AntiVisionBleed antiVision="Test Mid-Range" health={50} />
+    );
+    expect(getByTestId('anti-vision-bleed')).toBeDefined();
+    expect(getByText('Test Mid-Range')).toBeDefined();
+  });
+
+  it('should render at health 30 (low)', () => {
+    const { getByTestId, getByText } = render(
+      <AntiVisionBleed antiVision="Test Low Health" health={30} />
+    );
+    expect(getByTestId('anti-vision-bleed')).toBeDefined();
+    expect(getByText('Test Low Health')).toBeDefined();
   });
 
   it('should render when health is 0', () => {

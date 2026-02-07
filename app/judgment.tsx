@@ -2,9 +2,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, BackHandler } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Colors } from '../src/ui/theme/colors';
+import { theme } from '../src/ui/theme/theme';
 import { ThemedText } from '../src/ui/components/ThemedText';
-import { IdentityEngine } from '../src/core/IdentityEngine';
+import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { HapticEngine } from '../src/core/HapticEngine';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 
@@ -63,19 +63,21 @@ export default function JudgmentScreen() {
         if (timerRef.current) clearInterval(timerRef.current);
         await HapticEngine.punishFailure();
         // Timeout = Hesitation = Failure
-        await IdentityEngine.applyDamage(10);
+        const engine = await IdentityEngine.getInstance();
+        await engine.applyDamage(10);
         router.replace('/');
     };
 
     const handleDecision = async (result: boolean) => {
         if (timerRef.current) clearInterval(timerRef.current);
+        const engine = await IdentityEngine.getInstance();
 
         if (result) {
             await HapticEngine.snapLens(); // Satisfying click
-            await IdentityEngine.restoreHealth(2);
+            await engine.restoreHealth(2);
         } else {
             await HapticEngine.punishFailure();
-            await IdentityEngine.applyDamage(5); // Honest failure is better than hesitation?
+            await engine.applyDamage(5); // Honest failure is better than hesitation?
         }
 
         router.replace('/');
@@ -94,7 +96,7 @@ export default function JudgmentScreen() {
                 </View>
 
                 {/* Timer */}
-                <ThemedText type="title" style={[styles.timer, { color: timeLeft < 3 ? Colors.dark.error : Colors.dark.text }]}>
+                <ThemedText type="title" style={[styles.timer, { color: timeLeft < 3 ? theme.colors.error : theme.colors.foreground }]}>
                     0:0{timeLeft}
                 </ThemedText>
 
@@ -129,12 +131,12 @@ const styles = StyleSheet.create({
         padding: 24,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
     },
     label: {
         fontSize: 12,
         letterSpacing: 2,
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         marginBottom: 40,
     },
     questionContainer: {
@@ -164,11 +166,11 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     noBtn: {
-        borderColor: Colors.dark.error,
+        borderColor: theme.colors.error,
         backgroundColor: 'rgba(255, 0, 0, 0.1)',
     },
     yesBtn: {
-        borderColor: Colors.dark.success,
+        borderColor: theme.colors.success,
         backgroundColor: 'rgba(0, 255, 0, 0.1)',
     },
     btnText: {

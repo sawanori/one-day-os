@@ -7,10 +7,14 @@
 import React, { useEffect } from 'react';
 import { Platform, View, Text, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
-import { getDB, databaseInit } from '../src/database/client';
-import { Colors } from '../src/ui/theme/colors';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
+import { NotoSerifJP_700Bold } from '@expo-google-fonts/noto-serif-jp';
+import { databaseInit } from '../src/database/client';
+import { theme } from '../src/ui/theme/theme';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 import { NotificationController } from '../src/core/NotificationController';
+import { ErrorBoundary } from '../src/ui/components/ErrorBoundary';
 
 // Web Not Supported Component
 const WebNotSupported = () => {
@@ -65,6 +69,11 @@ const WebNotSupported = () => {
 
 // Root Layout Component
 function RootLayout() {
+  // Load custom fonts
+  const [fontsLoaded] = useFonts({
+    NotoSerifJP_700Bold,
+  });
+
   useEffect(() => {
     // Initialize database on app start
     databaseInit().catch((error) => {
@@ -72,19 +81,28 @@ function RootLayout() {
     });
   }, []);
 
+  // Wait for fonts to load
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
-    <StressContainer>
-      <NotificationController />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: Colors.dark.background,
-          },
-          animation: 'none', // Brutalist: no animations
-        }}
-      />
-    </StressContainer>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <StressContainer>
+          <NotificationController />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: {
+                backgroundColor: theme.colors.background,
+              },
+              animation: 'none', // Brutalist: no animations
+            }}
+          />
+        </StressContainer>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
 

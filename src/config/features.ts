@@ -27,12 +27,17 @@ export const FEATURES = {
   // Phase 4: Lens Zoom
   LENS_ZOOM_GESTURE: true,             // Lens Zoom（Phase 4）✅
   LENS_BUTTON_ANIMATION: false,        // Button Animation（Phase 4.3）
+  UNIFIED_LENS_VIEW: true,             // Unified Lens View with Opacity Transitions（Phase 4.4）✅
 
   // Phase 5: Notification Actions
   NOTIFICATION_ACTIONS: true,          // Interactive Notifications（Phase 5）✅
 
   // Phase 6: IdentityEngine v2
   IDENTITY_ENGINE_V2: true,            // IdentityEngine v2（Phase 6）✅
+
+  // Phase 7: Visual Audio Domination (Quest Interrogation v4 Ultra)
+  SUBLIMINAL_FLASH: true,              // Subliminal Flash Effect
+  PERSISTENT_NOISE: true,              // Persistent Anti-Vision Noise
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;

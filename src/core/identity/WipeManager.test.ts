@@ -8,7 +8,6 @@
 
 import { WipeManager } from './WipeManager';
 import * as SQLite from 'expo-sqlite';
-import { openDatabase, initializeDatabase } from '../../database/db';
 
 // Mock expo-sqlite
 jest.mock('expo-sqlite', () => ({
@@ -18,16 +17,12 @@ jest.mock('expo-sqlite', () => ({
     getFirstAsync: jest.fn(),
     getAllAsync: jest.fn(() => Promise.resolve([])),
   })),
-}));
-
-jest.mock('../../database/db', () => ({
-  openDatabase: jest.fn(() => Promise.resolve({
+  openDatabaseSync: jest.fn(() => ({
     execAsync: jest.fn(),
     runAsync: jest.fn(),
     getFirstAsync: jest.fn(),
     getAllAsync: jest.fn(() => Promise.resolve([])),
   })),
-  initializeDatabase: jest.fn(),
 }));
 
 describe('WipeManager - Integration Tests', () => {

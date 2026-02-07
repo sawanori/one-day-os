@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '../src/ui/components/ThemedText';
-import { Colors } from '../src/ui/theme/colors';
-import { IdentityEngine } from '../src/core/IdentityEngine';
+import { theme } from '../src/ui/theme/theme';
+import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 
 export default function EveningAudit() {
@@ -15,10 +15,11 @@ export default function EveningAudit() {
 
     const handleFinish = async () => {
         // Audit Logic
+        const engine = await IdentityEngine.getInstance();
         if (win) {
-            await IdentityEngine.restoreHealth(10);
+            await engine.restoreHealth(10);
         } else {
-            await IdentityEngine.applyDamage(20);
+            await engine.applyDamage(20);
         }
         router.replace('/');
     };
@@ -85,7 +86,7 @@ export default function EveningAudit() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
         padding: 24,
         paddingTop: 60,
     },
@@ -93,20 +94,20 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     header: {
-        color: Colors.dark.accent,
+        color: theme.colors.accent,
         marginBottom: 40,
         textAlign: 'center',
         letterSpacing: 2,
     },
     prompt: {
-        color: Colors.dark.text,
+        color: theme.colors.foreground,
         fontSize: 20,
         marginBottom: 32,
         textAlign: 'center',
     },
     input: {
-        backgroundColor: Colors.dark.surface,
-        color: Colors.dark.text,
+        backgroundColor: theme.colors.surface,
+        color: theme.colors.foreground,
         padding: 16,
         fontSize: 18,
         borderWidth: 1,
@@ -115,12 +116,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     btn: {
-        backgroundColor: Colors.dark.primary,
+        backgroundColor: theme.colors.foreground,
         padding: 16,
         alignItems: 'center',
     },
     btnText: {
-        color: Colors.dark.background,
+        color: theme.colors.background,
         fontWeight: 'bold',
         letterSpacing: 1,
     },
@@ -136,11 +137,11 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     lossBtn: {
-        borderColor: Colors.dark.error,
+        borderColor: theme.colors.error,
         backgroundColor: '#330000',
     },
     winBtn: {
-        borderColor: Colors.dark.success,
+        borderColor: theme.colors.success,
         backgroundColor: '#003300',
     },
 });

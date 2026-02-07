@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, BackHandler } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '../src/ui/components/ThemedText';
-import { Colors } from '../src/ui/theme/colors';
-import { IdentityEngine } from '../src/core/IdentityEngine';
+import { theme } from '../src/ui/theme/theme';
+import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { getDB } from '../src/database/client';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 
@@ -46,8 +46,7 @@ export default function MorningExcavation() {
             await db.runAsync('INSERT INTO quests (date, title, type) VALUES (?, ?, ?)', [today, quests.quest2, 'MINION']);
         }
 
-        // Log completion (optional: could update a 'morning_completed' flag in user_status)
-        console.log("Morning Ritual Completed");
+        // Morning ritual completed
     };
 
     const renderStep = () => {
@@ -194,7 +193,7 @@ export default function MorningExcavation() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
         padding: 24,
         paddingTop: 60,
     },
@@ -202,13 +201,13 @@ const styles = StyleSheet.create({
         paddingBottom: 40,
     },
     stepTitle: {
-        color: Colors.dark.error,
+        color: theme.colors.error,
         marginBottom: 24,
         fontSize: 14,
         letterSpacing: 2,
     },
     prompt: {
-        color: Colors.dark.text,
+        color: theme.colors.foreground,
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 32,
@@ -227,8 +226,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     input: {
-        backgroundColor: Colors.dark.surface,
-        color: Colors.dark.text,
+        backgroundColor: theme.colors.surface,
+        color: theme.colors.foreground,
         padding: 16,
         fontSize: 16,
         minHeight: 120,
@@ -238,13 +237,13 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     label: {
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         marginBottom: 8,
         fontSize: 12,
         fontWeight: 'bold',
     },
     button: {
-        backgroundColor: Colors.dark.primary,
+        backgroundColor: theme.colors.foreground,
         padding: 18,
         alignItems: 'center',
         marginBottom: 20,
@@ -253,13 +252,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
     },
     buttonText: {
-        color: Colors.dark.background,
+        color: theme.colors.background,
         fontWeight: 'bold',
         fontSize: 14,
         letterSpacing: 1,
     },
     timerText: {
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         textAlign: 'center',
         marginBottom: 16,
     }

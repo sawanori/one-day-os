@@ -4,14 +4,20 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import JudgmentScreen from './judgment';
-import { IdentityEngine } from '../src/core/IdentityEngine';
 import { HapticEngine } from '../src/core/HapticEngine';
 
-// Mock IdentityEngine
-jest.mock('../src/core/IdentityEngine', () => ({
+// Mock IdentityEngine instance methods
+const mockApplyDamage = jest.fn().mockResolvedValue(undefined);
+const mockRestoreHealth = jest.fn().mockResolvedValue(undefined);
+
+jest.mock('../src/core/identity/IdentityEngine', () => ({
   IdentityEngine: {
-    applyDamage: jest.fn().mockResolvedValue(undefined),
-    restoreHealth: jest.fn().mockResolvedValue(undefined),
+    getInstance: jest.fn().mockResolvedValue({
+      applyDamage: (...args: any[]) => mockApplyDamage(...args),
+      restoreHealth: (...args: any[]) => mockRestoreHealth(...args),
+      checkHealth: jest.fn().mockResolvedValue({ health: 100, isDead: false }),
+    }),
+    resetInstance: jest.fn(),
   },
 }));
 
@@ -59,9 +65,9 @@ describe('Judgment Screen - Preset Support', () => {
 
     render(<JudgmentScreen />);
 
-    // YES処理が自動実行される
+    // YES processing auto-executes
     await waitFor(() => {
-      expect(IdentityEngine.restoreHealth).toHaveBeenCalledWith(2);
+      expect(mockRestoreHealth).toHaveBeenCalledWith(2);
       expect(HapticEngine.snapLens).toHaveBeenCalled();
       expect(mockReplace).toHaveBeenCalledWith('/');
     });
@@ -78,7 +84,7 @@ describe('Judgment Screen - Preset Support', () => {
     render(<JudgmentScreen />);
 
     await waitFor(() => {
-      expect(IdentityEngine.applyDamage).toHaveBeenCalledWith(5);
+      expect(mockApplyDamage).toHaveBeenCalledWith(5);
       expect(HapticEngine.punishFailure).toHaveBeenCalled();
       expect(mockReplace).toHaveBeenCalledWith('/');
     });
@@ -93,7 +99,7 @@ describe('Judgment Screen - Preset Support', () => {
 
     const { getByText } = render(<JudgmentScreen />);
 
-    // タイマーが動作
+    // Timer operates
     expect(getByText(/0:05/)).toBeDefined();
   });
 
@@ -125,7 +131,7 @@ describe('Judgment Screen - Preset Support', () => {
     render(<JudgmentScreen />);
 
     await waitFor(() => {
-      expect(IdentityEngine.restoreHealth).toHaveBeenCalledWith(2);
+      expect(mockRestoreHealth).toHaveBeenCalledWith(2);
     });
   });
 

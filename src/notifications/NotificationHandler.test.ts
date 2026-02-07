@@ -8,13 +8,14 @@
 
 import { NotificationHandler } from './NotificationHandler';
 import { IdentityEngine } from '../core/identity/IdentityEngine';
+import { getDB } from '../database/client';
 import * as SQLite from 'expo-sqlite';
 import { AppState, AppStateStatus } from 'react-native';
 import { NOTIFICATION_SCHEDULE } from '../constants';
 
-// Mock expo-sqlite
-jest.mock('expo-sqlite', () => ({
-  openDatabaseAsync: jest.fn(),
+// Mock database client
+jest.mock('../database/client', () => ({
+  getDB: jest.fn(),
 }));
 
 // Mock react-native AppState
@@ -22,6 +23,16 @@ jest.mock('react-native', () => ({
   AppState: {
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
+  },
+}));
+
+// Mock HapticEngine
+jest.mock('../core/HapticEngine', () => ({
+  HapticEngine: {
+    punishmentHeartbeat: jest.fn().mockResolvedValue(undefined),
+    pulseHeartbeat: jest.fn().mockResolvedValue(undefined),
+    snapLens: jest.fn().mockResolvedValue(undefined),
+    lightClick: jest.fn().mockResolvedValue(undefined),
   },
 }));
 
@@ -52,7 +63,7 @@ describe('NotificationHandler', () => {
       execAsync: jest.fn().mockResolvedValue(undefined),
     } as any;
 
-    (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(mockDb);
+    (getDB as jest.Mock).mockReturnValue(mockDb);
 
     // Create mock IdentityEngine
     mockEngine = {
@@ -160,7 +171,7 @@ describe('NotificationHandler', () => {
   });
 
   describe('タイムアウト検知テスト', () => {
-    test('15分以上未応答の通知がIGNORED扱いになる', async () => {
+    test('15分以上未応答の通知がIGNORED扱いになる（IH -20%）', async () => {
       const now = Date.now();
       const timeoutThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS;
 
@@ -175,8 +186,8 @@ describe('NotificationHandler', () => {
 
       mockEngine.applyNotificationResponse.mockResolvedValue({
         previousIH: 100,
-        newIH: 85,
-        delta: -15,
+        newIH: 80,
+        delta: -20,
         timestamp: Date.now(),
       });
 
@@ -197,7 +208,7 @@ describe('NotificationHandler', () => {
       expect(checkTimeoutsSpy).toHaveBeenCalled();
     });
 
-    test('タイムアウト時にIdentityEngineにIGNOREDを渡す（IH -15%）', async () => {
+    test('タイムアウト時にIdentityEngineにIGNOREDを渡す（IH -20%）', async () => {
       const now = Date.now();
       const timeoutThreshold = now - NOTIFICATION_SCHEDULE.TIMEOUT_MS;
 
@@ -210,9 +221,9 @@ describe('NotificationHandler', () => {
       ]);
 
       mockEngine.applyNotificationResponse.mockResolvedValue({
-        previousIH: 85,
-        newIH: 70,
-        delta: -15,
+        previousIH: 100,
+        newIH: 80,
+        delta: -20,
         timestamp: Date.now(),
       });
 
@@ -645,7 +656,7 @@ describe('NotificationHandler', () => {
       const newHandler = new NotificationHandler();
       await newHandler.initialize();
 
-      expect(SQLite.openDatabaseAsync).toHaveBeenCalled();
+      expect(getDB).toHaveBeenCalled();
     });
 
     test('initialize()がAppStateリスナーを登録する', async () => {

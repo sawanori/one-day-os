@@ -5,7 +5,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { isFeatureEnabled } from '../../config/features';
-import { Colors } from '../theme/colors';
+import { theme } from '../theme/theme';
 
 interface AntiVisionBleedProps {
   antiVision: string;
@@ -18,13 +18,24 @@ export const AntiVisionBleed = ({ antiVision, health }: AntiVisionBleedProps) =>
     return null;
   }
 
-  // IH 30%以上: 非表示
-  // IH 29%以下: 表示（opacity 0.01 ~ 0.3）
-  if (health >= 30) {
+  // IH 80%以上: 非表示
+  // IH 80%未満: 段階的に濃くなる
+  if (health >= 80) {
     return null;
   }
 
-  const opacity = (30 - health) / 100; // 0.01 ~ 0.3
+  // Calculate opacity based on health ranges (INTENSIFIED)
+  let opacity: number;
+  if (health >= 50) {
+    // IH 50-80%: opacity 0.2 - 0.5 (faint → medium)
+    opacity = 0.2 + ((80 - health) / 30) * 0.3;
+  } else if (health >= 30) {
+    // IH 30-50%: opacity 0.5 - 0.7 (medium → strong)
+    opacity = 0.5 + ((50 - health) / 20) * 0.2;
+  } else {
+    // IH 0-30%: opacity 0.7 - 0.9 (strong → overwhelming)
+    opacity = 0.7 + ((30 - health) / 30) * 0.2;
+  }
 
   return (
     <View

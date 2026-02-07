@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemedText } from '../components/ThemedText';
-import { Colors } from '../theme/colors';
-import { IdentityEngine } from '../../core/IdentityEngine';
+import { theme } from '../theme/theme';
+import { IdentityEngine } from '../../core/identity/IdentityEngine';
 
 export function QuestLens() {
     const [quests, setQuests] = useState([
@@ -16,12 +16,13 @@ export function QuestLens() {
             q.id === id ? { ...q, completed: !q.completed } : q
         ));
         // Reward IH on completion
-        await IdentityEngine.restoreHealth(5);
+        const engine = await IdentityEngine.getInstance();
+        await engine.restoreHealth(5);
     };
 
     return (
         <View style={styles.container}>
-            <ThemedText type="subtitle" style={styles.label}>LENS: 2.0x [TODAY]</ThemedText>
+            <ThemedText type="subtitle" style={styles.label}>LENS: 2.0x [今日]</ThemedText>
 
             <View style={styles.questContainer}>
                 {quests.map((quest) => (
@@ -44,7 +45,7 @@ export function QuestLens() {
             </View>
 
             <ThemedText style={styles.footer}>
-                Only these matters. Ignoring the rest.
+                これだけが重要。他は無視。
             </ThemedText>
         </View>
     );
@@ -53,16 +54,17 @@ export function QuestLens() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
         padding: 24,
         justifyContent: 'center',
     },
     label: {
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         letterSpacing: 2,
         marginBottom: 32,
         fontSize: 12,
         alignSelf: 'center',
+        fontFamily: theme.typography.fontFamilySerif,
     },
     questContainer: {
         gap: 16,
@@ -71,12 +73,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 24,
-        backgroundColor: Colors.dark.surface,
+        backgroundColor: theme.colors.surface,
         borderWidth: 1,
-        borderColor: Colors.dark.secondary,
+        borderColor: theme.colors.secondary,
     },
     questCompleted: {
-        borderColor: Colors.dark.success,
+        borderColor: theme.colors.success,
         opacity: 0.5,
     },
     indicatorContainer: {
@@ -86,35 +88,36 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         borderWidth: 2,
-        borderColor: Colors.dark.primary,
+        borderColor: theme.colors.foreground,
     },
     indicatorActive: {
-        backgroundColor: Colors.dark.success,
-        borderColor: Colors.dark.success,
+        backgroundColor: theme.colors.success,
+        borderColor: theme.colors.success,
     },
     textContainer: {
         flex: 1,
     },
     questType: {
-        color: Colors.dark.accent,
+        color: theme.colors.accent,
         fontSize: 10,
         fontWeight: 'bold',
         marginBottom: 4,
         letterSpacing: 1,
+        fontFamily: theme.typography.fontFamilySerif,
     },
     questTitle: {
-        color: Colors.dark.primary,
+        color: theme.colors.foreground,
         fontSize: 18,
         fontWeight: '500',
     },
     textCompleted: {
         textDecorationLine: 'line-through',
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
     },
     footer: {
         marginTop: 40,
         textAlign: 'center',
-        color: Colors.dark.secondary,
+        color: theme.colors.secondary,
         fontStyle: 'italic',
     },
 });

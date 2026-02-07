@@ -1,11 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { IdentityEngine } from '../../core/IdentityEngine';
+import { IdentityEngine } from '../../core/identity/IdentityEngine';
 import { HapticEngine } from '../../core/HapticEngine';
 import { NoiseOverlay } from '../effects/NoiseOverlay';
 import { AntiVisionBleed } from '../effects/AntiVisionBleed';
-import { Colors } from '../theme/colors';
+import { AntiVisionFragments } from '../effects/AntiVisionFragments';
+import { theme } from '../theme/theme';
 
 export const StressContainer = ({ children }: { children: React.ReactNode }) => {
     const [health, setHealth] = useState(100);
@@ -15,18 +16,20 @@ export const StressContainer = ({ children }: { children: React.ReactNode }) => 
     useEffect(() => {
         // Fetch Anti-Vision on mount
         const fetchAntiVision = async () => {
-            const content = await IdentityEngine.getAntiVision();
+            const engine = await IdentityEngine.getInstance();
+            const content = await engine.getAntiVision();
             setAntiVision(content);
         };
         fetchAntiVision();
 
         // Poll Identity Health
         const interval = setInterval(async () => {
-            const status = await IdentityEngine.checkHealth();
+            const engine = await IdentityEngine.getInstance();
+            const status = await engine.checkHealth();
             setHealth(status.health);
 
             // Fetch Anti-Vision content
-            const content = await IdentityEngine.getAntiVision();
+            const content = await engine.getAntiVision();
             setAntiVision(content);
 
             // Heartbeat Effect (Low Health)
@@ -65,8 +68,8 @@ export const StressContainer = ({ children }: { children: React.ReactNode }) => 
         ]).start();
     };
 
-    // Calculate global noise opacity (0 at 100 health, 0.5 at 0 health)
-    const noiseOpacity = Math.max(0, (100 - health) / 200);
+    // Calculate global noise opacity (INTENSIFIED: 0 at 100 health, 1.0 at 0 health)
+    const noiseOpacity = Math.max(0, (100 - health) / 100);
 
     return (
         <View style={styles.wrapper} pointerEvents="box-none">
@@ -74,6 +77,7 @@ export const StressContainer = ({ children }: { children: React.ReactNode }) => 
                 {children}
             </Animated.View>
             <AntiVisionBleed antiVision={antiVision} health={health} />
+            <AntiVisionFragments antiVision={antiVision} health={health} />
             <NoiseOverlay opacity={noiseOpacity} />
         </View>
     );
@@ -82,7 +86,7 @@ export const StressContainer = ({ children }: { children: React.ReactNode }) => 
 const styles = StyleSheet.create({
     wrapper: {
         flex: 1,
-        backgroundColor: Colors.dark.background,
+        backgroundColor: theme.colors.background,
     },
     container: {
         flex: 1,

@@ -31,8 +31,8 @@ export const NOTIFICATION_SCHEDULE = {
   TIMEOUT_MS: IH_CONSTANTS.NOTIFICATION_TIMEOUT_MINUTES * 60 * 1000,
 } as const;
 
-// Five Questions for Notifications
-export const FIVE_QUESTIONS = [
+// Reflection Questions for Notifications (6 questions, one per daily notification)
+export const REFLECTION_QUESTIONS = [
   "あなたは誰か？",
   "あなたは何をしているか？",
   "なぜそれをしているのか？",

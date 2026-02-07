@@ -5,14 +5,19 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { StressContainer } from './StressContainer';
-import { IdentityEngine } from '../../core/IdentityEngine';
 import { HapticEngine } from '../../core/HapticEngine';
 
-// Mock IdentityEngine
-jest.mock('../../core/IdentityEngine', () => ({
+// Mock IdentityEngine instance methods
+const mockCheckHealth = jest.fn();
+const mockGetAntiVision = jest.fn();
+
+jest.mock('../../core/identity/IdentityEngine', () => ({
   IdentityEngine: {
-    checkHealth: jest.fn(),
-    getAntiVision: jest.fn(),
+    getInstance: jest.fn().mockResolvedValue({
+      checkHealth: (...args: any[]) => mockCheckHealth(...args),
+      getAntiVision: (...args: any[]) => mockGetAntiVision(...args),
+    }),
+    resetInstance: jest.fn(),
   },
 }));
 
@@ -38,13 +43,12 @@ describe('StressContainer - Anti-Vision Integration', () => {
     jest.useRealTimers();
   });
 
-  it('should fetch and display anti-vision when health < 30', async () => {
-    // Mock IdentityEngine
-    (IdentityEngine.checkHealth as jest.Mock).mockResolvedValue({
-      health: 20,
+  it('should fetch and display anti-vision when health < 80', async () => {
+    mockCheckHealth.mockResolvedValue({
+      health: 75,
       isDead: false,
     });
-    (IdentityEngine.getAntiVision as jest.Mock).mockResolvedValue(
+    mockGetAntiVision.mockResolvedValue(
       'Test Anti-Vision Content'
     );
 
@@ -58,17 +62,17 @@ describe('StressContainer - Anti-Vision Integration', () => {
     jest.advanceTimersByTime(2000);
 
     await waitFor(() => {
-      expect(IdentityEngine.getAntiVision).toHaveBeenCalled();
+      expect(mockGetAntiVision).toHaveBeenCalled();
       expect(getByText('Test Anti-Vision Content')).toBeDefined();
     });
   });
 
-  it('should not display anti-vision when health >= 30', async () => {
-    (IdentityEngine.checkHealth as jest.Mock).mockResolvedValue({
-      health: 50,
+  it('should not display anti-vision when health >= 80', async () => {
+    mockCheckHealth.mockResolvedValue({
+      health: 85,
       isDead: false,
     });
-    (IdentityEngine.getAntiVision as jest.Mock).mockResolvedValue(
+    mockGetAntiVision.mockResolvedValue(
       'Test Anti-Vision Content'
     );
 
@@ -81,20 +85,20 @@ describe('StressContainer - Anti-Vision Integration', () => {
     jest.advanceTimersByTime(2000);
 
     await waitFor(() => {
-      expect(IdentityEngine.getAntiVision).toHaveBeenCalled();
+      expect(mockGetAntiVision).toHaveBeenCalled();
     });
 
     // Anti-vision should not be visible
     expect(queryByText('Test Anti-Vision Content')).toBeNull();
   });
 
-  it('should update anti-vision when health drops below 30', async () => {
-    let healthValue = 50;
-    (IdentityEngine.checkHealth as jest.Mock).mockImplementation(async () => ({
+  it('should update anti-vision when health drops below 80', async () => {
+    let healthValue = 85;
+    mockCheckHealth.mockImplementation(async () => ({
       health: healthValue,
       isDead: false,
     }));
-    (IdentityEngine.getAntiVision as jest.Mock).mockResolvedValue(
+    mockGetAntiVision.mockResolvedValue(
       'Test Anti-Vision'
     );
 
@@ -104,14 +108,14 @@ describe('StressContainer - Anti-Vision Integration', () => {
       </StressContainer>
     );
 
-    // Initial state: health = 50, no anti-vision
+    // Initial state: health = 85, no anti-vision
     jest.advanceTimersByTime(2000);
     await waitFor(() => {
       expect(queryByText('Test Anti-Vision')).toBeNull();
     });
 
-    // Health drops to 20
-    healthValue = 20;
+    // Health drops to 75
+    healthValue = 75;
     jest.advanceTimersByTime(2000);
 
     await waitFor(() => {
@@ -120,11 +124,11 @@ describe('StressContainer - Anti-Vision Integration', () => {
   });
 
   it('should render children inside container', () => {
-    (IdentityEngine.checkHealth as jest.Mock).mockResolvedValue({
+    mockCheckHealth.mockResolvedValue({
       health: 100,
       isDead: false,
     });
-    (IdentityEngine.getAntiVision as jest.Mock).mockResolvedValue('');
+    mockGetAntiVision.mockResolvedValue('');
 
     const { getByText } = render(
       <StressContainer>
@@ -136,11 +140,11 @@ describe('StressContainer - Anti-Vision Integration', () => {
   });
 
   it('should handle empty anti-vision content', async () => {
-    (IdentityEngine.checkHealth as jest.Mock).mockResolvedValue({
-      health: 20,
+    mockCheckHealth.mockResolvedValue({
+      health: 75,
       isDead: false,
     });
-    (IdentityEngine.getAntiVision as jest.Mock).mockResolvedValue('');
+    mockGetAntiVision.mockResolvedValue('');
 
     const { queryByTestId } = render(
       <StressContainer>
@@ -151,10 +155,10 @@ describe('StressContainer - Anti-Vision Integration', () => {
     jest.advanceTimersByTime(2000);
 
     await waitFor(() => {
-      expect(IdentityEngine.getAntiVision).toHaveBeenCalled();
+      expect(mockGetAntiVision).toHaveBeenCalled();
     });
 
-    // Even with empty content, AntiVisionBleed should render (if health < 30)
+    // Even with empty content, AntiVisionBleed should render (if health < 80)
     // But with empty text, it won't be visible
     expect(queryByTestId('anti-vision-bleed')).toBeDefined();
   });

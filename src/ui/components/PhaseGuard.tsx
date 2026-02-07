@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { PHASE_TIMES } from '@/constants';
-import { GlitchText } from './GlitchText';
+import { PHASE_TIMES } from '../../constants';
+import { GlitchText } from '../effects/GlitchText';
 import { theme } from '../theme/theme';
 
 // Type definitions
@@ -102,12 +102,11 @@ export const PhaseGuard: React.FC<PhaseGuardProps> = ({ phase, children }) => {
       <View style={styles.content}>
         {/* Phase name with glitch effect */}
         <GlitchText
-          ih={0} // Critical intensity for high visibility
-          variant="heading"
+          text={`${phaseName}レイヤー`}
+          severity={1}
+          health={0}
           style={styles.phaseTitle}
-        >
-          {phaseName}レイヤー
-        </GlitchText>
+        />
 
         {/* Access denied message */}
         <Text style={styles.deniedText}>アクセス不可</Text>

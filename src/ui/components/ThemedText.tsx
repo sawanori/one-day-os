@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, type TextProps, StyleSheet } from 'react-native';
 
-import { Colors } from '../theme/colors';
+import { theme } from '../theme/theme';
 
 export type ThemedTextProps = TextProps & {
     lightColor?: string;
@@ -17,7 +17,7 @@ export function ThemedText({
     type = 'default',
     ...rest
 }: ThemedTextProps) {
-    const color = Colors.dark.text; // Force Dark Mode for now
+    const color = theme.colors.foreground; // Force Dark Mode
 
     return (
         <Text

@@ -29,6 +29,9 @@ interface Colors {
   accent: string;
   error: string;
   warning: string;
+  secondary: string;
+  surface: string;
+  success: string;
 }
 
 interface ColorsWithIH extends Colors {
@@ -38,6 +41,7 @@ interface ColorsWithIH extends Colors {
 interface Theme {
   colors: ColorsWithIH;
   typography: {
+    fontFamilySerif: string | undefined;
     fontFamily: string | undefined;
     fontSize: {
       title: number;
@@ -107,6 +111,15 @@ const colors = {
 
   // Amber/yellow warning color
   warning: '#FFBF00',
+
+  // Secondary text color (muted gray)
+  secondary: '#A1A1AA',
+
+  // Surface color for cards and elevated elements
+  surface: '#202020',
+
+  // Success color (green)
+  success: '#4ADE80',
 };
 
 // Add ih as non-enumerable property so Object.values() won't include it
@@ -129,10 +142,17 @@ const brutalistTheme: Theme = {
   colors: colors as ColorsWithIH,
 
   // ============================================================================
-  // TYPOGRAPHY - Monospace Only
+  // TYPOGRAPHY - Dual Font System
   // ============================================================================
   typography: {
-    // Brutalist monospace font stack with Japanese support
+    // Serif font for system labels and titles (authority, gravitas)
+    fontFamilySerif: Platform.select({
+      ios: 'NotoSerifJP_700Bold',
+      android: 'NotoSerifJP_700Bold',
+      default: 'serif',
+    }),
+
+    // Monospace font for user content (brutalist, technical)
     fontFamily: Platform.select({
       ios: '"Courier New", "Hiragino Sans", "Hiragino Kaku Gothic ProN", monospace',
       android: '"Courier New", "Noto Sans Mono CJK JP", "Droid Sans Mono", monospace',

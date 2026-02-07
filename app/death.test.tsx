@@ -4,20 +4,32 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import DeathScreen from './death';
-import { WipeAnimation } from '../src/core/WipeAnimation';
-import { IdentityEngine } from '../src/core/IdentityEngine';
+import { WipeManager } from '../src/core/identity/WipeManager';
+import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 
-// Mock WipeAnimation
-jest.mock('../src/core/WipeAnimation', () => ({
-  WipeAnimation: {
-    executeWipe: jest.fn().mockResolvedValue(undefined),
-  },
+// Mock WipeManager
+const mockExecuteWipe = jest.fn().mockResolvedValue({
+  success: true,
+  timestamp: Date.now(),
+  reason: 'IH_ZERO',
+  tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+  nextScreen: 'onboarding',
+});
+
+jest.mock('../src/core/identity/WipeManager', () => ({
+  WipeManager: jest.fn().mockImplementation(() => ({
+    executeWipe: mockExecuteWipe,
+  })),
 }));
 
 // Mock IdentityEngine
-jest.mock('../src/core/IdentityEngine', () => ({
+jest.mock('../src/core/identity/IdentityEngine', () => ({
   IdentityEngine: {
-    useInsurance: jest.fn().mockResolvedValue(undefined),
+    getInstance: jest.fn().mockResolvedValue({
+      useInsurance: jest.fn().mockResolvedValue(undefined),
+      checkHealth: jest.fn().mockResolvedValue({ health: 100, isDead: false }),
+    }),
+    resetInstance: jest.fn(),
   },
 }));
 
@@ -26,6 +38,26 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({
     replace: jest.fn(),
   }),
+}));
+
+// Mock getDB
+jest.mock('../src/database/client', () => ({
+  getDB: jest.fn().mockReturnValue({
+    getFirstAsync: jest.fn(),
+    getAllAsync: jest.fn(),
+    runAsync: jest.fn(),
+    execAsync: jest.fn(),
+  }),
+}));
+
+// Mock DespairModeManager
+jest.mock('../src/core/despair/DespairModeManager', () => ({
+  DespairModeManager: {
+    getInstance: jest.fn().mockReturnValue({
+      canResetup: jest.fn().mockResolvedValue(false),
+      getRemainingLockoutMs: jest.fn().mockResolvedValue(24 * 60 * 60 * 1000),
+    }),
+  },
 }));
 
 describe('Death Screen - Stage Management', () => {
@@ -56,14 +88,14 @@ describe('Death Screen - Stage Management', () => {
     });
   });
 
-  it('should execute WipeAnimation during wiping stage', async () => {
+  it('should execute WipeManager.executeWipe during wiping stage', async () => {
     render(<DeathScreen />);
 
     // Advance to wiping stage
     jest.advanceTimersByTime(2000);
 
     await waitFor(() => {
-      expect(WipeAnimation.executeWipe).toHaveBeenCalled();
+      expect(mockExecuteWipe).toHaveBeenCalledWith('IH_ZERO', 0);
     });
   });
 
@@ -73,7 +105,7 @@ describe('Death Screen - Stage Management', () => {
     // Advance to wiping stage (2s)
     jest.advanceTimersByTime(2000);
 
-    // Let WipeAnimation.executeWipe resolve
+    // Let WipeManager.executeWipe resolve
     await Promise.resolve();
 
     // Advance void timer (3s)
@@ -84,21 +116,22 @@ describe('Death Screen - Stage Management', () => {
     });
   });
 
-  it('should display resurrection button in void stage', async () => {
+  it('should display lockout message in void stage (24-hour lock)', async () => {
     const { getByText } = render(<DeathScreen />);
 
     // Advance to wiping stage
     jest.advanceTimersByTime(2000);
 
-    // Let WipeAnimation.executeWipe resolve
+    // Let WipeManager.executeWipe resolve
     await Promise.resolve();
 
     // Advance to void stage
     jest.advanceTimersByTime(3000);
 
     await waitFor(() => {
-      expect(getByText('Wait... I have Insurance.')).toBeDefined();
-      expect(getByText('[¥1,000]')).toBeDefined();
+      expect(getByText('LOCKED')).toBeDefined();
+      expect(getByText(/You cannot rebuild for .* hours/)).toBeDefined();
+      expect(getByText('This is the consequence.')).toBeDefined();
     });
   });
 

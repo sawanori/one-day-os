@@ -14,7 +14,7 @@
 import { DespairModeManager } from './DespairModeManager';
 import { WipeManager } from '../identity/WipeManager';
 import * as SQLite from 'expo-sqlite';
-import { openDatabase, initializeDatabase, getAppState, updateAppState } from '../../database/db';
+import { getDB, databaseInit, getAppState, updateAppState } from '../../database/client';
 
 // Mock expo-sqlite
 jest.mock('expo-sqlite', () => ({
@@ -26,15 +26,15 @@ jest.mock('expo-sqlite', () => ({
   })),
 }));
 
-// Mock database module
-jest.mock('../../database/db', () => ({
-  openDatabase: jest.fn(() => Promise.resolve({
+// Mock database client module
+jest.mock('../../database/client', () => ({
+  getDB: jest.fn(() => ({
     execAsync: jest.fn(),
     runAsync: jest.fn(),
     getFirstAsync: jest.fn(),
     getAllAsync: jest.fn(() => Promise.resolve([])),
   })),
-  initializeDatabase: jest.fn(),
+  databaseInit: jest.fn(),
   getAppState: jest.fn(() => Promise.resolve('active')),
   updateAppState: jest.fn(() => Promise.resolve()),
 }));
@@ -52,8 +52,8 @@ describe('DespairModeManager - TDD Tests', () => {
     jest.clearAllMocks();
 
     // Create mock database
-    db = await openDatabase();
-    await initializeDatabase();
+    db = getDB() as unknown as SQLite.SQLiteDatabase;
+    await databaseInit();
 
     // Create WipeManager instance
     wipeManager = new WipeManager(db);
@@ -606,7 +606,7 @@ describe('DespairModeManager - TDD Tests', () => {
   // ========================================
   // 8. 仕様確認テスト
   // ========================================
-  describe('仕様確認テスト: "Data wipe only, immediate re-setup possible"', () => {
+  describe('仕様確認テスト: "No lockout - immediate re-setup"', () => {
     test('24時間ロックアウトが存在しない', async () => {
       const hasLockout = despairManager.hasLockoutPeriod();
       expect(hasLockout).toBe(false);

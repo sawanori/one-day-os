@@ -3,8 +3,10 @@
  * Core engine for Identity Health (IH) calculation and management
  */
 
-import { openDatabase } from '../../database/db';
+import { getDB } from '../../database/client';
 import { IH_CONSTANTS } from '../../constants';
+import { initDatabase } from '../../database/schema';
+import { runInTransaction } from '../../database/transaction';
 import * as SQLite from 'expo-sqlite';
 
 /**
@@ -21,17 +23,17 @@ export interface IHResponse {
  * Event triggered when IH reaches 0 (wipe condition)
  */
 export interface WipeEvent {
-  reason: 'IH_ZERO';
+  reason: 'IH_ZERO' | 'QUEST_FAIL' | 'USER_REQUEST';
   finalIH: number;
   timestamp: number;
 }
 
 /**
- * Quest completion status
+ * Quest completion status - dynamic, supports any number of quests
  */
 export interface QuestCompletion {
-  quest1: boolean;
-  quest2: boolean;
+  completedCount: number;
+  totalCount: number;
 }
 
 /**
@@ -80,7 +82,7 @@ export class IdentityEngine {
       return;
     }
 
-    this.db = await openDatabase();
+    this.db = getDB();
 
     // Try to load existing IH from database
     const result = await this.db.getFirstAsync<{ identity_health: number }>(
@@ -133,9 +135,10 @@ export class IdentityEngine {
     // Calculate delta based on response
     if (response === 'YES') {
       delta = 0; // No penalty for YES
-    } else if (response === 'NO' || response === 'IGNORED') {
-      // Use NOTIFICATION_PENALTY which is 15 for NO/IGNORED responses
-      delta = -IH_CONSTANTS.NOTIFICATION_PENALTY;
+    } else if (response === 'NO') {
+      delta = -IH_CONSTANTS.NOTIFICATION_PENALTY; // -15 for explicit NO
+    } else if (response === 'IGNORED') {
+      delta = -IH_CONSTANTS.MISSED_NOTIFICATION_PENALTY; // -20 for timeout/ignored
     }
 
     // Apply delta and clamp
@@ -166,7 +169,7 @@ export class IdentityEngine {
     let delta = 0;
 
     // If ANY quest is incomplete, apply penalty once
-    const anyIncomplete = !completion.quest1 || !completion.quest2;
+    const anyIncomplete = completion.completedCount < completion.totalCount;
     if (anyIncomplete) {
       delta = -IH_CONSTANTS.INCOMPLETE_QUEST_PENALTY;
     }
@@ -187,6 +190,200 @@ export class IdentityEngine {
       delta,
       timestamp: Date.now(),
     };
+  }
+
+  /**
+   * Apply onboarding stagnation penalty (-5% IH)
+   * Used when user fails to input during onboarding excavation phase
+   */
+  public async applyOnboardingStagnationPenalty(): Promise<IHResponse> {
+    const previousIH = this.currentIH;
+    const delta = -5; // Fixed 5% penalty for onboarding stagnation
+
+    // Apply delta and clamp
+    const newIH = this.clampIH(previousIH + delta);
+    this.currentIH = newIH;
+    await this.persistIH();
+
+    // Check for wipe trigger
+    if (newIH === 0 && previousIH > 0) {
+      this.triggerWipe();
+    }
+
+    return {
+      previousIH,
+      newIH,
+      delta,
+      timestamp: Date.now(),
+    };
+  }
+
+  /**
+   * Check current Identity Health status from database.
+   * Returns health value and whether user is dead (in despair).
+   */
+  public async checkHealth(): Promise<{ health: number; isDead: boolean }> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+
+    // Get identity health from identity table
+    const identityResult = await this.db.getFirstAsync<{ identity_health: number }>(
+      'SELECT identity_health FROM identity WHERE id = 1'
+    );
+
+    // Get app state to check if in despair mode
+    const stateResult = await this.db.getFirstAsync<{ state: string }>(
+      'SELECT state FROM app_state WHERE id = 1'
+    );
+
+    if (!identityResult) return { health: 100, isDead: false };
+
+    const isDead = stateResult?.state === 'despair';
+
+    if (identityResult.identity_health <= 0 && !isDead) {
+      await this.killUser();
+      return { health: 0, isDead: true };
+    }
+
+    // Sync in-memory IH with DB value
+    this.currentIH = this.clampIH(identityResult.identity_health);
+
+    return { health: identityResult.identity_health, isDead };
+  }
+
+  /**
+   * Apply damage to Identity Health.
+   * @param amount Damage amount (default 10 for missed notifications)
+   */
+  public async applyDamage(amount: number = 10): Promise<{ health: number; isDead: boolean }> {
+    return runInTransaction(async () => {
+      if (!this.db) {
+        throw new Error('Database not initialized');
+      }
+      await this.db.runAsync(
+        'UPDATE identity SET identity_health = MAX(0, identity_health - ?), updated_at = datetime(\'now\') WHERE id = 1',
+        [amount]
+      );
+
+      // Sync in-memory state
+      const result = await this.db.getFirstAsync<{ identity_health: number }>(
+        'SELECT identity_health FROM identity WHERE id = 1'
+      );
+      if (result) {
+        this.currentIH = this.clampIH(result.identity_health);
+      }
+
+      return this.checkHealth();
+    });
+  }
+
+  /**
+   * Restore Identity Health (capped at 100).
+   * @param amount Healing amount (default 5)
+   */
+  public async restoreHealth(amount: number = 5): Promise<void> {
+    return runInTransaction(async () => {
+      if (!this.db) {
+        throw new Error('Database not initialized');
+      }
+      await this.db.runAsync(
+        'UPDATE identity SET identity_health = MIN(100, identity_health + ?), updated_at = datetime(\'now\') WHERE id = 1',
+        [amount]
+      );
+
+      // Sync in-memory state
+      const result = await this.db.getFirstAsync<{ identity_health: number }>(
+        'SELECT identity_health FROM identity WHERE id = 1'
+      );
+      if (result) {
+        this.currentIH = this.clampIH(result.identity_health);
+      }
+    });
+  }
+
+  /**
+   * THE NUCLEAR OPTION
+   * Irreversibly wipes all user content tables.
+   * Sets app_state to "despair" to mark as DEAD.
+   */
+  public async killUser(): Promise<void> {
+    return runInTransaction(async () => {
+      if (!this.db) {
+        throw new Error('Database not initialized');
+      }
+      console.warn('EXECUTING IDENTITY WIPE...');
+
+      // DELETE data from all user content tables (not DROP)
+      await this.db.execAsync(`
+        DELETE FROM quests;
+        DELETE FROM identity;
+        DELETE FROM notifications;
+        DELETE FROM daily_state;
+      `);
+
+      // Mark app as in despair state
+      await this.db.runAsync(
+        'UPDATE app_state SET state = ?, updated_at = datetime(\'now\') WHERE id = 1',
+        ['despair']
+      );
+
+      this.currentIH = 0;
+    });
+  }
+
+  /**
+   * "Identity Insurance" Purchase (Monetization)
+   * Revives the user if they are dead or near death.
+   * Recreates tables and sets IH to 50%.
+   */
+  public async useInsurance(): Promise<void> {
+    return runInTransaction(async () => {
+      if (!this.db) {
+        throw new Error('Database not initialized');
+      }
+
+      // Re-initialize database (CREATE TABLE IF NOT EXISTS)
+      await initDatabase();
+
+      // Update app_state to active
+      await this.db.runAsync(
+        'UPDATE app_state SET state = ?, updated_at = datetime(\'now\') WHERE id = 1',
+        ['active']
+      );
+
+      // Set identity_health to 50% using INSERT OR REPLACE
+      // to handle both empty table and existing row
+      await this.db.runAsync(
+        `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
+         VALUES (
+           1,
+           COALESCE((SELECT anti_vision FROM identity WHERE id = 1), ''),
+           COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
+           COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
+           ?,
+           COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
+           datetime('now')
+         )`,
+        [50]
+      );
+
+      this.currentIH = 50;
+    });
+  }
+
+  /**
+   * Get current Anti-Vision content
+   * Used for Anti-Vision Bleed effect
+   */
+  public async getAntiVision(): Promise<string> {
+    if (!this.db) {
+      throw new Error('Database not initialized');
+    }
+    const result = await this.db.getFirstAsync<{ anti_vision: string }>(
+      'SELECT anti_vision FROM identity WHERE id = 1'
+    );
+    return result?.anti_vision || '';
   }
 
   /**

@@ -10,7 +10,7 @@
 
 import * as SQLite from 'expo-sqlite';
 import { WipeManager, WipeReason, WipeResult } from '../identity/WipeManager';
-import { getAppState, updateAppState } from '../../database/db';
+import { getAppState, updateAppState } from '../../database/client';
 
 export type AppState = 'onboarding' | 'active' | 'despair';
 
@@ -139,7 +139,7 @@ export class DespairModeManager {
 
   /**
    * Check if re-setup is allowed
-   * Always returns true - no 24-hour lockout period
+   * Always returns true - immediate re-setup allowed (no lockout period)
    */
   async canResetup(): Promise<boolean> {
     return true;
@@ -147,10 +147,18 @@ export class DespairModeManager {
 
   /**
    * Check if there is a lockout period
-   * Always returns false - specification: immediate re-setup possible
+   * Returns false - no lockout period, immediate re-setup allowed
    */
   hasLockoutPeriod(): boolean {
     return false;
+  }
+
+  /**
+   * Get remaining lockout time in milliseconds
+   * Always returns 0 - no lockout period
+   */
+  async getRemainingLockoutMs(): Promise<number> {
+    return 0;
   }
 
   /**

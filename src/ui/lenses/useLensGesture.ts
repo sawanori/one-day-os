@@ -2,18 +2,35 @@
  * useLensGesture Hook
  * Provides PanResponder for pinch-to-zoom lens switching
  */
-import { useRef } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { PanResponder, Animated, GestureResponderEvent } from 'react-native';
 import { getDistanceFromEvent, calculateScale } from '../../utils/touchUtils';
 import { HapticEngine } from '../../core/HapticEngine';
+import { SNAP_THRESHOLDS, LENS_ANIMATION_CONFIG, LENS_VALUES } from '../../constants/lenses';
 
 export type LensZoom = 0.5 | 1.0 | 2.0;
 
 export const useLensGesture = (
   onLensChange: (lens: LensZoom) => void
 ) => {
-  const scale = useRef(new Animated.Value(1)).current;
+  const scale = useRef(new Animated.Value(0.5)).current;
   const initialDistance = useRef<number>(0);
+
+  // H7: Use ref to always have the latest onLensChange (avoids stale closure in PanResponder)
+  const onLensChangeRef = useRef(onLensChange);
+  onLensChangeRef.current = onLensChange;
+
+  // H8: Track current scale value via listener instead of accessing internal _value
+  const scaleValueRef = useRef(0.5);
+
+  useEffect(() => {
+    const id = scale.addListener(({ value }) => {
+      scaleValueRef.current = value;
+    });
+    return () => {
+      scale.removeListener(id);
+    };
+  }, [scale]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -42,29 +59,30 @@ export const useLensGesture = (
 
       onPanResponderRelease: () => {
         // ピンチ終了: スナップロジック
-        const finalScale = (scale as any)._value;
+        const finalScale = scaleValueRef.current;
         let targetLens: LensZoom;
 
-        if (finalScale < 0.75) {
-          targetLens = 0.5;
-        } else if (finalScale > 1.5) {
-          targetLens = 2.0;
+        if (finalScale < SNAP_THRESHOLDS.ZOOM_OUT) {
+          targetLens = LENS_VALUES.MISSION;
+        } else if (finalScale > SNAP_THRESHOLDS.ZOOM_IN) {
+          targetLens = LENS_VALUES.QUEST;
         } else {
-          targetLens = 1.0;
+          targetLens = LENS_VALUES.IDENTITY;
         }
 
         // Haptic feedback
         HapticEngine.snapLens();
 
-        // Lens変更
-        onLensChange(targetLens);
-
-        // スケールをリセット
+        // スケールをtargetLensにアニメーション
         Animated.spring(scale, {
-          toValue: 1,
-          friction: 5,
-          useNativeDriver: true,
-        }).start();
+          toValue: targetLens,
+          friction: LENS_ANIMATION_CONFIG.friction,
+          tension: LENS_ANIMATION_CONFIG.tension,
+          useNativeDriver: true, // Re-enabled for transform + opacity
+        }).start(() => {
+          // アニメーション完了後にLens変更を通知 (use ref to avoid stale closure)
+          onLensChangeRef.current(targetLens);
+        });
 
         // 初期距離リセット
         initialDistance.current = 0;

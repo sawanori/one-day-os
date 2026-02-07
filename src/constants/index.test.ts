@@ -3,7 +3,7 @@
  * Simple test to verify Jest is working
  */
 
-import { IH_CONSTANTS, NOTIFICATION_SCHEDULE, FIVE_QUESTIONS } from './index';
+import { IH_CONSTANTS, NOTIFICATION_SCHEDULE, REFLECTION_QUESTIONS } from './index';
 
 describe('Constants', () => {
   describe('IH_CONSTANTS', () => {
@@ -32,18 +32,18 @@ describe('Constants', () => {
     });
   });
 
-  describe('FIVE_QUESTIONS', () => {
-    it('should have exactly 6 questions', () => {
-      expect(FIVE_QUESTIONS).toHaveLength(6);
+  describe('REFLECTION_QUESTIONS', () => {
+    it('should have exactly 6 reflection questions', () => {
+      expect(REFLECTION_QUESTIONS).toHaveLength(6);
     });
 
     it('should contain identity-focused questions in Japanese', () => {
-      expect(FIVE_QUESTIONS).toContain('あなたは誰か？');
-      expect(FIVE_QUESTIONS).toContain('それはあなたのアイデンティティと一致しているか？');
+      expect(REFLECTION_QUESTIONS).toContain('あなたは誰か？');
+      expect(REFLECTION_QUESTIONS).toContain('それはあなたのアイデンティティと一致しているか？');
     });
 
     it('should match the notification schedule length', () => {
-      expect(FIVE_QUESTIONS).toHaveLength(NOTIFICATION_SCHEDULE.TIMES.length);
+      expect(REFLECTION_QUESTIONS).toHaveLength(NOTIFICATION_SCHEDULE.TIMES.length);
     });
   });
 });

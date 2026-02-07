@@ -7,12 +7,16 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "test": "jest",
+    "lint": "npx tsc --noEmit",
+    "typecheck": "npx tsc --noEmit",
     "generate-noise": "node scripts/generate-noise.js"
   },
   "dependencies": {
+    "@expo-google-fonts/noto-serif-jp": "^0.4.2",
     "@expo/metro-runtime": "~6.1.2",
     "expo": "~54.0.32",
     "expo-constants": "~18.0.13",
+    "expo-font": "^14.0.11",
     "expo-haptics": "~15.0.8",
     "expo-linking": "~8.0.11",
     "expo-notifications": "~0.32.16",

@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { View } from 'react-native';
+import { View, Animated } from 'react-native';
 import { useLensGesture } from './useLensGesture';
 import { HapticEngine } from '../../core/HapticEngine';
 
@@ -13,6 +13,15 @@ jest.mock('../../core/HapticEngine', () => ({
     snapLens: jest.fn(),
   },
 }));
+
+// Mock Animated.spring to call callback immediately
+const originalSpring = Animated.spring;
+Animated.spring = jest.fn((value, config) => ({
+  start: (callback?: any) => {
+    value.setValue(config.toValue);
+    if (callback) callback();
+  },
+})) as any;
 
 // Test component that uses the hook
 const TestComponent = ({ onLensChange }: { onLensChange: (lens: any) => void }) => {
@@ -29,10 +38,10 @@ describe('useLensGesture', () => {
     jest.clearAllMocks();
   });
 
-  it('should initialize with scale 1.0', () => {
+  it('should initialize with scale 0.5', () => {
     const { getByTestId } = render(<TestComponent onLensChange={jest.fn()} />);
     const scaleView = getByTestId('scale-value');
-    expect(scaleView.children[0]).toBe('1');
+    expect(scaleView.children[0]).toBe('0.5');
   });
 
   it('should provide panResponder handlers', () => {
