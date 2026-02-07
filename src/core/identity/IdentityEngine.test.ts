@@ -11,6 +11,11 @@ import { getDB } from '../../database/client';
 // Mock database client
 jest.mock('../../database/client');
 
+// Mock transaction to pass-through (IdentityLifecycle uses runInTransaction)
+jest.mock('../../database/transaction', () => ({
+  runInTransaction: jest.fn((fn: () => Promise<unknown>) => fn()),
+}));
+
 import { IdentityEngine } from './IdentityEngine';
 import { IH_CONSTANTS } from '../../constants';
 

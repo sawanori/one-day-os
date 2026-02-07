@@ -71,7 +71,7 @@ export const UnifiedLensView = ({
   // Quest Layer: visible at 2.0, enters from small when coming from 1.0
   const questScale = scale.interpolate({
     inputRange: [1.0, 1.5, 2.0],
-    outputRange: [0.3, 0.8, 1.3], // Small (entering) → Growing → Normal size
+    outputRange: [0.3, 0.7, 1.0], // Small (entering) → Growing → Normal size
     extrapolate: 'clamp',
   });
 

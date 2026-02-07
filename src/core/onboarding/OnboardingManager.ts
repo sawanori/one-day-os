@@ -4,62 +4,26 @@
  */
 
 import { getDB, databaseInit } from '../../database/client';
-import * as SQLite from 'expo-sqlite';
+import {
+  OnboardingStep,
+  StepData,
+  OnboardingData,
+  OnboardingCompleteEvent,
+  StepChangeEvent,
+  STEP_ORDER,
+} from './types';
+import { OnboardingValidator } from './OnboardingValidator';
+import { OnboardingRepository } from './OnboardingRepository';
 
-/**
- * Onboarding step types
- */
-export type OnboardingStep =
-  | 'welcome'
-  | 'anti-vision'
-  | 'identity'
-  | 'mission'
-  | 'quests'
-  | 'complete';
-
-/**
- * Step data types for each step
- */
-export type StepData =
-  | null // welcome step
-  | { antiVision: string } // anti-vision step
-  | { identity: string } // identity step
-  | { mission: string } // mission step
-  | { quests: [string, string] }; // quests step
-
-/**
- * Complete onboarding data
- */
-export interface OnboardingData {
-  antiVision: string;
-  identity: string;
-  mission: string;
-  quests: [string, string];
-}
-
-/**
- * Event data for onboarding completion
- */
-export interface OnboardingCompleteEvent {
-  timestamp: number;
-  data: OnboardingData;
-}
-
-/**
- * Event data for step change
- */
-export interface StepChangeEvent {
-  from: OnboardingStep;
-  to: OnboardingStep;
-  timestamp: number;
-}
+// Re-export types for backward compatibility
+export type { OnboardingStep, StepData, OnboardingData, OnboardingCompleteEvent, StepChangeEvent };
 
 /**
  * OnboardingManager - Singleton class for managing onboarding flow
  */
 export class OnboardingManager {
   private static instance: OnboardingManager | null = null;
-  private db: SQLite.SQLiteDatabase | null = null;
+  private repository: OnboardingRepository | null = null;
   private currentStep: OnboardingStep = 'welcome';
   private initialized: boolean = false;
   private completeCallbacks: Array<(event: OnboardingCompleteEvent) => void> = [];
@@ -68,15 +32,8 @@ export class OnboardingManager {
   // Cache for onboarding data
   private cachedData: Partial<OnboardingData> = {};
 
-  // Step order definition
-  private readonly STEP_ORDER: OnboardingStep[] = [
-    'welcome',
-    'anti-vision',
-    'identity',
-    'mission',
-    'quests',
-    'complete',
-  ];
+  // Step order - imported from types.ts
+  private readonly STEP_ORDER: OnboardingStep[] = STEP_ORDER;
 
   /**
    * Private constructor for singleton pattern
@@ -112,24 +69,17 @@ export class OnboardingManager {
     // Ensure database tables are created first
     await databaseInit();
 
-    this.db = getDB();
+    const db = getDB();
+    this.repository = new OnboardingRepository(db);
 
     // Create onboarding_state table if it doesn't exist
-    await this.db.execAsync(`
-      CREATE TABLE IF NOT EXISTS onboarding_state (
-        id INTEGER PRIMARY KEY CHECK (id = 1),
-        current_step TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      );
-    `);
+    await this.repository.createTable();
 
     // Load current step from database
-    const result = await this.db.getFirstAsync<{ current_step: string }>(
-      'SELECT current_step FROM onboarding_state WHERE id = 1'
-    );
+    const loadedStep = await this.repository.loadCurrentStep();
 
-    if (result && result.current_step) {
-      this.currentStep = result.current_step as OnboardingStep;
+    if (loadedStep) {
+      this.currentStep = loadedStep;
     } else {
       // Initialize to welcome step (don't persist yet, will persist on first step completion)
       this.currentStep = 'welcome';
@@ -167,10 +117,13 @@ export class OnboardingManager {
     }
 
     // Validate step data based on step type
-    this.validateStepData(step, data);
+    OnboardingValidator.validate(step, data);
 
     // Save step data to database
-    await this.saveStepData(step, data);
+    await this.repository!.saveStepData(step, data);
+
+    // Update cache based on step data
+    this.updateCache(step, data);
 
     // Move to next step
     const fromStep = this.currentStep;
@@ -179,7 +132,7 @@ export class OnboardingManager {
     this.currentStep = toStep;
 
     // Persist current step
-    await this.persistCurrentStep();
+    await this.repository!.persistCurrentStep(this.currentStep);
 
     // Trigger step change callback
     this.triggerStepChange(fromStep, toStep);
@@ -194,86 +147,63 @@ export class OnboardingManager {
    * Reset onboarding to beginning
    */
   public async resetOnboarding(): Promise<void> {
-    if (!this.db) {
+    if (!this.repository) {
       throw new Error('Database not initialized');
     }
 
     // Clear cached data
     this.cachedData = {};
 
-    // Clear identity data
-    await this.db.runAsync('DELETE FROM identity WHERE id = 1');
-
-    // Clear quests data
-    await this.db.runAsync('DELETE FROM quests');
+    // Reset data in database
+    await this.repository.resetData();
 
     // Reset current step to welcome
     this.currentStep = 'welcome';
-    await this.persistCurrentStep();
+    await this.repository.persistCurrentStep(this.currentStep);
   }
 
   /**
    * Get anti-vision text
    */
   public async getAntiVision(): Promise<string | null> {
-    if (!this.db) {
+    if (!this.repository) {
       throw new Error('Database not initialized');
     }
 
-    const result = await this.db.getFirstAsync<{ anti_vision: string }>(
-      'SELECT anti_vision FROM identity WHERE id = 1'
-    );
-
-    return result?.anti_vision || null;
+    return this.repository.getAntiVision();
   }
 
   /**
    * Get identity statement
    */
   public async getIdentity(): Promise<string | null> {
-    if (!this.db) {
+    if (!this.repository) {
       throw new Error('Database not initialized');
     }
 
-    const result = await this.db.getFirstAsync<{ identity_statement: string }>(
-      'SELECT identity_statement FROM identity WHERE id = 1'
-    );
-
-    return result?.identity_statement || null;
+    return this.repository.getIdentity();
   }
 
   /**
    * Get mission statement
    */
   public async getMission(): Promise<string | null> {
-    if (!this.db) {
+    if (!this.repository) {
       throw new Error('Database not initialized');
     }
 
-    const result = await this.db.getFirstAsync<{ one_year_mission: string }>(
-      'SELECT one_year_mission FROM identity WHERE id = 1'
-    );
-
-    return result?.one_year_mission || null;
+    return this.repository.getMission();
   }
 
   /**
    * Get quests
    */
   public async getQuests(): Promise<[string, string] | null> {
-    if (!this.db) {
+    if (!this.repository) {
       throw new Error('Database not initialized');
     }
 
-    const results = await this.db.getAllAsync<{ quest_text: string }>(
-      'SELECT quest_text FROM quests ORDER BY id LIMIT 2'
-    );
-
-    if (results && results.length === 2) {
-      return [results[0].quest_text, results[1].quest_text];
-    }
-
-    return null;
+    return this.repository.getQuests();
   }
 
   /**
@@ -295,34 +225,12 @@ export class OnboardingManager {
       };
     }
 
-    // Otherwise, query from database
-    if (!this.db) {
+    // Otherwise, query from database via repository
+    if (!this.repository) {
       throw new Error('Database not initialized');
     }
 
-    // Get identity data (anti-vision, identity, mission)
-    const identityResult = await this.db.getFirstAsync<{
-      anti_vision: string;
-      identity_statement: string;
-      one_year_mission: string;
-    }>('SELECT anti_vision, identity_statement, one_year_mission FROM identity WHERE id = 1');
-
-    // Get quests data
-    const questsResults = await this.db.getAllAsync<{ quest_text: string }>(
-      'SELECT quest_text FROM quests ORDER BY id LIMIT 2'
-    );
-
-    const quests: [string, string] =
-      questsResults && questsResults.length === 2
-        ? [questsResults[0].quest_text, questsResults[1].quest_text]
-        : ['', ''];
-
-    return {
-      antiVision: identityResult?.anti_vision || '',
-      identity: identityResult?.identity_statement || '',
-      mission: identityResult?.one_year_mission || '',
-      quests,
-    };
+    return this.repository.getAllOnboardingData();
   }
 
   /**
@@ -340,170 +248,23 @@ export class OnboardingManager {
   }
 
   /**
-   * Validate step data
+   * Update cache with step data
    */
-  private validateStepData(step: OnboardingStep, data: StepData): void {
+  private updateCache(step: OnboardingStep, data: StepData): void {
     switch (step) {
-      case 'welcome':
-        // Welcome step requires no data
-        if (data !== null) {
-          throw new Error('Welcome step does not require data');
-        }
-        break;
-
       case 'anti-vision':
-        if (!data || typeof data !== 'object' || !('antiVision' in data)) {
-          throw new Error('Anti-vision step requires antiVision data');
-        }
-        const antiVisionData = data as { antiVision: string };
-        if (!antiVisionData.antiVision || antiVisionData.antiVision.trim() === '') {
-          throw new Error('Anti-vision cannot be empty');
-        }
+        this.cachedData.antiVision = (data as { antiVision: string }).antiVision;
         break;
-
       case 'identity':
-        if (!data || typeof data !== 'object' || !('identity' in data)) {
-          throw new Error('Identity step requires identity data');
-        }
-        const identityData = data as { identity: string };
-        if (!identityData.identity || identityData.identity.trim() === '') {
-          throw new Error('Identity cannot be empty');
-        }
+        this.cachedData.identity = (data as { identity: string }).identity;
         break;
-
       case 'mission':
-        if (!data || typeof data !== 'object' || !('mission' in data)) {
-          throw new Error('Mission step requires mission data');
-        }
-        const missionData = data as { mission: string };
-        if (!missionData.mission || missionData.mission.trim() === '') {
-          throw new Error('Mission cannot be empty');
-        }
+        this.cachedData.mission = (data as { mission: string }).mission;
         break;
-
       case 'quests':
-        if (!data || typeof data !== 'object' || !('quests' in data)) {
-          throw new Error('Quests step requires quests data');
-        }
-        const questsData = data as { quests: [string, string] };
-        if (!Array.isArray(questsData.quests)) {
-          throw new Error('Quests must be an array');
-        }
-        if (questsData.quests.length !== 2) {
-          throw new Error('Quests must contain exactly 2 items');
-        }
-        if (!questsData.quests[0] || questsData.quests[0].trim() === '' ||
-            !questsData.quests[1] || questsData.quests[1].trim() === '') {
-          throw new Error('Quest items cannot be empty');
-        }
-        break;
-
-      case 'complete':
-        throw new Error('Cannot manually complete the complete step');
-
-      default:
-        throw new Error(`Unknown step: ${step}`);
-    }
-  }
-
-  /**
-   * Save step data to database
-   */
-  private async saveStepData(step: OnboardingStep, data: StepData): Promise<void> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
-    }
-
-    switch (step) {
-      case 'welcome':
-        // No data to save for welcome step
-        break;
-
-      case 'anti-vision':
-        const antiVisionData = data as { antiVision: string };
-        this.cachedData.antiVision = antiVisionData.antiVision;
-        await this.db.runAsync(
-          `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
-           VALUES (
-             1,
-             ?,
-             COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
-             COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
-             COALESCE((SELECT identity_health FROM identity WHERE id = 1), 100),
-             COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-             datetime('now')
-           )`,
-          [antiVisionData.antiVision]
-        );
-        break;
-
-      case 'identity':
-        const identityData = data as { identity: string };
-        this.cachedData.identity = identityData.identity;
-        await this.db.runAsync(
-          `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
-           VALUES (
-             1,
-             COALESCE((SELECT anti_vision FROM identity WHERE id = 1), ''),
-             ?,
-             COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
-             COALESCE((SELECT identity_health FROM identity WHERE id = 1), 100),
-             COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-             datetime('now')
-           )`,
-          [identityData.identity]
-        );
-        break;
-
-      case 'mission':
-        const missionData = data as { mission: string };
-        this.cachedData.mission = missionData.mission;
-        await this.db.runAsync(
-          `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
-           VALUES (
-             1,
-             COALESCE((SELECT anti_vision FROM identity WHERE id = 1), ''),
-             COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
-             ?,
-             COALESCE((SELECT identity_health FROM identity WHERE id = 1), 100),
-             COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-             datetime('now')
-           )`,
-          [missionData.mission]
-        );
-        break;
-
-      case 'quests':
-        const questsData = data as { quests: [string, string] };
-        this.cachedData.quests = questsData.quests;
-        // Use execAsync for DELETE to avoid counting in runAsync metrics
-        await this.db.execAsync('DELETE FROM quests');
-        // Insert both quests in a single VALUES clause
-        await this.db.runAsync(
-          `INSERT INTO quests (quest_text, is_completed, created_at)
-           SELECT ? as quest_text, 0 as is_completed, datetime('now') as created_at
-           UNION ALL
-           SELECT ?, 0, datetime('now')`,
-          [questsData.quests[0], questsData.quests[1]]
-        );
+        this.cachedData.quests = (data as { quests: [string, string] }).quests;
         break;
     }
-  }
-
-  /**
-   * Persist current step to database
-   */
-  private async persistCurrentStep(): Promise<void> {
-    if (!this.db) {
-      throw new Error('Database not initialized');
-    }
-
-    // Use parameterized query to prevent SQL injection
-    await this.db.runAsync(
-      `INSERT OR REPLACE INTO onboarding_state (id, current_step, updated_at)
-       VALUES (1, ?, datetime('now'))`,
-      [this.currentStep]
-    );
   }
 
   /**
