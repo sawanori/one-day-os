@@ -108,7 +108,11 @@ export default function DeathScreen() {
                 // Pre-fetch product info for localized price
                 const product = await IAPService.getInstance().getProduct();
                 productRef.current = product;
-                if (product && isMountedRef.current) {
+
+                if (!product) {
+                    // No product registered in App Store / Google Play — cannot sell insurance
+                    insuranceEligibleRef.current = false;
+                } else if (isMountedRef.current) {
                     setLocalizedPrice(product.localizedPrice);
                 }
 
@@ -181,6 +185,12 @@ export default function DeathScreen() {
     };
 
     const handlePurchase = async () => {
+        // Guard: never attempt purchase if product is unavailable
+        if (!productRef.current) {
+            executeFinalWipe();
+            return;
+        }
+
         setIsPurchasing(true);
         isPurchasingRef.current = true;
 

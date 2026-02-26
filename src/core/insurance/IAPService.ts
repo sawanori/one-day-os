@@ -186,10 +186,10 @@ export class IAPService {
           }
         });
 
-        // Safety timeout - resolve after 60 s if no event arrives
+        // Safety timeout - resolve after 15 s if no event arrives
         timeoutId = setTimeout(() => {
           settle({ success: false, error: 'timeout' });
-        }, 60000);
+        }, 15000);
 
         // Fire the purchase request; results come through the listeners above
         RNIap.requestPurchase({
