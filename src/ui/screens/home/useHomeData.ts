@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { IdentityEngine } from '../../../core/identity/IdentityEngine';
 import { getDB } from '../../../database/client';
@@ -71,7 +72,8 @@ export const useHomeData = () => {
   );
 
   // Toggle quest completion
-  const toggleQuest = async (id: number) => {
+  // Internal function that performs the actual DB update
+  const executeToggle = async (id: number) => {
     try {
       const db = getDB();
       const quest = quests.find(q => q.id === id);
@@ -81,33 +83,49 @@ export const useHomeData = () => {
       const wasAlreadyCompletedBefore = quest.completed_at !== null;
 
       if (newCompleted === 1) {
-        // Completing: set completed_at only if never completed before (COALESCE preserves existing value)
         await db.runAsync(
           'UPDATE quests SET is_completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
           [new Date().toISOString(), id]
         );
       } else {
-        // Uncompleting: toggle is_completed but KEEP completed_at as evidence of prior completion
         await db.runAsync(
           'UPDATE quests SET is_completed = 0 WHERE id = ?',
           [id]
         );
       }
 
-      // Update local state (never clear completed_at - it serves as "was ever completed" evidence)
       setQuests(prev => prev.map(q => q.id === id ? {
         ...q,
         is_completed: newCompleted,
         completed_at: newCompleted === 1 ? (q.completed_at || new Date().toISOString()) : q.completed_at,
       } : q));
 
-      // Restore health only on FIRST completion (never completed before today)
       if (newCompleted === 1 && !wasAlreadyCompletedBefore) {
         const engine = await IdentityEngine.getInstance();
         await engine.restoreHealth(5);
       }
     } catch (error) {
       console.error('Failed to toggle quest:', error);
+    }
+  };
+
+  // Public toggle with confirmation alert when unchecking
+  const toggleQuest = async (id: number) => {
+    const quest = quests.find(q => q.id === id);
+    if (!quest) return;
+
+    if (quest.is_completed === 1) {
+      // Unchecking — show confirmation alert
+      Alert.alert(
+        'QUEST UNCHECK',
+        'Are you sure? Unchecking a completed quest cannot restore lost IH.',
+        [
+          { text: 'CANCEL', style: 'cancel' },
+          { text: 'UNCHECK', style: 'destructive', onPress: () => executeToggle(id) },
+        ]
+      );
+    } else {
+      await executeToggle(id);
     }
   };
 

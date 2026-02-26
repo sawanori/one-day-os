@@ -21,6 +21,8 @@ jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => { cb(); },
 }));
 
+import { Alert } from 'react-native';
+
 const mockGetFirstAsync = jest.fn();
 const mockGetAllAsync = jest.fn();
 const mockRunAsync = jest.fn();
@@ -49,6 +51,8 @@ jest.mock('../../../core/identity/IdentityEngine', () => ({
 import { useHomeData } from './useHomeData';
 
 describe('useHomeData', () => {
+  let alertSpy: jest.SpyInstance;
+
   beforeEach(() => {
     mockReplace.mockReset();
     mockPush.mockReset();
@@ -59,6 +63,17 @@ describe('useHomeData', () => {
     mockGetInstance.mockClear();
     mockRestoreHealth.mockResolvedValue(undefined);
     mockRunAsync.mockResolvedValue({ changes: 1 });
+    // Auto-confirm destructive alerts
+    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(
+      (_title, _message, buttons) => {
+        const destructive = buttons?.find((b: any) => b.style === 'destructive');
+        if (destructive?.onPress) destructive.onPress();
+      }
+    );
+  });
+
+  afterEach(() => {
+    alertSpy.mockRestore();
   });
 
   describe('data loading', () => {
@@ -201,7 +216,7 @@ describe('useHomeData', () => {
       );
     });
 
-    it('should toggle quest from complete to incomplete', async () => {
+    it('should show confirmation alert when unchecking a completed quest', async () => {
       const { result } = renderHook(() => useHomeData());
 
       await waitFor(() => {
@@ -212,7 +227,17 @@ describe('useHomeData', () => {
         await result.current.toggleQuest(2);
       });
 
-      // DB should only toggle is_completed, keeping completed_at as evidence
+      // Alert should be shown with destructive option
+      expect(alertSpy).toHaveBeenCalledWith(
+        'QUEST UNCHECK',
+        expect.any(String),
+        expect.arrayContaining([
+          expect.objectContaining({ text: 'CANCEL', style: 'cancel' }),
+          expect.objectContaining({ text: 'UNCHECK', style: 'destructive' }),
+        ])
+      );
+
+      // After auto-confirm, DB should toggle is_completed
       expect(mockRunAsync).toHaveBeenCalledWith(
         'UPDATE quests SET is_completed = 0 WHERE id = ?',
         [2]
