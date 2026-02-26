@@ -1,4 +1,7 @@
 /**
+ * @deprecated This module is dead code. Kept for reference only.
+ * Never instantiated or imported anywhere in the running app.
+ *
  * One Day OS - DespairModeManager
  * Manages despair mode state after data wipe
  *

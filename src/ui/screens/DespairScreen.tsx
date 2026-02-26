@@ -1,4 +1,7 @@
 /**
+ * @deprecated This module is dead code. Kept for reference only.
+ * Not rendered or imported anywhere in the running app.
+ *
  * DespairScreen
  *
  * Post-wipe despair screen displaying lockout countdown

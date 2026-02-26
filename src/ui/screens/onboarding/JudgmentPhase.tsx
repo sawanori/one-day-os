@@ -92,10 +92,7 @@ export function JudgmentPhase({ onComplete, onFail }: JudgmentPhaseProps) {
 
   // Handle countdown tick
   const handleCountdownTick = () => {
-    setCountdown((prev) => {
-      const next = prev - 1;
-      return next;
-    });
+    setCountdown((prev) => Math.max(0, prev - 1));
   };
 
   // Initialize countdown timer

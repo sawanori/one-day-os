@@ -8,6 +8,7 @@
 import { getDB } from '../../database/client';
 import { DB_TABLES, INSURANCE_CONSTANTS } from '../../constants';
 import { isFeatureEnabled } from '../../config/features';
+import { getLocalDatetime } from '../../utils/date';
 import { IAPService } from './IAPService';
 import { IdentityBackupManager } from './IdentityBackupManager';
 import type {
@@ -86,16 +87,18 @@ export class InsuranceManager {
       const lifeNumber = appState?.life_number ?? 1;
 
       // Record the purchase
+      const now = getLocalDatetime();
       await db.runAsync(
         `INSERT INTO ${DB_TABLES.INSURANCE_PURCHASES}
          (transaction_id, product_id, price_amount, price_currency, life_number, purchased_at, ih_before, ih_after)
-         VALUES (?, ?, ?, ?, ?, datetime('now'), 0, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, 0, ?)`,
         [
           transactionId,
           product?.productId || 'unknown',
           product?.priceAmount ?? null,
           product?.currency ?? null,
           lifeNumber,
+          now,
           revivalIH,
         ]
       );

@@ -1,14 +1,16 @@
 import { SQLiteDatabase } from 'expo-sqlite';
 import { DailyStateRow } from './types';
+import { getLocalDatetime } from '../../utils/date';
 
 export class DailyStateRepository {
   constructor(private db: SQLiteDatabase) {}
 
   async initializeDailyState(today: string): Promise<void> {
+    const now = getLocalDatetime();
     await this.db.runAsync(
       `INSERT OR IGNORE INTO daily_state (id, current_date, last_reset_at)
-       VALUES (1, ?, datetime('now'))`,
-      [today]
+       VALUES (1, ?, ?)`,
+      [today, now]
     );
   }
 
@@ -20,9 +22,10 @@ export class DailyStateRepository {
   }
 
   async updateDailyState(today: string): Promise<void> {
+    const now = getLocalDatetime();
     await this.db.runAsync(
-      `UPDATE daily_state SET current_date = ?, last_reset_at = datetime('now') WHERE id = 1`,
-      [today]
+      `UPDATE daily_state SET current_date = ?, last_reset_at = ? WHERE id = 1`,
+      [today, now]
     );
   }
 

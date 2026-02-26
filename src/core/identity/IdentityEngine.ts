@@ -9,6 +9,7 @@ import * as SQLite from 'expo-sqlite';
 import type { IHResponse, WipeEvent, QuestCompletion, NotificationResponse } from './types';
 import { IHCalculator } from './IHCalculator';
 import { IdentityLifecycle } from './IdentityLifecycle';
+import { getLocalDatetime } from '../../utils/date';
 
 // Re-export types for backward compatibility
 export type { IHResponse, WipeEvent, QuestCompletion, NotificationResponse };
@@ -269,6 +270,7 @@ export class IdentityEngine {
     }
 
     // Use INSERT OR REPLACE to handle both insert and update
+    const now = getLocalDatetime();
     await this.db.runAsync(
       `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
        VALUES (
@@ -277,10 +279,10 @@ export class IdentityEngine {
          COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
          COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
          ?,
-         COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-         datetime('now')
+         COALESCE((SELECT created_at FROM identity WHERE id = 1), ?),
+         ?
        )`,
-      [this.currentIH]
+      [this.currentIH, now, now]
     );
   }
 }

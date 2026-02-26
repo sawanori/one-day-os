@@ -1,4 +1,7 @@
 /**
+ * @deprecated This module is dead code. Kept for reference only.
+ * Replaced by JudgmentNotificationScheduler. Not imported or used anywhere in the running app.
+ *
  * One Day OS - NotificationScheduler
  * Manages scheduling and handling of daily identity questions
  */

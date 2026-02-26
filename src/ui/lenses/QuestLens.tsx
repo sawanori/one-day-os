@@ -1,36 +1,124 @@
 
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ThemedText } from '../components/ThemedText';
 import { theme } from '../theme/theme';
 import { IdentityEngine } from '../../core/identity/IdentityEngine';
 import { JudgmentEngine } from '../../core/judgment';
 import type { JudgmentScheduleRecord } from '../../core/judgment';
+import { getDB } from '../../database/client';
+
+interface QuestRow {
+    id: number;
+    quest_text: string;
+    is_completed: number;
+    created_at: string;
+    completed_at: string | null;
+}
+
+interface QuestItem {
+    id: number;
+    title: string;
+    completed: boolean;
+    type: string;
+    rewardClaimed: boolean;
+}
+
+function mapQuestRow(row: QuestRow): QuestItem {
+    return {
+        id: row.id,
+        title: row.quest_text,
+        completed: row.is_completed === 1,
+        type: 'QUEST',
+        rewardClaimed: row.completed_at !== null,
+    };
+}
 
 export function QuestLens() {
     const { t } = useTranslation();
-    const [quests, setQuests] = useState([
-        { id: 1, title: 'Deep Work: 4 Hours', completed: false, type: 'BOSS', rewardClaimed: false },
-        { id: 2, title: 'Gym Session', completed: false, type: 'MINION', rewardClaimed: false },
-    ]);
+    const [quests, setQuests] = useState<QuestItem[]>([]);
     const [nextJudgment, setNextJudgment] = useState<JudgmentScheduleRecord | null>(null);
     const [nextJudgmentLoaded, setNextJudgmentLoaded] = useState(false);
 
+    // Load quests from database (polls every 2 seconds, same as health check)
+    const loadQuests = useCallback(async () => {
+        try {
+            const db = getDB();
+            const rows = await db.getAllAsync<QuestRow>(
+                'SELECT * FROM quests ORDER BY id ASC'
+            );
+            if (rows) {
+                setQuests(rows.map(mapQuestRow));
+            }
+        } catch {
+            // Database may not be initialized yet
+        }
+    }, []);
+
+    useEffect(() => {
+        loadQuests();
+        const interval = setInterval(loadQuests, 2000);
+        return () => clearInterval(interval);
+    }, [loadQuests]);
+
+    // Internal function that performs the actual DB update and state change
+    const executeToggle = async (id: number) => {
+        try {
+            const db = getDB();
+            const quest = quests.find(q => q.id === id);
+            if (!quest) return;
+
+            const isCompleting = !quest.completed;
+            const wasAlreadyCompletedBefore = quest.rewardClaimed;
+
+            if (isCompleting) {
+                await db.runAsync(
+                    'UPDATE quests SET is_completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
+                    [new Date().toISOString(), id]
+                );
+            } else {
+                await db.runAsync(
+                    'UPDATE quests SET is_completed = 0 WHERE id = ?',
+                    [id]
+                );
+            }
+
+            setQuests(prev => prev.map(q =>
+                q.id === id ? {
+                    ...q,
+                    completed: isCompleting,
+                    rewardClaimed: q.rewardClaimed || isCompleting,
+                } : q
+            ));
+
+            // Only reward IH on FIRST completion (not re-completion after toggle)
+            if (isCompleting && !wasAlreadyCompletedBefore) {
+                const engine = await IdentityEngine.getInstance();
+                await engine.restoreHealth(5);
+            }
+        } catch (error) {
+            console.error('Failed to toggle quest:', error);
+        }
+    };
+
+    // Public toggle with confirmation alert when unchecking
     const toggleQuest = async (id: number) => {
         const quest = quests.find(q => q.id === id);
         if (!quest) return;
-        const isCompleting = !quest.completed;
-        const wasAlreadyCompletedBefore = quest.rewardClaimed;
 
-        setQuests(prev => prev.map(q =>
-            q.id === id ? { ...q, completed: !q.completed, rewardClaimed: q.rewardClaimed || isCompleting } : q
-        ));
-
-        // Only reward IH on FIRST completion (not re-completion after toggle)
-        if (isCompleting && !wasAlreadyCompletedBefore) {
-            const engine = await IdentityEngine.getInstance();
-            await engine.restoreHealth(5);
+        if (quest.completed) {
+            // Unchecking - show confirmation alert
+            Alert.alert(
+                'QUEST UNCHECK',
+                'Are you sure? Unchecking a completed quest cannot restore lost IH.',
+                [
+                    { text: 'CANCEL', style: 'cancel' },
+                    { text: 'UNCHECK', style: 'destructive', onPress: () => executeToggle(id) },
+                ]
+            );
+        } else {
+            await executeToggle(id);
         }
     };
 

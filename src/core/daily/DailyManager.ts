@@ -3,6 +3,7 @@ import { getDB, getAppState } from '../../database/client';
 import { IdentityEngine } from '../identity/IdentityEngine';
 import { DailyStateRepository } from './DailyStateRepository';
 import { DailyCheckResult, DateChangeEvent } from './types';
+import { getTodayString } from '../../utils/date';
 
 export class DailyManager {
   private static instance: DailyManager | null = null;
@@ -34,7 +35,7 @@ export class DailyManager {
   }
 
   private async initialize(): Promise<void> {
-    const today = this.getTodayString();
+    const today = getTodayString();
     await this.repository.initializeDailyState(today);
 
     // Register AppState listener
@@ -56,7 +57,7 @@ export class DailyManager {
   };
 
   async checkDateChange(): Promise<DailyCheckResult> {
-    const today = this.getTodayString();
+    const today = getTodayString();
 
     if (this.checking) {
       return { dateChanged: false, previousDate: null, currentDate: today, penaltyApplied: false };
@@ -136,13 +137,5 @@ export class DailyManager {
       this.appStateSubscription = null;
     }
     this.callbacks = [];
-  }
-
-  private getTodayString(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   }
 }

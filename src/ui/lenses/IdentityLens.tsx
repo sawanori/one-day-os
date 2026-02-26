@@ -9,6 +9,7 @@ import { IdentityEngine } from '../../core/identity/IdentityEngine';
 import { JudgmentEngine } from '../../core/judgment';
 import type { JudgmentLogRecord } from '../../core/judgment';
 import { InsuranceManager } from '../../core/insurance';
+import { getDB } from '../../database/client';
 
 interface GhostText {
     id: number;
@@ -45,7 +46,7 @@ function buildGhostTexts(records: JudgmentLogRecord[]): GhostText[] {
 
 export function IdentityLens() {
     const { t } = useTranslation();
-    const [identity, setIdentity] = useState<string>('I am a person who executes without hesitation.');
+    const [identity, setIdentity] = useState<string>('');
     const [health, setHealth] = useState(100);
     const [ghostTexts, setGhostTexts] = useState<GhostText[]>([]);
     const ghostTextsRef = useRef<GhostText[]>([]);
@@ -62,6 +63,19 @@ export function IdentityLens() {
             const engine = await IdentityEngine.getInstance();
             const status = await engine.checkHealth();
             setHealth(status.health);
+
+            // Load identity statement from database
+            try {
+                const db = getDB();
+                const row = await db.getFirstAsync<{ identity_statement: string }>(
+                    'SELECT identity_statement FROM identity WHERE id = 1'
+                );
+                if (row?.identity_statement) {
+                    setIdentity(row.identity_statement);
+                }
+            } catch {
+                // Database may not be initialized yet
+            }
 
             // Fetch ghost text data (piggyback on health check interval)
             try {

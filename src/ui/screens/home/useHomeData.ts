@@ -118,7 +118,7 @@ export const useHomeData = () => {
       // Unchecking — show confirmation alert
       Alert.alert(
         'QUEST UNCHECK',
-        'Are you sure? Unchecking a completed quest cannot restore lost IH.',
+        'Uncheck this quest? The IH you earned will NOT be revoked, but this quest will be marked incomplete.',
         [
           { text: 'CANCEL', style: 'cancel' },
           { text: 'UNCHECK', style: 'destructive', onPress: () => executeToggle(id) },

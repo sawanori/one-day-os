@@ -16,6 +16,8 @@ import {
     InsuranceManager,
     IAPService,
 } from '../src/core/insurance';
+import { OnboardingManager } from '../src/core/onboarding';
+import { JudgmentEngine } from '../src/core/judgment';
 import type { InsuranceProduct } from '../src/core/insurance';
 import { InsuranceModal } from '../src/ui/screens/InsuranceModal';
 
@@ -279,6 +281,14 @@ export default function DeathScreen() {
         await wipeManager.executeWipe('IH_ZERO', 0);
 
         if (!isMountedRef.current) return;
+
+        // Reset all singletons so they re-initialize from clean DB state.
+        // This must happen AFTER wipe completes but BEFORE navigating to onboarding,
+        // otherwise stale singleton state (e.g. OnboardingManager thinking step is 'complete')
+        // will prevent re-onboarding from working.
+        OnboardingManager.resetInstance();
+        IdentityEngine.resetInstance();
+        JudgmentEngine.resetInstance();
 
         // Stage 5: VOID (1s)
         const id = setTimeout(() => {

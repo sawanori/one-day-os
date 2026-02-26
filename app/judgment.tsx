@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: 8,
+        borderRadius: 0,
         borderWidth: 1,
     },
     noBtn: {

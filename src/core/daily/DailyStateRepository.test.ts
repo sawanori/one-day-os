@@ -22,7 +22,7 @@ describe('DailyStateRepository', () => {
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT OR IGNORE INTO daily_state'),
-        ['2024-01-15']
+        ['2024-01-15', expect.any(String)]
       );
     });
 
@@ -67,7 +67,7 @@ describe('DailyStateRepository', () => {
 
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE daily_state SET current_date'),
-        ['2024-01-16']
+        ['2024-01-16', expect.any(String)]
       );
     });
   });

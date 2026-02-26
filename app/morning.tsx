@@ -4,7 +4,6 @@ import { View, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, BackH
 import { useRouter } from 'expo-router';
 import { ThemedText } from '../src/ui/components/ThemedText';
 import { theme } from '../src/ui/theme/theme';
-import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { getDB } from '../src/database/client';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 import { PhaseGuard } from '../src/ui/components/PhaseGuard';
@@ -175,7 +174,7 @@ export default function MorningExcavation() {
     // Anti-vision timer logic
     useEffect(() => {
         if (step === 0) {
-            const timer = setTimeout(() => setCanProceed(true), 5000); // 5 seconds for demo, 15s real
+            const timer = setTimeout(() => setCanProceed(true), 15000);
             return () => clearTimeout(timer);
         }
     }, [step]);

@@ -185,7 +185,7 @@ function RootLayout() {
           // - Recent (<=30 min): apply -5 if >3 min late, keep unfired for JudgmentInvasionOverlay
           const overdue = await engine.getOverdueJudgments(today, currentTime);
           for (const schedule of overdue) {
-            const scheduledAt = `${schedule.scheduled_date}T${schedule.scheduled_time}:00.000Z`;
+            const scheduledAt = `${schedule.scheduled_date}T${schedule.scheduled_time}:00`;
             const scheduledTime = new Date(scheduledAt).getTime();
             const now = Date.now();
             const elapsedMinutes = (now - scheduledTime) / (1000 * 60);

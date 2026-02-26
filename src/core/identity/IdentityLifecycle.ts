@@ -6,6 +6,7 @@
 import { initDatabase } from '../../database/schema';
 import { runInTransaction } from '../../database/transaction';
 import { IHCalculator } from './IHCalculator';
+import { getLocalDatetime } from '../../utils/date';
 import * as SQLite from 'expo-sqlite';
 
 /**
@@ -42,8 +43,12 @@ export class IdentityLifecycle {
 
     const isDead = stateResult?.state === 'despair';
 
+    // When IH <= 0 and not already in despair, signal death WITHOUT auto-wiping.
+    // The death screen (app/death.tsx) is responsible for:
+    //   1. Creating a backup FIRST
+    //   2. THEN calling WipeManager.executeWipe()
+    // Calling killUser() here would wipe data before the death screen can back it up.
     if (identityResult.identity_health <= 0 && !isDead) {
-      await this.killUser();
       return { health: 0, isDead: true };
     }
 
@@ -59,9 +64,10 @@ export class IdentityLifecycle {
    */
   async applyDamage(amount: number = 10): Promise<{ health: number; isDead: boolean }> {
     return runInTransaction(async () => {
+      const now = getLocalDatetime();
       await this.db.runAsync(
-        'UPDATE identity SET identity_health = MAX(0, identity_health - ?), updated_at = datetime(\'now\') WHERE id = 1',
-        [amount]
+        'UPDATE identity SET identity_health = MAX(0, identity_health - ?), updated_at = ? WHERE id = 1',
+        [amount, now]
       );
 
       // Sync in-memory state
@@ -82,9 +88,10 @@ export class IdentityLifecycle {
    */
   async restoreHealth(amount: number = 5): Promise<void> {
     return runInTransaction(async () => {
+      const now = getLocalDatetime();
       await this.db.runAsync(
-        'UPDATE identity SET identity_health = MIN(100, identity_health + ?), updated_at = datetime(\'now\') WHERE id = 1',
-        [amount]
+        'UPDATE identity SET identity_health = MIN(100, identity_health + ?), updated_at = ? WHERE id = 1',
+        [amount, now]
       );
 
       // Sync in-memory state
@@ -101,6 +108,11 @@ export class IdentityLifecycle {
    * THE NUCLEAR OPTION
    * Irreversibly wipes all user content tables.
    * Sets app_state to "despair" to mark as DEAD.
+   *
+   * WARNING: Do NOT call this directly. The death flow uses
+   * WipeManager.executeWipe() instead, which handles backup,
+   * insurance eligibility, and singleton resets properly.
+   * This method exists for backward compatibility only.
    */
   async killUser(): Promise<void> {
     return runInTransaction(async () => {
@@ -115,9 +127,10 @@ export class IdentityLifecycle {
       `);
 
       // Mark app as in despair state
+      const now = getLocalDatetime();
       await this.db.runAsync(
-        'UPDATE app_state SET state = ?, updated_at = datetime(\'now\') WHERE id = 1',
-        ['despair']
+        'UPDATE app_state SET state = ?, updated_at = ? WHERE id = 1',
+        ['despair', now]
       );
 
       this.syncIH(0);
@@ -135,9 +148,10 @@ export class IdentityLifecycle {
       await initDatabase();
 
       // Update app_state to active
+      const now = getLocalDatetime();
       await this.db.runAsync(
-        'UPDATE app_state SET state = ?, updated_at = datetime(\'now\') WHERE id = 1',
-        ['active']
+        'UPDATE app_state SET state = ?, updated_at = ? WHERE id = 1',
+        ['active', now]
       );
 
       // Set identity_health to 50% using INSERT OR REPLACE
@@ -150,10 +164,10 @@ export class IdentityLifecycle {
            COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
            COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
            ?,
-           COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-           datetime('now')
+           COALESCE((SELECT created_at FROM identity WHERE id = 1), ?),
+           ?
          )`,
-        [50]
+        [50, now, now]
       );
 
       this.syncIH(50);

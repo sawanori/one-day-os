@@ -8,6 +8,7 @@ import { theme } from '../theme/theme';
 import { IdentityEngine } from '../../core/identity/IdentityEngine';
 import { JudgmentEngine } from '../../core/judgment';
 import type { JudgmentLogRecord } from '../../core/judgment';
+import { getDB } from '../../database/client';
 
 interface TombstoneEntry {
     time: string;
@@ -33,8 +34,8 @@ function calculateTotalLoss(entries: TombstoneEntry[]): number {
 
 export function MissionLens() {
     const { t } = useTranslation();
-    const [mission, setMission] = useState<string>('Destroy old patterns.');
-    const [antiVision, setAntiVision] = useState<string>('Stagnation. Regret. Wasted Potential.');
+    const [mission, setMission] = useState<string>('');
+    const [antiVision, setAntiVision] = useState<string>('');
     const [health, setHealth] = useState(100);
     const [tombstones, setTombstones] = useState<TombstoneEntry[]>([]);
 
@@ -43,6 +44,20 @@ export function MissionLens() {
             const engine = await IdentityEngine.getInstance();
             const status = await engine.checkHealth();
             setHealth(status.health);
+
+            // Load mission and anti-vision from database
+            try {
+                const db = getDB();
+                const row = await db.getFirstAsync<{ one_year_mission: string; anti_vision: string }>(
+                    'SELECT one_year_mission, anti_vision FROM identity WHERE id = 1'
+                );
+                if (row) {
+                    if (row.one_year_mission) setMission(row.one_year_mission);
+                    if (row.anti_vision) setAntiVision(row.anti_vision);
+                }
+            } catch {
+                // Database may not be initialized yet
+            }
 
             // Fetch tombstone data (piggyback on health check interval)
             try {

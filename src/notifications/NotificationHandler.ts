@@ -1,4 +1,7 @@
 /**
+ * @deprecated This module is dead code. Kept for reference only.
+ * Replaced by JudgmentEngine and NotificationController. Not imported or used anywhere in the running app.
+ *
  * One Day OS - NotificationHandler
  * Handles notification responses and timeout detection
  */

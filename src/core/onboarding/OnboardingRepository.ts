@@ -50,10 +50,11 @@ export class OnboardingRepository {
    * Persist current step to database
    */
   public async persistCurrentStep(currentStep: OnboardingStep): Promise<void> {
+    const now = getLocalDatetime();
     await this.db.runAsync(
       `INSERT OR REPLACE INTO onboarding_state (id, current_step, updated_at)
-       VALUES (1, ?, datetime('now'))`,
-      [currentStep]
+       VALUES (1, ?, ?)`,
+      [currentStep, now]
     );
   }
 
@@ -70,6 +71,7 @@ export class OnboardingRepository {
 
       case 'excavation':
         const antiVisionData = data as { antiVision: string };
+        const excavationNow = getLocalDatetime();
         await this.db.runAsync(
           `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
            VALUES (
@@ -78,15 +80,16 @@ export class OnboardingRepository {
              COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
              COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
              COALESCE((SELECT identity_health FROM identity WHERE id = 1), 100),
-             COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-             datetime('now')
+             COALESCE((SELECT created_at FROM identity WHERE id = 1), ?),
+             ?
            )`,
-          [antiVisionData.antiVision]
+          [antiVisionData.antiVision, excavationNow, excavationNow]
         );
         break;
 
       case 'identity':
         const identityData = data as { identity: string };
+        const identityNow = getLocalDatetime();
         await this.db.runAsync(
           `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
            VALUES (
@@ -95,15 +98,16 @@ export class OnboardingRepository {
              ?,
              COALESCE((SELECT one_year_mission FROM identity WHERE id = 1), ''),
              COALESCE((SELECT identity_health FROM identity WHERE id = 1), 100),
-             COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-             datetime('now')
+             COALESCE((SELECT created_at FROM identity WHERE id = 1), ?),
+             ?
            )`,
-          [identityData.identity]
+          [identityData.identity, identityNow, identityNow]
         );
         break;
 
       case 'mission':
         const missionData = data as { mission: string };
+        const missionNow = getLocalDatetime();
         await this.db.runAsync(
           `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
            VALUES (
@@ -112,10 +116,10 @@ export class OnboardingRepository {
              COALESCE((SELECT identity_statement FROM identity WHERE id = 1), ''),
              ?,
              COALESCE((SELECT identity_health FROM identity WHERE id = 1), 100),
-             COALESCE((SELECT created_at FROM identity WHERE id = 1), datetime('now')),
-             datetime('now')
+             COALESCE((SELECT created_at FROM identity WHERE id = 1), ?),
+             ?
            )`,
-          [missionData.mission]
+          [missionData.mission, missionNow, missionNow]
         );
         break;
 

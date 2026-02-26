@@ -216,7 +216,7 @@ export function JudgmentInvasionOverlay() {
             category: intelligentCategory,
             questionKey: selected.questionKey,
             questionRendered: selected.questionRendered,
-            scheduledAt: `${dueJudgment.scheduled_date}T${dueJudgment.scheduled_time}:00.000Z`,
+            scheduledAt: `${dueJudgment.scheduled_date}T${dueJudgment.scheduled_time}:00`,
           };
 
           // Start the invasion animation

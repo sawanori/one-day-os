@@ -7,6 +7,7 @@
  */
 import { getDB } from '../../database/client';
 import { DB_TABLES } from '../../constants';
+import { getLocalDatetime } from '../../utils/date';
 
 export interface IdentityBackup {
   antiVision: string;
@@ -43,15 +44,17 @@ export class IdentityBackupManager {
       await db.runAsync(`DELETE FROM ${DB_TABLES.IDENTITY_BACKUP}`);
 
       // Insert backup
+      const now = getLocalDatetime();
       await db.runAsync(
         `INSERT INTO ${DB_TABLES.IDENTITY_BACKUP}
          (id, anti_vision, identity_statement, one_year_mission, original_ih, backed_up_at)
-         VALUES (1, ?, ?, ?, ?, datetime('now'))`,
+         VALUES (1, ?, ?, ?, ?, ?)`,
         [
           identity.anti_vision,
           identity.identity_statement,
           identity.one_year_mission,
           identity.identity_health,
+          now,
         ]
       );
 
@@ -139,22 +142,25 @@ export class IdentityBackupManager {
       }
 
       // Restore identity with backup data and new IH
+      const now = getLocalDatetime();
       await db.runAsync(
         `INSERT OR REPLACE INTO ${DB_TABLES.IDENTITY}
          (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)
-         VALUES (1, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+         VALUES (1, ?, ?, ?, ?, ?, ?)`,
         [
           backup.antiVision,
           backup.identityStatement,
           backup.oneYearMission,
           revivalIH,
+          now,
+          now,
         ]
       );
 
       // Mark insurance as used and restore active state
       await db.runAsync(
-        "UPDATE app_state SET state = ?, has_used_insurance = 1, updated_at = datetime('now') WHERE id = 1",
-        ['active']
+        'UPDATE app_state SET state = ?, has_used_insurance = 1, updated_at = ? WHERE id = 1',
+        ['active', now]
       );
 
       // Clean up backup

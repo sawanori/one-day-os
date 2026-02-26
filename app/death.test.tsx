@@ -22,16 +22,39 @@ jest.mock('../src/core/identity/WipeManager', () => ({
 
 // Mock IdentityEngine
 const mockSetCurrentIH = jest.fn().mockResolvedValue(undefined);
-jest.mock('../src/core/identity/IdentityEngine', () => ({
-    IdentityEngine: {
-        getInstance: jest.fn().mockResolvedValue({
-            setCurrentIH: mockSetCurrentIH,
-            useInsurance: jest.fn().mockResolvedValue(undefined),
-            checkHealth: jest.fn().mockResolvedValue({ health: 100, isDead: false }),
-        }),
-        resetInstance: jest.fn(),
-    },
-}));
+jest.mock('../src/core/identity/IdentityEngine', () => {
+    const resetInstance = jest.fn();
+    return {
+        IdentityEngine: {
+            getInstance: jest.fn().mockResolvedValue({
+                setCurrentIH: mockSetCurrentIH,
+                useInsurance: jest.fn().mockResolvedValue(undefined),
+                checkHealth: jest.fn().mockResolvedValue({ health: 100, isDead: false }),
+            }),
+            resetInstance,
+        },
+    };
+});
+
+// Mock OnboardingManager (singleton reset after wipe)
+jest.mock('../src/core/onboarding', () => {
+    const resetInstance = jest.fn();
+    return {
+        OnboardingManager: {
+            resetInstance,
+        },
+    };
+});
+
+// Mock JudgmentEngine (singleton reset after wipe)
+jest.mock('../src/core/judgment', () => {
+    const resetInstance = jest.fn();
+    return {
+        JudgmentEngine: {
+            resetInstance,
+        },
+    };
+});
 
 // Mock expo-router
 const mockReplace = jest.fn();
@@ -423,6 +446,42 @@ describe('Death Screen - 7-Stage System', () => {
 
         await waitFor(() => {
             expect(mockReplace).toHaveBeenCalledWith('/onboarding');
+        });
+    });
+
+    it('should reset all singletons after wipe before navigating to onboarding', async () => {
+        // Get mock references from mocked modules
+        const { OnboardingManager } = require('../src/core/onboarding');
+        const { IdentityEngine: IE } = require('../src/core/identity/IdentityEngine');
+        const { JudgmentEngine: JE } = require('../src/core/judgment');
+
+        mockCheckEligibility.mockResolvedValue({ eligible: false });
+        render(<DeathScreen />);
+
+        // Wait for SENTENCING
+        await waitFor(() => {
+            expect(mockCreateBackup).toHaveBeenCalled();
+        });
+
+        // SENTENCING (2s) + WIPING_VISUAL (3s)
+        act(() => {
+            jest.advanceTimersByTime(2000);
+        });
+
+        act(() => {
+            jest.advanceTimersByTime(3000);
+        });
+
+        // Wait for wipe to execute
+        await waitFor(() => {
+            expect(mockExecuteWipe).toHaveBeenCalled();
+        });
+
+        // All singletons should be reset after wipe
+        await waitFor(() => {
+            expect(OnboardingManager.resetInstance).toHaveBeenCalled();
+            expect(IE.resetInstance).toHaveBeenCalled();
+            expect(JE.resetInstance).toHaveBeenCalled();
         });
     });
 

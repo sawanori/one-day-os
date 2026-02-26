@@ -1,5 +1,6 @@
 
 import { dbResult, initDatabase } from './schema';
+import { getLocalDatetime } from '../utils/date';
 
 export const getDB = () => dbResult;
 export const databaseInit = initDatabase;
@@ -21,10 +22,11 @@ export async function getAppState(): Promise<'onboarding' | 'active' | 'despair'
  */
 export async function updateAppState(state: 'onboarding' | 'active' | 'despair'): Promise<void> {
   const db = getDB();
+  const now = getLocalDatetime();
 
   await db.runAsync(`
     UPDATE app_state
-    SET state = ?, updated_at = datetime('now')
+    SET state = ?, updated_at = ?
     WHERE id = 1
-  `, [state]);
+  `, [state, now]);
 }

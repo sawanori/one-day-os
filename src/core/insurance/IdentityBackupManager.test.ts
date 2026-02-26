@@ -58,10 +58,10 @@ describe('IdentityBackupManager', () => {
         expect.stringContaining('DELETE FROM identity_backup')
       );
 
-      // Verify new backup was inserted with correct values
+      // Verify new backup was inserted with correct values (includes local datetime)
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO identity_backup'),
-        ['My anti-vision', 'I am a builder', 'Ship the product', 75]
+        ['My anti-vision', 'I am a builder', 'Ship the product', 75, expect.any(String)]
       );
     });
 
@@ -186,16 +186,16 @@ describe('IdentityBackupManager', () => {
 
       expect(result).toBe(true);
 
-      // Verify identity was restored with revivalIH
+      // Verify identity was restored with revivalIH (includes local datetime for created_at, updated_at)
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT OR REPLACE INTO identity'),
-        ['Backed up vision', 'Backed up identity', 'Backed up mission', 10]
+        ['Backed up vision', 'Backed up identity', 'Backed up mission', 10, expect.any(String), expect.any(String)]
       );
 
-      // Verify app_state was updated
+      // Verify app_state was updated (includes local datetime for updated_at)
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE app_state'),
-        ['active']
+        ['active', expect.any(String)]
       );
 
       // Verify backup was cleared

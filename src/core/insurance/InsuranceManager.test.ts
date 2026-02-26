@@ -141,7 +141,7 @@ describe('InsuranceManager', () => {
       // Verify restore was called with revival IH (10)
       expect(mockRestoreFromBackup).toHaveBeenCalledWith(10);
 
-      // Verify purchase was recorded
+      // Verify purchase was recorded (includes local datetime for purchased_at)
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO insurance_purchases'),
         [
@@ -150,6 +150,7 @@ describe('InsuranceManager', () => {
           1500,
           'JPY',
           2,
+          expect.any(String),
           10,
         ]
       );
@@ -178,7 +179,7 @@ describe('InsuranceManager', () => {
       expect(result).toBe(true);
       expect(mockDb.runAsync).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO insurance_purchases'),
-        ['txn_xyz', 'unknown', null, null, 1, 10]
+        ['txn_xyz', 'unknown', null, null, 1, expect.any(String), 10]
       );
     });
 

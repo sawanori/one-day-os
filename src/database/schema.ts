@@ -1,6 +1,7 @@
 
 import * as SQLite from 'expo-sqlite';
 import { migrate001Insurance } from './migrations/001_insurance';
+import { getLocalDatetime } from '../utils/date';
 
 export const dbResult = SQLite.openDatabaseSync('onedayos.db');
 
@@ -52,10 +53,6 @@ export const initDatabase = async () => {
       state TEXT NOT NULL CHECK (state IN ('onboarding', 'active', 'despair')),
       updated_at TEXT NOT NULL
     );
-
-    -- Initialize app state to 'onboarding' if not exists
-    INSERT OR IGNORE INTO app_state (id, state, updated_at)
-    VALUES (1, 'onboarding', datetime('now'));
 
     -- Legacy table: anti_vision (kept for backward compatibility)
     CREATE TABLE IF NOT EXISTS anti_vision (
@@ -125,6 +122,13 @@ export const initDatabase = async () => {
       ih_after INTEGER NOT NULL
     );
   `);
+
+  // Initialize app state to 'onboarding' if not exists (uses local datetime)
+  const now = getLocalDatetime();
+  await dbResult.runAsync(
+    `INSERT OR IGNORE INTO app_state (id, state, updated_at) VALUES (1, 'onboarding', ?)`,
+    [now]
+  );
 
   // Run migrations
   await migrate001Insurance(dbResult);
