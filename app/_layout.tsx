@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { NotoSerifJP_700Bold } from '@expo-google-fonts/noto-serif-jp';
+import * as Notifications from 'expo-notifications';
 import { databaseInit } from '../src/database/client';
 import { DailyManager } from '../src/core/daily';
 import { PhaseManager } from '../src/core/phase';
@@ -25,6 +26,18 @@ import { JudgmentNotificationScheduler } from '../src/notifications/JudgmentNoti
 import { JudgmentInvasionOverlay } from '../src/ui/effects/JudgmentInvasionOverlay';
 import { PaidIdentityWatermark } from '../src/ui/effects/PaidIdentityWatermark';
 import { IAPService } from '../src/core/insurance';
+
+// Notification handler — set at module level (Expo recommendation).
+// Without this, iOS silently suppresses ALL foreground notifications.
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 // Web Not Supported Component
 const WebNotSupported = () => {
@@ -106,6 +119,18 @@ function RootLayout() {
         dailyManager.onDateChange((event) => {
           console.log('[Layout] Date changed:', event.previousDate, '->', event.newDate);
         });
+
+        // Request notification permission before scheduling.
+        // Only prompts when undetermined; denied state logs a warning without crashing.
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        if (existingStatus === 'undetermined') {
+          const { status: newStatus } = await Notifications.requestPermissionsAsync();
+          if (newStatus !== 'granted') {
+            console.warn('[Layout] Notification permission denied. status:', newStatus);
+          }
+        } else if (existingStatus === 'denied') {
+          console.warn('[Layout] Notification permission previously denied.');
+        }
 
         // Initialize JudgmentEngine and generate today's schedule
         const judgmentEngine = await JudgmentEngine.getInstance();

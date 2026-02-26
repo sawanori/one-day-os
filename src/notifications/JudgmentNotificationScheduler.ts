@@ -53,7 +53,12 @@ export class JudgmentNotificationScheduler {
       const scheduledDate = new Date(
         `${schedule.scheduled_date}T${schedule.scheduled_time}:00`
       );
-      if (scheduledDate <= now) continue;
+      if (scheduledDate <= now) {
+        console.warn(
+          `[JudgmentNotificationScheduler] Skipping past time: scheduleId=${schedule.id}, scheduled=${schedule.scheduled_date}T${schedule.scheduled_time}, now=${now.toISOString()}`
+        );
+        continue;
+      }
 
       // Get rendered question for notification body
       const { questionKey, questionRendered } =
@@ -65,7 +70,6 @@ export class JudgmentNotificationScheduler {
           title: 'ONE DAY OS',
           body: questionRendered,
           categoryIdentifier: JUDGMENT_CATEGORY_IDENTIFIER,
-          interruptionLevel: 'timeSensitive',
           data: {
             type: 'judgment',
             scheduleId: schedule.id,
