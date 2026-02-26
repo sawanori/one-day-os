@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { IdentityEngine } from '../../../core/identity/IdentityEngine';
 import { getDB } from '../../../database/client';
 
@@ -10,6 +10,19 @@ export interface Quest {
   created_at: string;
   completed_at: string | null;
 }
+
+/**
+ * Returns the current local date as 'YYYY-MM-DD'.
+ * Matches the format produced by DailyManager.getTodayString() so that
+ * DATE(created_at) comparisons work correctly across timezones.
+ */
+const getTodayString = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 /**
  * useHomeData
@@ -28,34 +41,48 @@ export const useHomeData = () => {
   const [quests, setQuests] = useState<Quest[]>([]);
 
   // Load data from database and check onboarding status
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const db = getDB();
+  const loadData = useCallback(async () => {
+    try {
+      const db = getDB();
 
-        // Check if identity table exists and has data
-        const identityData = await db.getFirstAsync<any>('SELECT * FROM identity WHERE id = 1');
+      // Check if identity table exists and has data
+      const identityData = await db.getFirstAsync<any>('SELECT * FROM identity WHERE id = 1');
 
-        // If no identity data, redirect to onboarding
-        if (!identityData || !identityData.identity_statement) {
-          router.replace('/onboarding');
-          return;
-        }
-
-        const questsData = await db.getAllAsync<Quest>('SELECT * FROM quests');
-
-        setMission(identityData.one_year_mission || '');
-        setAntiVision(identityData.anti_vision || '');
-        setIdentity(identityData.identity_statement || '');
-        setQuests(questsData || []);
-        setIsLoading(false);
-      } catch (error) {
-        // Database not initialized yet or no data exists - go to onboarding
+      // If no identity data, redirect to onboarding
+      if (!identityData || !identityData.identity_statement) {
         router.replace('/onboarding');
+        return;
       }
-    };
-    loadData();
+
+      // Filter quests to today only so stale quests from prior days never appear
+      const today = getTodayString();
+      const questsData = await db.getAllAsync<Quest>(
+        'SELECT * FROM quests WHERE DATE(created_at) = ? ORDER BY id ASC',
+        [today]
+      );
+
+      setMission(identityData.one_year_mission || '');
+      setAntiVision(identityData.anti_vision || '');
+      setIdentity(identityData.identity_statement || '');
+      setQuests(questsData || []);
+      setIsLoading(false);
+    } catch (error) {
+      // Database not initialized yet or no data exists - go to onboarding
+      router.replace('/onboarding');
+    }
   }, [router]);
+
+  // Load on first mount
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Reload whenever the screen regains focus (e.g. after date change or returning from morning)
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  );
 
   // Toggle quest completion
   const toggleQuest = async (id: number) => {

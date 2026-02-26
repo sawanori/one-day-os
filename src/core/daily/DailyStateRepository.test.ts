@@ -72,6 +72,32 @@ describe('DailyStateRepository', () => {
     });
   });
 
+  describe('resetDailyQuests', () => {
+    it('should DELETE quests where DATE(created_at) != today', async () => {
+      await repository.resetDailyQuests('2024-01-15');
+
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        expect.stringContaining('DELETE FROM quests WHERE DATE(created_at) != ?'),
+        ['2024-01-15']
+      );
+    });
+
+    it('should call runAsync exactly once', async () => {
+      await repository.resetDailyQuests('2024-01-15');
+
+      expect(mockDb.runAsync).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pass the correct date parameter', async () => {
+      await repository.resetDailyQuests('2024-02-29');
+
+      expect(mockDb.runAsync).toHaveBeenCalledWith(
+        expect.any(String),
+        ['2024-02-29']
+      );
+    });
+  });
+
   describe('getIncompleteQuestCount', () => {
     it('should return { total: 0, completed: 0 } when no quests exist', async () => {
       mockDb.getFirstAsync.mockResolvedValue({ total: 0, completed: 0 });

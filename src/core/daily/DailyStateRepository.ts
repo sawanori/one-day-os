@@ -39,4 +39,17 @@ export class DailyStateRepository {
       completed: result?.completed ?? 0,
     };
   }
+
+  /**
+   * Delete all quests not created on the given date (local date).
+   * Uses DELETE instead of is_completed reset because morning.tsx
+   * inserts fresh quests each day — old quests should be purged entirely.
+   * @param today - Local date in YYYY-MM-DD format
+   */
+  async resetDailyQuests(today: string): Promise<void> {
+    await this.db.runAsync(
+      `DELETE FROM quests WHERE DATE(created_at) != ?`,
+      [today]
+    );
+  }
 }

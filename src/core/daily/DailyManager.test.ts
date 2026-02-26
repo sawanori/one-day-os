@@ -65,6 +65,7 @@ describe('DailyManager', () => {
       getDailyState: jest.fn().mockResolvedValue(null),
       updateDailyState: jest.fn().mockResolvedValue(undefined),
       getIncompleteQuestCount: jest.fn().mockResolvedValue({ total: 0, completed: 0 }),
+      resetDailyQuests: jest.fn().mockResolvedValue(undefined),
     };
     DailyStateRepository.mockImplementation(() => mockRepository);
 
@@ -425,6 +426,69 @@ describe('DailyManager', () => {
       const instance2 = await DailyManager.getInstance();
 
       expect(instance1).not.toBe(instance2);
+    });
+  });
+
+  describe('quest reset on date change', () => {
+    it('should call resetDailyQuests when date changes', async () => {
+      mockRepository.getDailyState.mockResolvedValue({
+        id: 1, current_date: '2024-01-14', last_reset_at: '2024-01-14T08:00:00',
+      });
+      mockRepository.getIncompleteQuestCount.mockResolvedValue({ total: 0, completed: 0 });
+
+      await DailyManager.getInstance();
+
+      expect(mockRepository.resetDailyQuests).toHaveBeenCalledWith('2024-01-15');
+    });
+
+    it('should NOT call resetDailyQuests when same day', async () => {
+      mockRepository.getDailyState.mockResolvedValue({
+        id: 1, current_date: '2024-01-15', last_reset_at: '2024-01-15T08:00:00',
+      });
+
+      const manager = await DailyManager.getInstance();
+      mockRepository.resetDailyQuests.mockClear();
+
+      await manager.checkDateChange();
+
+      expect(mockRepository.resetDailyQuests).not.toHaveBeenCalled();
+    });
+
+    it('should call resetDailyQuests AFTER getIncompleteQuestCount (penalty before reset)', async () => {
+      const callOrder: string[] = [];
+
+      mockRepository.getDailyState.mockResolvedValue({
+        id: 1, current_date: '2024-01-14', last_reset_at: '2024-01-14T08:00:00',
+      });
+      mockRepository.getIncompleteQuestCount.mockImplementation(async () => {
+        callOrder.push('getIncompleteQuestCount');
+        return { total: 2, completed: 0 };
+      });
+      mockRepository.resetDailyQuests.mockImplementation(async () => {
+        callOrder.push('resetDailyQuests');
+      });
+      mockRepository.updateDailyState.mockImplementation(async () => {
+        callOrder.push('updateDailyState');
+      });
+
+      await DailyManager.getInstance();
+
+      expect(callOrder).toEqual([
+        'getIncompleteQuestCount',
+        'resetDailyQuests',
+        'updateDailyState',
+      ]);
+    });
+
+    it('should call resetDailyQuests even during onboarding (quests must still clear)', async () => {
+      getAppState.mockResolvedValue('onboarding');
+      mockRepository.getDailyState.mockResolvedValue({
+        id: 1, current_date: '2024-01-14', last_reset_at: '2024-01-14T08:00:00',
+      });
+
+      await DailyManager.getInstance();
+
+      expect(mockRepository.resetDailyQuests).toHaveBeenCalledWith('2024-01-15');
     });
   });
 });

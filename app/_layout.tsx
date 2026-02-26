@@ -103,6 +103,10 @@ function RootLayout() {
 
         dailyManager = await DailyManager.getInstance();
 
+        dailyManager.onDateChange((event) => {
+          console.log('[Layout] Date changed:', event.previousDate, '->', event.newDate);
+        });
+
         // Initialize JudgmentEngine and generate today's schedule
         const judgmentEngine = await JudgmentEngine.getInstance();
         const today = JudgmentEngine.getTodayDate();

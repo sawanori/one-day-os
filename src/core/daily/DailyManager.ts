@@ -93,6 +93,10 @@ export class DailyManager {
         }
       }
 
+      // Reset quests from previous days (DELETE, not just is_completed reset).
+      // Runs outside the onboarding guard so quests are always cleaned up.
+      await this.repository.resetDailyQuests(today);
+
       // Update daily_state to today
       await this.repository.updateDailyState(today);
 

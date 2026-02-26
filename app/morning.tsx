@@ -9,6 +9,23 @@ import { getDB } from '../src/database/client';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 import { PhaseGuard } from '../src/ui/components/PhaseGuard';
 
+/**
+ * Returns the current local datetime as 'YYYY-MM-DD HH:MM:SS'.
+ * Using plain local datetime (no timezone offset) ensures that
+ * SQLite's DATE(created_at) returns the correct local date,
+ * matching the YYYY-MM-DD strings produced by DailyManager.getTodayString().
+ */
+function getLocalDatetime(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${h}:${m}:${s}`;
+}
+
 export default function MorningExcavation() {
     const router = useRouter();
     const [step, setStep] = useState(0);
@@ -38,12 +55,22 @@ export default function MorningExcavation() {
     const saveMorningData = async () => {
         const db = getDB();
 
+        // Use local datetime string so DATE(created_at) matches getTodayString() in DailyManager.
+        // datetime('now') returns UTC which causes date mismatch in timezones like JST (UTC+9).
+        const localDatetime = getLocalDatetime();
+
         // Save Quests
         if (quests.quest1) {
-            await db.runAsync('INSERT INTO quests (quest_text, is_completed, created_at) VALUES (?, 0, datetime(\'now\'))', [quests.quest1]);
+            await db.runAsync(
+                'INSERT INTO quests (quest_text, is_completed, created_at) VALUES (?, 0, ?)',
+                [quests.quest1, localDatetime]
+            );
         }
         if (quests.quest2) {
-            await db.runAsync('INSERT INTO quests (quest_text, is_completed, created_at) VALUES (?, 0, datetime(\'now\'))', [quests.quest2]);
+            await db.runAsync(
+                'INSERT INTO quests (quest_text, is_completed, created_at) VALUES (?, 0, ?)',
+                [quests.quest2, localDatetime]
+            );
         }
 
         // Morning ritual completed
