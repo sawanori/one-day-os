@@ -4,7 +4,6 @@ import { View, TouchableOpacity, StatusBar, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '../src/ui/components/ThemedText';
 import { HapticEngine } from '../src/core/HapticEngine';
-import { StressContainer } from '../src/ui/layout/StressContainer';
 import { useLensGesture } from '../src/ui/lenses/useLensGesture';
 import { LENS_ANIMATION_CONFIG } from '../src/constants/lenses';
 import { styles } from '../src/ui/screens/home/home.styles';
@@ -15,7 +14,7 @@ import { LensContent } from '../src/ui/screens/home/LensContent';
 
 export default function Home() {
   const [lens, setLens] = useState<0.5 | 1.0 | 2.0>(0.5);
-  const { health, setHealth } = useHealthMonitor(lens);
+  const { health } = useHealthMonitor(lens);
   const { isLoading, mission, antiVision, identity, quests, toggleQuest } = useHomeData();
 
   // Lens Zoom Gesture (Phase 4)
@@ -59,22 +58,20 @@ export default function Home() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      <HomeHeader health={health} onHealthUpdate={setHealth} />
+      <HomeHeader health={health} />
 
-      {/* Main Lens Content with Gesture Support and Stress Effects */}
-      <StressContainer>
-        <LensContent
-          lens={lens}
-          scale={scale}
-          panResponder={panResponder}
-          health={health}
-          mission={mission}
-          antiVision={antiVision}
-          identity={identity}
-          quests={quests}
-          onQuestToggle={toggleQuest}
-        />
-      </StressContainer>
+      {/* Main Lens Content with Gesture Support */}
+      <LensContent
+        lens={lens}
+        scale={scale}
+        panResponder={panResponder}
+        health={health}
+        mission={mission}
+        antiVision={antiVision}
+        identity={identity}
+        quests={quests}
+        onQuestToggle={toggleQuest}
+      />
 
       {/* Lens Selector Buttons */}
       <View style={styles.lensSelector}>

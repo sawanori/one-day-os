@@ -22,6 +22,7 @@ export class IdentityEngine {
   private currentIH: number = IH_CONSTANTS.INITIAL_IH;
   private wipeCallbacks: Array<(event: WipeEvent) => void> = [];
   private initialized: boolean = false;
+  private wipeInProgress: boolean = false;
   private lifecycle: IdentityLifecycle | null = null;
 
   /**
@@ -84,12 +85,15 @@ export class IdentityEngine {
    * Set current Identity Health value (for testing and internal use)
    */
   public async setCurrentIH(value: number): Promise<void> {
-    const _previousIH = this.currentIH; // Reserved for future auditing
+    const previousIH = this.currentIH;
     this.currentIH = IHCalculator.clamp(value);
     await this.persistIH();
 
-    // Don't trigger wipe callback from setCurrentIH
-    // Only trigger from applyNotificationResponse and applyQuestPenalty
+    // Trigger wipe when IH reaches 0 for the first time (prevent double-fire)
+    if (this.currentIH === 0 && previousIH > 0 && !this.wipeInProgress) {
+      this.wipeInProgress = true;
+      this.triggerWipe();
+    }
   }
 
   /**
@@ -101,15 +105,9 @@ export class IdentityEngine {
     const previousIH = this.currentIH;
     const delta = IHCalculator.notificationDelta(response);
 
-    // Apply delta and clamp
+    // Apply delta and clamp, delegating wipe check to setCurrentIH
     const newIH = IHCalculator.applyDelta(previousIH, delta);
-    this.currentIH = newIH;
-    await this.persistIH();
-
-    // Check for wipe trigger
-    if (newIH === 0 && previousIH > 0) {
-      this.triggerWipe();
-    }
+    await this.setCurrentIH(newIH);
 
     return {
       previousIH,
@@ -128,15 +126,9 @@ export class IdentityEngine {
     const previousIH = this.currentIH;
     const delta = IHCalculator.questDelta(completion);
 
-    // Apply delta and clamp
+    // Apply delta and clamp, delegating wipe check to setCurrentIH
     const newIH = IHCalculator.applyDelta(previousIH, delta);
-    this.currentIH = newIH;
-    await this.persistIH();
-
-    // Check for wipe trigger
-    if (newIH === 0 && previousIH > 0) {
-      this.triggerWipe();
-    }
+    await this.setCurrentIH(newIH);
 
     return {
       previousIH,
@@ -154,15 +146,9 @@ export class IdentityEngine {
     const previousIH = this.currentIH;
     const delta = IHCalculator.onboardingStagnationDelta();
 
-    // Apply delta and clamp
+    // Apply delta and clamp, delegating wipe check to setCurrentIH
     const newIH = IHCalculator.applyDelta(previousIH, delta);
-    this.currentIH = newIH;
-    await this.persistIH();
-
-    // Check for wipe trigger
-    if (newIH === 0 && previousIH > 0) {
-      this.triggerWipe();
-    }
+    await this.setCurrentIH(newIH);
 
     return {
       previousIH,

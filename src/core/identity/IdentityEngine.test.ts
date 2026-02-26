@@ -267,12 +267,14 @@ describe('IdentityEngine', () => {
       const wipeCallback = jest.fn();
       engine.onWipeTrigger(wipeCallback);
 
+      // setCurrentIH(0) triggers wipe once (previousIH=100 > 0)
       await engine.setCurrentIH(0);
-      await engine.applyNotificationResponse('NO'); // Still 0
-      await engine.applyNotificationResponse('NO'); // Still 0
+      // Subsequent calls with IH already 0 should not re-trigger
+      await engine.applyNotificationResponse('NO'); // Still 0, no re-trigger
+      await engine.applyNotificationResponse('NO'); // Still 0, no re-trigger
 
-      // Should only trigger once when it first hit 0
-      expect(wipeCallback).toHaveBeenCalledTimes(0); // setCurrentIH doesn't trigger
+      // Should only trigger once (when IH first hit 0 via setCurrentIH)
+      expect(wipeCallback).toHaveBeenCalledTimes(1);
     });
   });
 

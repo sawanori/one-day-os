@@ -38,6 +38,17 @@ export const FEATURES = {
   // Phase 7: Visual Audio Domination (Quest Interrogation v4 Ultra)
   SUBLIMINAL_FLASH: true,              // Subliminal Flash Effect
   PERSISTENT_NOISE: true,              // Persistent Anti-Vision Noise
+
+  // Insurance (Monetization)
+  INSURANCE_ENABLED: true,             // Identity Insurance IAP system
+
+  // Phase 4: Alternative Terror Effects
+  DECAY_TEXT: true,                    // Typography decay effect（Phase 4.2）
+  HEARTBEAT_FLASH: true,               // Heartbeat red flash overlay（Phase 4.3）
+
+  // Phase 3: Effect Intensity Redesign (ih-fix-and-stress-ux-plan)
+  EDGE_VIGNETTE: true,                 // Edge vignette darkening effect (Phase 3.6)
+  SCANLINE_OVERLAY: true,              // Scanline overlay texture effect (Phase 3.7)
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;

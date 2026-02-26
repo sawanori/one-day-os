@@ -29,6 +29,9 @@ describe('Feature Flags', () => {
 
     // Phase 6
     expect(FEATURES).toHaveProperty('IDENTITY_ENGINE_V2');
+
+    // Insurance (Monetization)
+    expect(FEATURES).toHaveProperty('INSURANCE_ENABLED');
   });
 
   it('should have Phase 1-6 features enabled', () => {
@@ -40,6 +43,10 @@ describe('Feature Flags', () => {
     expect(FEATURES.LENS_ZOOM_GESTURE).toBe(true);
     expect(FEATURES.NOTIFICATION_ACTIONS).toBe(true);
     expect(FEATURES.IDENTITY_ENGINE_V2).toBe(true);
+  });
+
+  it('should have Insurance feature enabled', () => {
+    expect(FEATURES.INSURANCE_ENABLED).toBe(true);
   });
 
   it('should have incomplete features disabled', () => {
@@ -57,6 +64,9 @@ describe('Feature Flags', () => {
       expect(isFeatureEnabled('LENS_ZOOM_GESTURE')).toBe(true);
       expect(isFeatureEnabled('NOTIFICATION_ACTIONS')).toBe(true);
       expect(isFeatureEnabled('IDENTITY_ENGINE_V2')).toBe(true);
+
+      // Insurance
+      expect(isFeatureEnabled('INSURANCE_ENABLED')).toBe(true);
 
       // Incomplete features
       expect(isFeatureEnabled('LENS_BUTTON_ANIMATION')).toBe(false);

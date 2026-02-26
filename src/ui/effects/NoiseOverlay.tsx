@@ -7,10 +7,13 @@ import { View, ImageBackground, StyleSheet } from 'react-native';
 import { isFeatureEnabled } from '../../config/features';
 
 interface NoiseOverlayProps {
-  opacity: number;
+  health: number;
 }
 
-export const NoiseOverlay = ({ opacity }: NoiseOverlayProps) => {
+export const NoiseOverlay = ({ health }: NoiseOverlayProps) => {
+  // Calculate opacity from health: max 0.35 at 0% health, 0 at 100% health
+  const opacity = Math.min(0.35, Math.max(0, (100 - health) / 100) * 0.35);
+
   // Don't render if opacity is 0 or negative
   if (opacity <= 0) return null;
 

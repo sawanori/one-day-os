@@ -10,11 +10,16 @@ import { isFeatureEnabled } from '../../config/features';
 type GlitchTextProps = {
   text: string;
   style?: any;
-  severity?: number; // 0 to 1, determines offset amount
-  health?: number; // Optional: for color tinting
+  severity?: number; // 0 to 1, determines offset amount (optional: auto-calculated from health if not provided)
+  health?: number; // Optional: for color tinting and auto severity calculation
 };
 
-export const GlitchText = ({ text, style, severity = 0, health = 100 }: GlitchTextProps) => {
+export const GlitchText = ({ text, style, severity: externalSeverity, health = 100 }: GlitchTextProps) => {
+  // health から severity を自動計算 (外部指定がない場合)
+  const severity = externalSeverity !== undefined
+    ? externalSeverity
+    : Math.max(0, (100 - health) / 100); // IH=0 で severity=1.0
+
   const [offsets, setOffsets] = useState({ r: 0, b: 0 });
 
   // Calculate text color tint based on health
@@ -45,13 +50,14 @@ export const GlitchText = ({ text, style, severity = 0, health = 100 }: GlitchTe
       return;
     }
 
-    // 動的オフセット更新（INTENSIFIED: 50msごと、より大きな displacement）
+    // 動的オフセット更新（severity が高いほど更新頻度を上げる: 50ms → 最速16ms）
+    const updateInterval = Math.max(16, Math.floor(50 * (1 - severity)));
     const interval = setInterval(() => {
       setOffsets({
         r: (Math.random() - 0.5) * severity * 12,
         b: (Math.random() - 0.5) * severity * 10,
       });
-    }, 50); // 20fps（より激しいグリッチ）
+    }, updateInterval);
 
     return () => clearInterval(interval);
   }, [severity]);

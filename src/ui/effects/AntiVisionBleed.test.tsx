@@ -26,35 +26,31 @@ describe('AntiVisionBleed', () => {
   });
 
   it('should render when health < 80', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <AntiVisionBleed antiVision="Test Anti-Vision" health={79} />
     );
     expect(getByTestId('anti-vision-bleed')).toBeDefined();
-    expect(getByText('Test Anti-Vision')).toBeDefined();
   });
 
   it('should render at health 50 (mid-range)', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <AntiVisionBleed antiVision="Test Mid-Range" health={50} />
     );
     expect(getByTestId('anti-vision-bleed')).toBeDefined();
-    expect(getByText('Test Mid-Range')).toBeDefined();
   });
 
   it('should render at health 30 (low)', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <AntiVisionBleed antiVision="Test Low Health" health={30} />
     );
     expect(getByTestId('anti-vision-bleed')).toBeDefined();
-    expect(getByText('Test Low Health')).toBeDefined();
   });
 
   it('should render when health is 0', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId } = render(
       <AntiVisionBleed antiVision="Test Content" health={0} />
     );
     expect(getByTestId('anti-vision-bleed')).toBeDefined();
-    expect(getByText('Test Content')).toBeDefined();
   });
 
   it('should have pointerEvents="none" to not block touches', () => {
@@ -113,11 +109,23 @@ describe('AntiVisionBleed', () => {
     expect(getByTestId('anti-vision-bleed')).toBeDefined();
   });
 
-  it('should render multi-line anti-vision text', () => {
-    const multiLineText = 'Line 1\nLine 2\nLine 3';
-    const { getByText } = render(
-      <AntiVisionBleed antiVision={multiLineText} health={20} />
+  it('should distribute words across multiple positions', () => {
+    const { getAllByText } = render(
+      <AntiVisionBleed antiVision="WORD1 WORD2 WORD3" health={20} />
     );
-    expect(getByText(multiLineText)).toBeDefined();
+    // Words should be rendered across positions (some may repeat due to cycling)
+    const word1Elements = getAllByText('WORD1');
+    expect(word1Elements.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('should keep opacity within 0.25 max at health=0', () => {
+    const { getByTestId } = render(
+      <AntiVisionBleed antiVision="Test" health={0} />
+    );
+    const overlay = getByTestId('anti-vision-bleed');
+    // opacity is applied via style prop array
+    const styleArray = overlay.props.style;
+    const opacityStyle = styleArray.find((s: Record<string, unknown>) => s && typeof s.opacity === 'number');
+    expect(opacityStyle?.opacity).toBeLessThanOrEqual(0.25);
   });
 });

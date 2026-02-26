@@ -52,7 +52,7 @@ describe('StressContainer - Anti-Vision Integration', () => {
       'Test Anti-Vision Content'
     );
 
-    const { getByText } = render(
+    const { getByTestId } = render(
       <StressContainer>
         <Text>Child Content</Text>
       </StressContainer>
@@ -63,7 +63,8 @@ describe('StressContainer - Anti-Vision Integration', () => {
 
     await waitFor(() => {
       expect(mockGetAntiVision).toHaveBeenCalled();
-      expect(getByText('Test Anti-Vision Content')).toBeDefined();
+      // AntiVisionBleed renders as a container with distributed word fragments
+      expect(getByTestId('anti-vision-bleed')).toBeDefined();
     });
   });
 
@@ -76,7 +77,7 @@ describe('StressContainer - Anti-Vision Integration', () => {
       'Test Anti-Vision Content'
     );
 
-    const { queryByText } = render(
+    const { queryByTestId } = render(
       <StressContainer>
         <Text>Child Content</Text>
       </StressContainer>
@@ -88,8 +89,8 @@ describe('StressContainer - Anti-Vision Integration', () => {
       expect(mockGetAntiVision).toHaveBeenCalled();
     });
 
-    // Anti-vision should not be visible
-    expect(queryByText('Test Anti-Vision Content')).toBeNull();
+    // Anti-vision should not be visible when health >= 80
+    expect(queryByTestId('anti-vision-bleed')).toBeNull();
   });
 
   it('should update anti-vision when health drops below 80', async () => {
@@ -102,7 +103,7 @@ describe('StressContainer - Anti-Vision Integration', () => {
       'Test Anti-Vision'
     );
 
-    const { getByText, queryByText, rerender } = render(
+    const { queryByTestId } = render(
       <StressContainer>
         <Text>Child Content</Text>
       </StressContainer>
@@ -111,7 +112,7 @@ describe('StressContainer - Anti-Vision Integration', () => {
     // Initial state: health = 85, no anti-vision
     jest.advanceTimersByTime(2000);
     await waitFor(() => {
-      expect(queryByText('Test Anti-Vision')).toBeNull();
+      expect(queryByTestId('anti-vision-bleed')).toBeNull();
     });
 
     // Health drops to 75
@@ -119,7 +120,8 @@ describe('StressContainer - Anti-Vision Integration', () => {
     jest.advanceTimersByTime(2000);
 
     await waitFor(() => {
-      expect(getByText('Test Anti-Vision')).toBeDefined();
+      // AntiVisionBleed should now be visible
+      expect(queryByTestId('anti-vision-bleed')).toBeDefined();
     });
   });
 

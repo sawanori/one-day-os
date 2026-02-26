@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.colors.background,
+    backgroundColor: 'transparent',
     zIndex: 1000, // Highest z-index (above NoiseOverlay at 999)
   },
   flashText: {

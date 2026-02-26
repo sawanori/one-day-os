@@ -1,6 +1,7 @@
 /**
  * Anti-Vision Fragments Effect
  * Randomly floats fragments of the anti-vision text as IH decreases
+ * Fragments are limited to 4 and avoid the center area (30-70% x-range)
  */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
@@ -20,6 +21,17 @@ interface Fragment {
   rotation: number;
 }
 
+// Generate an x position that avoids the center (30-70%) range
+const getEdgeX = (): number => {
+  if (Math.random() < 0.5) {
+    // Left edge: 5-25%
+    return 5 + Math.random() * 20;
+  } else {
+    // Right edge: 75-95%
+    return 75 + Math.random() * 20;
+  }
+};
+
 export const AntiVisionFragments = ({ antiVision, health }: AntiVisionFragmentsProps) => {
   const [fragments, setFragments] = useState<Fragment[]>([]);
 
@@ -30,24 +42,25 @@ export const AntiVisionFragments = ({ antiVision, health }: AntiVisionFragmentsP
       return;
     }
 
-    // Calculate number of fragments based on health (lower = more fragments)
-    const fragmentCount = Math.floor((70 - health) / 10) + 1; // 1-8 fragments
+    // Calculate number of fragments based on health, capped at 4
+    const rawCount = Math.floor((70 - health) / 10) + 1; // 1-8 fragments raw
+    const fragmentCount = Math.min(4, rawCount); // cap at 4
 
     // Split anti-vision into words
     const words = antiVision.split(/\s+/).filter(w => w.length > 0);
     if (words.length === 0) return;
 
-    // Create random fragments
+    // Create random fragments with edge-biased x positions
     const newFragments: Fragment[] = [];
     for (let i = 0; i < fragmentCount; i++) {
       const randomWord = words[Math.floor(Math.random() * words.length)];
       newFragments.push({
         id: i,
         text: randomWord,
-        x: Math.random() * 80 + 10, // 10-90% of screen width
-        y: Math.random() * 80 + 10, // 10-90% of screen height
+        x: getEdgeX(),                           // Left 5-25% or right 75-95%
+        y: Math.random() * 80 + 10,              // 10-90% of screen height
         opacity: new Animated.Value(0),
-        rotation: (Math.random() - 0.5) * 30, // -15 to +15 degrees
+        rotation: (Math.random() - 0.5) * 20,   // -10 to +10 degrees (reduced from ±15)
       });
     }
 
@@ -55,13 +68,16 @@ export const AntiVisionFragments = ({ antiVision, health }: AntiVisionFragmentsP
 
     // Animate fragments to fade in/out randomly
     const timeoutIds: NodeJS.Timeout[] = [];
-    newFragments.forEach((fragment, index) => {
+    newFragments.forEach((fragment) => {
       const delay = Math.random() * 2000;
       const id = setTimeout(() => {
-        // Fade in
+        // Target opacity capped at 0.50
+        const targetOpacity = Math.min(0.50, 0.3 + (70 - health) / 100);
+
         Animated.sequence([
+          // Fade in
           Animated.timing(fragment.opacity, {
-            toValue: 0.3 + (70 - health) / 100, // Stronger as health decreases
+            toValue: targetOpacity,
             duration: 1000,
             useNativeDriver: true,
           }),

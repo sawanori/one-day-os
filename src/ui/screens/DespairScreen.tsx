@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GlitchText } from '../effects/GlitchText';
 import { NoiseOverlay } from '../effects/NoiseOverlay';
 import { ThemedText } from '../components/ThemedText';
@@ -17,6 +18,7 @@ export interface DespairScreenProps {
 }
 
 export const DespairScreen = ({ remainingLockoutMs, onLockoutEnd }: DespairScreenProps) => {
+  const { t } = useTranslation();
   const [displayTime, setDisplayTime] = useState('00:00:00');
 
   // M7: Use ref for callback to avoid re-runs when parent passes inline function
@@ -58,7 +60,7 @@ export const DespairScreen = ({ remainingLockoutMs, onLockoutEnd }: DespairScree
 
       {/* Subtext with maximum glitch */}
       <GlitchText
-        text="お前は死んだ。"
+        text={t('despair.title')}
         style={styles.subText}
         severity={1.0}
         health={0}
@@ -70,7 +72,7 @@ export const DespairScreen = ({ remainingLockoutMs, onLockoutEnd }: DespairScree
       </ThemedText>
 
       {/* Red noise overlay at maximum opacity */}
-      <NoiseOverlay opacity={1.0} />
+      <NoiseOverlay health={0} />
     </View>
   );
 };
