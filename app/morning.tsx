@@ -8,23 +8,7 @@ import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { getDB } from '../src/database/client';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 import { PhaseGuard } from '../src/ui/components/PhaseGuard';
-
-/**
- * Returns the current local datetime as 'YYYY-MM-DD HH:MM:SS'.
- * Using plain local datetime (no timezone offset) ensures that
- * SQLite's DATE(created_at) returns the correct local date,
- * matching the YYYY-MM-DD strings produced by DailyManager.getTodayString().
- */
-function getLocalDatetime(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${h}:${m}:${s}`;
-}
+import { getLocalDatetime } from '../src/utils/date';
 
 export default function MorningExcavation() {
     const router = useRouter();

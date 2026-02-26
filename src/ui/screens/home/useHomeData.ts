@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { IdentityEngine } from '../../../core/identity/IdentityEngine';
 import { getDB } from '../../../database/client';
+import { getTodayString } from '../../../utils/date';
 
 export interface Quest {
   id: number;
@@ -10,19 +11,6 @@ export interface Quest {
   created_at: string;
   completed_at: string | null;
 }
-
-/**
- * Returns the current local date as 'YYYY-MM-DD'.
- * Matches the format produced by DailyManager.getTodayString() so that
- * DATE(created_at) comparisons work correctly across timezones.
- */
-const getTodayString = (): string => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 /**
  * useHomeData

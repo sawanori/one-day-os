@@ -5,6 +5,7 @@
 
 import * as SQLite from 'expo-sqlite';
 import { OnboardingStep, StepData, OnboardingData } from './types';
+import { getLocalDatetime } from '../../utils/date';
 
 /**
  * OnboardingRepository - Manages database operations for onboarding
@@ -122,13 +123,14 @@ export class OnboardingRepository {
         const questsData = data as { quests: [string, string] };
         // Use execAsync for DELETE to avoid counting in runAsync metrics
         await this.db.execAsync('DELETE FROM quests');
+        const localDatetime = getLocalDatetime();
         // Insert both quests in a single VALUES clause
         await this.db.runAsync(
           `INSERT INTO quests (quest_text, is_completed, created_at)
-           SELECT ? as quest_text, 0 as is_completed, datetime('now') as created_at
+           SELECT ? as quest_text, 0 as is_completed, ? as created_at
            UNION ALL
-           SELECT ?, 0, datetime('now')`,
-          [questsData.quests[0], questsData.quests[1]]
+           SELECT ?, 0, ?`,
+          [questsData.quests[0], localDatetime, questsData.quests[1], localDatetime]
         );
         break;
     }
