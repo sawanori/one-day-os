@@ -9,6 +9,15 @@ import { renderHook, act } from '@testing-library/react-native';
 
 // --- Mocks ---
 
+const mockReplace = jest.fn();
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    replace: mockReplace,
+    push: jest.fn(),
+    back: jest.fn(),
+  }),
+}));
+
 const mockCheckHealth = jest.fn();
 const mockGetInstance = jest.fn(() => Promise.resolve({
   checkHealth: mockCheckHealth,
@@ -38,6 +47,7 @@ describe('useHealthMonitor', () => {
     mockCheckHealth.mockReset();
     mockGetInstance.mockClear();
     mockPulseHeartbeat.mockReset();
+    mockReplace.mockReset();
     jest.useFakeTimers();
     mockCheckHealth.mockResolvedValue({ health: 100, isDead: false });
   });
@@ -115,6 +125,50 @@ describe('useHealthMonitor', () => {
     });
 
     expect(result.current.health).toBe(50);
+  });
+
+  // --- isDead navigation tests ---
+
+  it('should navigate to /death when isDead is true', async () => {
+    mockCheckHealth.mockResolvedValue({ health: 0, isDead: true });
+
+    renderHook(() => useHealthMonitor(0.5));
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockReplace).toHaveBeenCalledWith('/death');
+  });
+
+  it('should NOT navigate to /death when isDead is false', async () => {
+    mockCheckHealth.mockResolvedValue({ health: 5, isDead: false });
+
+    renderHook(() => useHealthMonitor(0.5));
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('should only navigate once even if isDead stays true', async () => {
+    mockCheckHealth.mockResolvedValue({ health: 0, isDead: true });
+
+    renderHook(() => useHealthMonitor(0.5));
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Advance timer for second poll
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+      await Promise.resolve();
+    });
+
+    expect(mockReplace).toHaveBeenCalledTimes(1);
   });
 
   // --- Heartbeat haptic tests ---

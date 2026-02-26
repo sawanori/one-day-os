@@ -313,13 +313,13 @@ describe('WipeManager - Integration Tests', () => {
       expect(result.tablesCleared).toContain('identity_backup');
     });
 
-    test('app_state is updated to reset insurance and increment life_number', async () => {
+    test('app_state is set to despair, insurance reset, life_number incremented', async () => {
       const result = await wipeManager.executeWipe('IH_ZERO', 0);
       expect(result.success).toBe(true);
 
-      // Verify the UPDATE query was called with correct SQL
+      // Verify the UPDATE query sets state to despair
       expect(mockRunAsync).toHaveBeenCalledWith(
-        'UPDATE app_state SET has_used_insurance = 0, life_number = life_number + 1 WHERE id = 1'
+        `UPDATE app_state SET state = 'despair', has_used_insurance = 0, life_number = life_number + 1 WHERE id = 1`
       );
     });
 

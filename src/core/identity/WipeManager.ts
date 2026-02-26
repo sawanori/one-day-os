@@ -85,9 +85,9 @@ export class WipeManager {
         [timestamp, reason, finalIH]
       );
 
-      // Reset insurance state and increment life number
+      // Set app_state to despair, reset insurance, increment life number
       await this.db.runAsync(
-        'UPDATE app_state SET has_used_insurance = 0, life_number = life_number + 1 WHERE id = 1'
+        `UPDATE app_state SET state = 'despair', has_used_insurance = 0, life_number = life_number + 1 WHERE id = 1`
       );
 
       // Non-blocking VACUUM to prevent UI thread blocking
