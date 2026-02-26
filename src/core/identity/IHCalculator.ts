@@ -29,6 +29,8 @@ export class IHCalculator {
       return -IH_CONSTANTS.NOTIFICATION_PENALTY;
     } else if (response === 'IGNORED') {
       return -IH_CONSTANTS.MISSED_NOTIFICATION_PENALTY;
+    } else if (response === 'TIMEOUT') {
+      return -IH_CONSTANTS.MISSED_NOTIFICATION_PENALTY;
     }
     throw new Error(`Invalid notification response: ${response}`);
   }

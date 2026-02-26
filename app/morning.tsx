@@ -15,6 +15,25 @@ export default function MorningExcavation() {
     const [answers, setAnswers] = useState({ q1: '', q2: '', q3: '', q4: '' });
     const [quests, setQuests] = useState({ quest1: '', quest2: '' });
     const [canProceed, setCanProceed] = useState(false);
+    const [antiVision, setAntiVision] = useState('');
+
+    // Load anti-vision from database
+    useEffect(() => {
+        const loadAntiVision = async () => {
+            try {
+                const db = getDB();
+                const row = await db.getFirstAsync<{ anti_vision: string }>(
+                    'SELECT anti_vision FROM identity WHERE id = 1'
+                );
+                if (row?.anti_vision) {
+                    setAntiVision(row.anti_vision);
+                }
+            } catch (error) {
+                console.error('Failed to load anti-vision:', error);
+            }
+        };
+        loadAntiVision();
+    }, []);
 
     // Prevent back button
     useEffect(() => {
@@ -23,10 +42,17 @@ export default function MorningExcavation() {
         return () => subscription.remove();
     }, []);
 
+    // Check if at least one quest field has non-empty content
+    const hasValidQuests = quests.quest1.trim().length > 0 || quests.quest2.trim().length > 0;
+
     const handleNext = async () => {
         if (step === 0 && !canProceed) return; // Anti-vision timer
 
         if (step === 5) {
+            if (!hasValidQuests) {
+                Alert.alert('NO QUESTS', 'Define at least one quest. No excuses.');
+                return;
+            }
             // Final Step: Save & Exit
             await saveMorningData();
             router.replace('/');
@@ -70,8 +96,7 @@ export default function MorningExcavation() {
                         </ThemedText>
                         <View style={styles.antiVisionBox}>
                             <ThemedText style={styles.antiVisionText}>
-                                "5 Years from now: Waking up in the same bed, with the same complaints, checking the same bank account.
-                                The people you admire have moved on. You are forgotten."
+                                {antiVision || 'Loading...'}
                             </ThemedText>
                         </View>
                         <ThemedText style={styles.timerText}>{canProceed ? "PROCEED" : "ABSORB THE PAIN..."}</ThemedText>
@@ -188,9 +213,13 @@ export default function MorningExcavation() {
                     </ScrollView>
 
                     <TouchableOpacity
-                        style={[styles.button, (step === 0 && !canProceed) && styles.disabledButton]}
+                        style={[
+                            styles.button,
+                            (step === 0 && !canProceed) && styles.disabledButton,
+                            (step === 5 && !hasValidQuests) && styles.disabledButton,
+                        ]}
                         onPress={handleNext}
-                        disabled={step === 0 && !canProceed}
+                        disabled={(step === 0 && !canProceed) || (step === 5 && !hasValidQuests)}
                     >
                         <ThemedText style={styles.buttonText}>
                             {step === 0 && !canProceed ? "WAIT..." : step === 5 ? "START DAY" : "NEXT"}

@@ -8,6 +8,7 @@ import { IdentityEngine } from '../../core/identity/IdentityEngine';
 import { JudgmentEngine } from '../../core/judgment';
 import type { JudgmentScheduleRecord } from '../../core/judgment';
 import { getDB } from '../../database/client';
+import { getLocalDatetime } from '../../utils/date';
 
 interface QuestRow {
     id: number;
@@ -75,7 +76,7 @@ export function QuestLens() {
             if (isCompleting) {
                 await db.runAsync(
                     'UPDATE quests SET is_completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
-                    [new Date().toISOString(), id]
+                    [getLocalDatetime(), id]
                 );
             } else {
                 await db.runAsync(
@@ -111,7 +112,7 @@ export function QuestLens() {
             // Unchecking - show confirmation alert
             Alert.alert(
                 'QUEST UNCHECK',
-                'Are you sure? Unchecking a completed quest cannot restore lost IH.',
+                'Uncheck this quest? The IH you earned will NOT be revoked, but this quest will be marked incomplete.',
                 [
                     { text: 'CANCEL', style: 'cancel' },
                     { text: 'UNCHECK', style: 'destructive', onPress: () => executeToggle(id) },

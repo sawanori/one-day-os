@@ -6,6 +6,7 @@ import { NoiseOverlay } from '../effects/NoiseOverlay';
 import { ThemedText } from '../components/ThemedText';
 import { HapticEngine } from '../../core/HapticEngine';
 import { theme } from '../theme/theme';
+import { INSURANCE_CONSTANTS } from '../../constants';
 
 export interface InsuranceModalProps {
   visible: boolean;
@@ -14,9 +15,11 @@ export interface InsuranceModalProps {
   onDecline: () => void;
   /** Optional element rendered above the card inside the modal overlay (e.g. progress bar) */
   headerElement?: React.ReactNode;
+  /** Localized price string from the store (e.g. "¥1,500"). Falls back to INSURANCE_CONSTANTS.PRICE_DISPLAY. */
+  localizedPrice?: string;
 }
 
-export const InsuranceModal = ({ visible, countdownSeconds, onPurchase, onDecline, headerElement }: InsuranceModalProps) => {
+export const InsuranceModal = ({ visible, countdownSeconds, onPurchase, onDecline, headerElement, localizedPrice }: InsuranceModalProps) => {
   const { t } = useTranslation();
 
   // Countdown flash animation for last 3 seconds
@@ -66,6 +69,9 @@ export const InsuranceModal = ({ visible, countdownSeconds, onPurchase, onDeclin
           >
             <ThemedText style={styles.shameName}>
               {t('insurance.buyLabel', { defaultValue: 'I AM WEAK' })}
+            </ThemedText>
+            <ThemedText style={styles.priceText} testID="insurance-price">
+              {localizedPrice || INSURANCE_CONSTANTS.PRICE_DISPLAY}
             </ThemedText>
             <ThemedText style={styles.purchaseText}>
               {t('insurance.buy', { defaultValue: 'PURCHASE NOW' })}
@@ -148,6 +154,14 @@ const styles = StyleSheet.create({
     fontFamily: theme.typography.fontFamily,
     letterSpacing: 2,
     opacity: 0.7,
+    marginBottom: 4,
+  },
+  priceText: {
+    color: theme.colors.foreground,
+    fontSize: 28,
+    fontWeight: 'bold',
+    fontFamily: theme.typography.fontFamily,
+    letterSpacing: 1,
     marginBottom: 4,
   },
   purchaseText: {

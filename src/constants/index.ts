@@ -96,6 +96,12 @@ export type JudgmentCategory = 'EVASION' | 'OBSERVER' | 'DISSONANCE' | 'ANTI_VIS
 // Judgment Response (distinct from NotificationResponse for clarity)
 export type JudgmentResponse = 'YES' | 'NO' | 'TIMEOUT' | 'IGNORED' | 'SUMMONS_EXPIRED';
 
+// Evening Audit Constants
+export const EVENING_AUDIT_CONSTANTS = {
+  RESTORE_AMOUNT: 10,  // IH restored on victory
+  PENALTY_AMOUNT: 20,  // IH damage on loss
+} as const;
+
 // Insurance System Constants
 export const INSURANCE_CONSTANTS = {
   OFFER_TIMEOUT_SECONDS: 10,

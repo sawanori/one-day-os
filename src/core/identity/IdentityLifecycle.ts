@@ -141,6 +141,10 @@ export class IdentityLifecycle {
    * "Identity Insurance" Purchase (Monetization)
    * Revives the user if they are dead or near death.
    * Recreates tables and sets IH to 50%.
+   *
+   * @deprecated Dead code. Hardcodes IH to 50 which conflicts with
+   * INSURANCE_CONSTANTS.REVIVAL_IH (10). The actual insurance flow uses
+   * InsuranceManager.applyInsurance() instead. Do not call this method.
    */
   async useInsurance(): Promise<void> {
     return runInTransaction(async () => {

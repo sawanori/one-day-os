@@ -413,26 +413,26 @@ describe('IdentityEngine', () => {
       expect(final).toBe(90);
     });
 
-    test('オンボーディングペナルティでIHが0未満にならない', async () => {
+    test('オンボーディングペナルティでIHが1未満にならない（オンボーディング中の死亡防止）', async () => {
       await engine.setCurrentIH(3);
       const result = await engine.applyOnboardingStagnationPenalty();
 
-      expect(result.newIH).toBe(0);
-      expect(result.newIH).toBeGreaterThanOrEqual(0);
+      // Clamps to minimum 1 during onboarding to prevent soft-lock
+      expect(result.newIH).toBe(1);
+      expect(result.newIH).toBeGreaterThanOrEqual(1);
     });
 
-    test('オンボーディングペナルティでIHが0になった場合にwipeトリガー', async () => {
+    test('オンボーディングペナルティでIHが0にならずwipeトリガーされない', async () => {
       const wipeCallback = jest.fn();
       engine.onWipeTrigger(wipeCallback);
 
       await engine.setCurrentIH(5);
-      await engine.applyOnboardingStagnationPenalty(); // IH becomes 0
+      await engine.applyOnboardingStagnationPenalty(); // IH becomes 1, not 0
 
-      expect(wipeCallback).toHaveBeenCalledWith({
-        reason: 'IH_ZERO',
-        finalIH: 0,
-        timestamp: expect.any(Number),
-      });
+      // Wipe should NOT be triggered during onboarding
+      expect(wipeCallback).not.toHaveBeenCalled();
+      const currentIH = await engine.getCurrentIH();
+      expect(currentIH).toBe(1);
     });
 
     test('オンボーディングペナルティと通知ペナルティが累積される', async () => {

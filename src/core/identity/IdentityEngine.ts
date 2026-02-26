@@ -141,14 +141,17 @@ export class IdentityEngine {
 
   /**
    * Apply onboarding stagnation penalty (-5% IH)
-   * Used when user fails to input during onboarding excavation phase
+   * Used when user fails to input during onboarding excavation phase.
+   * Clamps to minimum 1 to prevent death during onboarding
+   * (useHealthMonitor is not mounted, so IH=0 would soft-lock the user).
    */
   public async applyOnboardingStagnationPenalty(): Promise<IHResponse> {
     const previousIH = this.currentIH;
     const delta = IHCalculator.onboardingStagnationDelta();
 
-    // Apply delta and clamp, delegating wipe check to setCurrentIH
-    const newIH = IHCalculator.applyDelta(previousIH, delta);
+    // Apply delta but clamp to minimum 1 - never kill during onboarding
+    const rawNewIH = IHCalculator.applyDelta(previousIH, delta);
+    const newIH = Math.max(1, rawNewIH);
     await this.setCurrentIH(newIH);
 
     return {
@@ -208,6 +211,10 @@ export class IdentityEngine {
    * "Identity Insurance" Purchase (Monetization)
    * Revives the user if they are dead or near death.
    * Recreates tables and sets IH to 50%.
+   *
+   * @deprecated Dead code. Hardcodes IH to 50 which conflicts with
+   * INSURANCE_CONSTANTS.REVIVAL_IH (10). The actual insurance flow uses
+   * InsuranceManager.applyInsurance() instead. Do not call this method.
    */
   public async useInsurance(): Promise<void> {
     if (!this.lifecycle) {

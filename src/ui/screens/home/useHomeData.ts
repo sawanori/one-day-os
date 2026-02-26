@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { IdentityEngine } from '../../../core/identity/IdentityEngine';
 import { getDB } from '../../../database/client';
+import { getLocalDatetime } from '../../../utils/date';
 
 export interface Quest {
   id: number;
@@ -85,7 +86,7 @@ export const useHomeData = () => {
       if (newCompleted === 1) {
         await db.runAsync(
           'UPDATE quests SET is_completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
-          [new Date().toISOString(), id]
+          [getLocalDatetime(), id]
         );
       } else {
         await db.runAsync(
@@ -97,7 +98,7 @@ export const useHomeData = () => {
       setQuests(prev => prev.map(q => q.id === id ? {
         ...q,
         is_completed: newCompleted,
-        completed_at: newCompleted === 1 ? (q.completed_at || new Date().toISOString()) : q.completed_at,
+        completed_at: newCompleted === 1 ? (q.completed_at || getLocalDatetime()) : q.completed_at,
       } : q));
 
       if (newCompleted === 1 && !wasAlreadyCompletedBefore) {

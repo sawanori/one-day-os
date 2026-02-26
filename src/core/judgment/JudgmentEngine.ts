@@ -11,6 +11,7 @@ import { HapticEngine } from '../HapticEngine';
 import { IH_CONSTANTS, JUDGMENT_CONSTANTS, DB_TABLES } from '../../constants';
 import type { JudgmentCategory, JudgmentResponse } from '../../constants';
 import type { IHResponse } from '../identity/types';
+import { getLocalDatetime } from '../../utils/date';
 
 /** Judgment log record from database */
 export interface JudgmentLogRecord {
@@ -155,7 +156,7 @@ export class JudgmentEngine {
     }
 
     // Record to judgment_log
-    const now = new Date().toISOString();
+    const now = getLocalDatetime();
     const respondedAt = (response === 'IGNORED' || response === 'SUMMONS_EXPIRED') ? null : now;
     await this.db!.runAsync(
       `INSERT INTO ${DB_TABLES.JUDGMENT_LOG} (schedule_id, category, question_key, question_rendered, response, ih_before, ih_after, response_time_ms, scheduled_at, responded_at, created_at)
@@ -249,7 +250,7 @@ export class JudgmentEngine {
     // Generate random times with minimum interval constraint
     const times = this.generateRandomTimes(start, end, count, minInterval);
     const categories = this.assignCategories(count);
-    const now = new Date().toISOString();
+    const now = getLocalDatetime();
     const records: JudgmentScheduleRecord[] = [];
 
     for (let i = 0; i < count; i++) {

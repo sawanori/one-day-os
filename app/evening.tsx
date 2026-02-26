@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '../src/ui/components/ThemedText';
 import { theme } from '../src/ui/theme/theme';
 import { IdentityEngine } from '../src/core/identity/IdentityEngine';
+import { EVENING_AUDIT_CONSTANTS } from '../src/constants';
 import { StressContainer } from '../src/ui/layout/StressContainer';
 import { PhaseGuard } from '../src/ui/components/PhaseGuard';
 
@@ -18,9 +19,9 @@ export default function EveningAudit() {
         // Audit Logic
         const engine = await IdentityEngine.getInstance();
         if (win) {
-            await engine.restoreHealth(10);
+            await engine.restoreHealth(EVENING_AUDIT_CONSTANTS.RESTORE_AMOUNT);
         } else {
-            await engine.applyDamage(20);
+            await engine.applyDamage(EVENING_AUDIT_CONSTANTS.PENALTY_AMOUNT);
         }
         router.replace('/');
     };
