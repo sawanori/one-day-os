@@ -229,8 +229,8 @@ export default function DeathScreen() {
                 setIsPurchasing(false);
             }
             isPurchasingRef.current = false;
-            if (result.error === 'cancelled') {
-                // User cancelled, keep offer visible
+            if (result.error === 'cancelled' || result.error === 'timeout') {
+                // User cancelled or timed out, keep offer visible for retry
                 return;
             }
             // Other error - wipe
@@ -350,6 +350,8 @@ export default function DeathScreen() {
                     countdownSeconds={countdown}
                     onPurchase={handlePurchase}
                     onDecline={handleDecline}
+                    isPurchasing={isPurchasing}
+                    localizedPrice={localizedPrice}
                     headerElement={
                         <View style={styles.progressBarSmall}>
                             <Animated.View style={[styles.progressFill, { width: progressWidth }]} />

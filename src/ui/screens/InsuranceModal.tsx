@@ -17,9 +17,11 @@ export interface InsuranceModalProps {
   headerElement?: React.ReactNode;
   /** Localized price string from the store (e.g. "¥1,500"). Falls back to INSURANCE_CONSTANTS.PRICE_DISPLAY. */
   localizedPrice?: string;
+  /** Whether a purchase is currently being processed */
+  isPurchasing?: boolean;
 }
 
-export const InsuranceModal = ({ visible, countdownSeconds, onPurchase, onDecline, headerElement, localizedPrice }: InsuranceModalProps) => {
+export const InsuranceModal = ({ visible, countdownSeconds, onPurchase, onDecline, headerElement, localizedPrice, isPurchasing }: InsuranceModalProps) => {
   const { t } = useTranslation();
 
   // Countdown flash animation for last 3 seconds
@@ -63,25 +65,31 @@ export const InsuranceModal = ({ visible, countdownSeconds, onPurchase, onDeclin
 
           {/* Purchase Button with "I AM WEAK" shame label */}
           <TouchableOpacity
-            style={styles.purchaseButton}
-            onPress={onPurchase}
+            style={[styles.purchaseButton, isPurchasing && styles.purchaseButtonDisabled]}
+            onPress={isPurchasing ? undefined : onPurchase}
+            disabled={isPurchasing}
             testID="insurance-purchase-button"
           >
             <ThemedText style={styles.shameName}>
-              {t('insurance.buyLabel', { defaultValue: 'I AM WEAK' })}
+              {isPurchasing
+                ? t('insurance.processing', { defaultValue: 'PROCESSING...' })
+                : t('insurance.buyLabel', { defaultValue: 'I AM WEAK' })}
             </ThemedText>
             <ThemedText style={styles.priceText} testID="insurance-price">
               {localizedPrice || INSURANCE_CONSTANTS.PRICE_DISPLAY}
             </ThemedText>
             <ThemedText style={styles.purchaseText}>
-              {t('insurance.buy', { defaultValue: 'PURCHASE NOW' })}
+              {isPurchasing
+                ? t('insurance.wait', { defaultValue: 'PLEASE WAIT' })
+                : t('insurance.buy', { defaultValue: 'PURCHASE NOW' })}
             </ThemedText>
           </TouchableOpacity>
 
           {/* Decline Button */}
           <TouchableOpacity
-            style={styles.declineButton}
-            onPress={onDecline}
+            style={[styles.declineButton, isPurchasing && styles.buttonDisabled]}
+            onPress={isPurchasing ? undefined : onDecline}
+            disabled={isPurchasing}
             testID="insurance-decline-button"
           >
             <ThemedText style={styles.declineText}>
@@ -195,5 +203,12 @@ const styles = StyleSheet.create({
   },
   countdownUrgent: {
     fontSize: 84,
+  },
+  purchaseButtonDisabled: {
+    opacity: 0.5,
+    borderColor: theme.colors.secondary,
+  },
+  buttonDisabled: {
+    opacity: 0.3,
   },
 });

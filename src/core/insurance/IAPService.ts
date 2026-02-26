@@ -121,6 +121,10 @@ export class IAPService {
    * Request a purchase of the insurance product.
    * Returns the purchase result with transaction ID.
    *
+   * Uses event-listener-based approach (per react-native-iap v14 docs) because
+   * requestPurchase() is fire-and-forget - results come through listeners, not
+   * the returned promise.
+   *
    * Important: After success, caller MUST call finishTransaction() to
    * acknowledge the transaction with the store.
    */
@@ -140,27 +144,71 @@ export class IAPService {
           ? INSURANCE_CONSTANTS.PRODUCT_ID_IOS
           : INSURANCE_CONSTANTS.PRODUCT_ID_ANDROID;
 
-      const purchase = await RNIap.requestPurchase({
-        request: {
-          apple: { sku: productId },
-          google: { skus: [productId] },
-        },
-        type: 'in-app',
+      // Event-based purchase handling (per react-native-iap v14 docs).
+      // requestPurchase() may never resolve its own promise; results arrive
+      // via purchaseUpdatedListener / purchaseErrorListener instead.
+      return new Promise<PurchaseResult>((resolve) => {
+        let settled = false;
+        let timeoutId: ReturnType<typeof setTimeout>;
+        let updateSub: { remove: () => void } | null = null;
+        let errorSub: { remove: () => void } | null = null;
+
+        const cleanup = () => {
+          if (timeoutId) clearTimeout(timeoutId);
+          updateSub?.remove();
+          errorSub?.remove();
+        };
+
+        const settle = (result: PurchaseResult) => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          resolve(result);
+        };
+
+        // Listen for successful purchase
+        updateSub = RNIap.purchaseUpdatedListener((purchase) => {
+          const transactionId = purchase?.transactionId;
+          if (transactionId) {
+            settle({ success: true, transactionId });
+          } else {
+            settle({ success: false, error: 'No transaction ID returned' });
+          }
+        });
+
+        // Listen for purchase errors
+        errorSub = RNIap.purchaseErrorListener((error: any) => {
+          if (error?.code === 'E_USER_CANCELLED') {
+            settle({ success: false, error: 'cancelled' });
+          } else {
+            console.error('[IAPService] Purchase error via listener:', error);
+            settle({ success: false, error: error?.message || 'Purchase failed' });
+          }
+        });
+
+        // Safety timeout - resolve after 60 s if no event arrives
+        timeoutId = setTimeout(() => {
+          settle({ success: false, error: 'timeout' });
+        }, 60000);
+
+        // Fire the purchase request; results come through the listeners above
+        RNIap.requestPurchase({
+          request: {
+            apple: { sku: productId },
+            google: { skus: [productId] },
+          },
+          type: 'in-app',
+        }).catch((err: any) => {
+          // Some platforms may reject the promise directly (e.g. immediate errors)
+          if (err?.code === 'E_USER_CANCELLED') {
+            settle({ success: false, error: 'cancelled' });
+          } else {
+            console.error('[IAPService] requestPurchase threw:', err);
+            settle({ success: false, error: err?.message || 'Purchase request failed' });
+          }
+        });
       });
-
-      const transactionId = Array.isArray(purchase)
-        ? purchase[0]?.transactionId
-        : (purchase as any)?.transactionId;
-
-      if (!transactionId) {
-        return { success: false, error: 'No transaction ID returned' };
-      }
-
-      return { success: true, transactionId };
     } catch (error: any) {
-      if (error?.code === 'E_USER_CANCELLED') {
-        return { success: false, error: 'cancelled' };
-      }
       console.error('[IAPService] Purchase failed:', error);
       return { success: false, error: error?.message || 'Purchase failed' };
     }

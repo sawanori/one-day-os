@@ -208,4 +208,80 @@ describe('InsuranceModal', () => {
 
     expect(getByText(/Will you erase everything/)).toBeTruthy();
   });
+
+  describe('isPurchasing state', () => {
+    it('shows "PROCESSING..." and "PLEASE WAIT" when isPurchasing is true', () => {
+      const { getByText } = render(
+        <InsuranceModal
+          visible={true}
+          countdownSeconds={10}
+          onPurchase={mockOnPurchase}
+          onDecline={mockOnDecline}
+          isPurchasing={true}
+        />
+      );
+
+      expect(getByText('PROCESSING...')).toBeTruthy();
+      expect(getByText('PLEASE WAIT')).toBeTruthy();
+    });
+
+    it('shows "I AM WEAK" and "PURCHASE NOW" when isPurchasing is false', () => {
+      const { getByText } = render(
+        <InsuranceModal
+          visible={true}
+          countdownSeconds={10}
+          onPurchase={mockOnPurchase}
+          onDecline={mockOnDecline}
+          isPurchasing={false}
+        />
+      );
+
+      expect(getByText('I AM WEAK')).toBeTruthy();
+      expect(getByText('PURCHASE NOW')).toBeTruthy();
+    });
+
+    it('does not call onPurchase when purchase button pressed during isPurchasing', () => {
+      const { getByTestId } = render(
+        <InsuranceModal
+          visible={true}
+          countdownSeconds={10}
+          onPurchase={mockOnPurchase}
+          onDecline={mockOnDecline}
+          isPurchasing={true}
+        />
+      );
+
+      fireEvent.press(getByTestId('insurance-purchase-button'));
+      expect(mockOnPurchase).not.toHaveBeenCalled();
+    });
+
+    it('does not call onDecline when decline button pressed during isPurchasing', () => {
+      const { getByTestId } = render(
+        <InsuranceModal
+          visible={true}
+          countdownSeconds={10}
+          onPurchase={mockOnPurchase}
+          onDecline={mockOnDecline}
+          isPurchasing={true}
+        />
+      );
+
+      fireEvent.press(getByTestId('insurance-decline-button'));
+      expect(mockOnDecline).not.toHaveBeenCalled();
+    });
+
+    it('still displays countdown while isPurchasing', () => {
+      const { getByText } = render(
+        <InsuranceModal
+          visible={true}
+          countdownSeconds={7}
+          onPurchase={mockOnPurchase}
+          onDecline={mockOnDecline}
+          isPurchasing={true}
+        />
+      );
+
+      expect(getByText('07')).toBeTruthy();
+    });
+  });
 });
