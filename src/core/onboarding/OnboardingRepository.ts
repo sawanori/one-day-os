@@ -61,11 +61,13 @@ export class OnboardingRepository {
    */
   public async saveStepData(step: OnboardingStep, data: StepData): Promise<void> {
     switch (step) {
-      case 'welcome':
-        // No data to save for welcome step
+      case 'covenant':
+      case 'optical_calibration':
+      case 'first_judgment':
+        // Ceremony steps - no data to save
         break;
 
-      case 'anti-vision':
+      case 'excavation':
         const antiVisionData = data as { antiVision: string };
         await this.db.runAsync(
           `INSERT OR REPLACE INTO identity (id, anti_vision, identity_statement, one_year_mission, identity_health, created_at, updated_at)

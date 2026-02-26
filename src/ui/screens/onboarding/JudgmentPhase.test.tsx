@@ -39,8 +39,8 @@ describe('JudgmentPhase', () => {
         <JudgmentPhase onComplete={onComplete} onFail={onFail} />
       );
 
-      expect(getByText('あなたは誰か？')).toBeTruthy();
-      expect(getByText('5秒以内に回答せよ')).toBeTruthy();
+      expect(getByText('ceremony.judgment.question')).toBeTruthy();
+      expect(getByText('ceremony.judgment.instruction')).toBeTruthy();
     });
 
     it('should render YES and NO buttons', () => {
@@ -154,7 +154,7 @@ describe('JudgmentPhase', () => {
 
       // Should show failure message
       await waitFor(() => {
-        expect(getByText('覚悟なき者に再構築の資格なし')).toBeTruthy();
+        expect(getByText('ceremony.judgment.warning')).toBeTruthy();
       });
     });
 

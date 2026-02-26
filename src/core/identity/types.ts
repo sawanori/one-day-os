@@ -33,4 +33,4 @@ export interface QuestCompletion {
 /**
  * Notification response types
  */
-export type NotificationResponse = 'YES' | 'NO' | 'IGNORED';
+export type NotificationResponse = 'YES' | 'NO' | 'IGNORED' | 'TIMEOUT';

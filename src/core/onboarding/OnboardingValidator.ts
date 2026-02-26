@@ -1,6 +1,6 @@
 /**
  * One Day OS - OnboardingValidator
- * Validates step data for the onboarding flow
+ * Validates step data for the unified onboarding flow
  */
 
 import { OnboardingStep, StepData } from './types';
@@ -14,16 +14,18 @@ export class OnboardingValidator {
    */
   public static validate(step: OnboardingStep, data: StepData): void {
     switch (step) {
-      case 'welcome':
-        // Welcome step requires no data
+      case 'covenant':
+      case 'optical_calibration':
+      case 'first_judgment':
+        // Ceremony steps require no data
         if (data !== null) {
-          throw new Error('Welcome step does not require data');
+          throw new Error(`${step} step does not require data`);
         }
         break;
 
-      case 'anti-vision':
+      case 'excavation':
         if (!data || typeof data !== 'object' || !('antiVision' in data)) {
-          throw new Error('Anti-vision step requires antiVision data');
+          throw new Error('Excavation step requires antiVision data');
         }
         const antiVisionData = data as { antiVision: string };
         if (!antiVisionData.antiVision || antiVisionData.antiVision.trim() === '') {

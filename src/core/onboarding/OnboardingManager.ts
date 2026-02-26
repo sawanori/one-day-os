@@ -1,6 +1,6 @@
 /**
  * One Day OS - OnboardingManager
- * Manages the 5-step onboarding flow
+ * Manages the unified 7-step onboarding flow
  */
 
 import { getDB, databaseInit } from '../../database/client';
@@ -11,6 +11,7 @@ import {
   OnboardingCompleteEvent,
   StepChangeEvent,
   STEP_ORDER,
+  CEREMONY_STEPS,
 } from './types';
 import { OnboardingValidator } from './OnboardingValidator';
 import { OnboardingRepository } from './OnboardingRepository';
@@ -24,7 +25,7 @@ export type { OnboardingStep, StepData, OnboardingData, OnboardingCompleteEvent,
 export class OnboardingManager {
   private static instance: OnboardingManager | null = null;
   private repository: OnboardingRepository | null = null;
-  private currentStep: OnboardingStep = 'welcome';
+  private currentStep: OnboardingStep = 'covenant';
   private initialized: boolean = false;
   private completeCallbacks: Array<(event: OnboardingCompleteEvent) => void> = [];
   private stepChangeCallbacks: Array<(event: StepChangeEvent) => void> = [];
@@ -79,10 +80,16 @@ export class OnboardingManager {
     const loadedStep = await this.repository.loadCurrentStep();
 
     if (loadedStep) {
-      this.currentStep = loadedStep;
+      // Migrate old step names to new ones
+      if ((loadedStep as string) === 'welcome' || (loadedStep as string) === 'anti-vision') {
+        this.currentStep = 'covenant';
+        await this.repository.persistCurrentStep(this.currentStep);
+      } else {
+        this.currentStep = loadedStep;
+      }
     } else {
-      // Initialize to welcome step (don't persist yet, will persist on first step completion)
-      this.currentStep = 'welcome';
+      // Initialize to covenant step
+      this.currentStep = 'covenant';
     }
 
     this.initialized = true;
@@ -119,8 +126,10 @@ export class OnboardingManager {
     // Validate step data based on step type
     OnboardingValidator.validate(step, data);
 
-    // Save step data to database
-    await this.repository!.saveStepData(step, data);
+    // Save step data to database (skip for ceremony steps)
+    if (!CEREMONY_STEPS.includes(step)) {
+      await this.repository!.saveStepData(step, data);
+    }
 
     // Update cache based on step data
     this.updateCache(step, data);
@@ -157,8 +166,8 @@ export class OnboardingManager {
     // Reset data in database
     await this.repository.resetData();
 
-    // Reset current step to welcome
-    this.currentStep = 'welcome';
+    // Reset current step to covenant
+    this.currentStep = 'covenant';
     await this.repository.persistCurrentStep(this.currentStep);
   }
 
@@ -252,7 +261,7 @@ export class OnboardingManager {
    */
   private updateCache(step: OnboardingStep, data: StepData): void {
     switch (step) {
-      case 'anti-vision':
+      case 'excavation':
         this.cachedData.antiVision = (data as { antiVision: string }).antiVision;
         break;
       case 'identity':

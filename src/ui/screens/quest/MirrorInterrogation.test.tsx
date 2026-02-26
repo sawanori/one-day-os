@@ -56,7 +56,7 @@ describe('MirrorInterrogation', () => {
     );
 
     expect(
-      getByText(/今の君の行動は、その醜悪な自分を肯定している/)
+      getByText('quest.mirror.question')
     ).toBeTruthy();
   });
 
@@ -69,7 +69,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    expect(getByPlaceholderText('殺すべき習慣を入力...')).toBeTruthy();
+    expect(getByPlaceholderText('quest.mirror.placeholder')).toBeTruthy();
   });
 
   it('should disable submit button when input is less than 10 characters', () => {
@@ -81,7 +81,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
     const button = getByTestId('submit-button');
 
     // Short input
@@ -99,7 +99,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
     const button = getByTestId('submit-button');
 
     // Valid input (10+ characters)
@@ -117,8 +117,8 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
-    const button = getByText('刻め');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
+    const button = getByText('quest.mirror.submit');
 
     const habitText = '夜更かしの習慣を殺す';
     fireEvent.changeText(input, habitText);
@@ -136,7 +136,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
 
     // Start typing
     fireEvent.changeText(input, '習慣');
@@ -159,7 +159,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
 
     // Start typing
     fireEvent.changeText(input, '習慣');
@@ -183,7 +183,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
 
     // Start typing
     fireEvent.changeText(input, '習慣');
@@ -213,7 +213,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
 
     // Start typing
     fireEvent.changeText(input, '習慣');
@@ -236,7 +236,7 @@ describe('MirrorInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('殺すべき習慣を入力...');
+    const input = getByPlaceholderText('quest.mirror.placeholder');
 
     // Start typing
     fireEvent.changeText(input, '習慣');

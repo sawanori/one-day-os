@@ -11,21 +11,13 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { CovenantPhase } from './CovenantPhase';
-import * as Haptics from 'expo-haptics';
+import { HapticEngine } from '../../../core/HapticEngine';
 
-// Mock expo-haptics
-jest.mock('expo-haptics', () => ({
-  impactAsync: jest.fn(),
-  notificationAsync: jest.fn(),
-  ImpactFeedbackStyle: {
-    Light: 'light',
-    Medium: 'medium',
-    Heavy: 'heavy',
-  },
-  NotificationFeedbackType: {
-    Success: 'success',
-    Warning: 'warning',
-    Error: 'error',
+// Mock HapticEngine
+const mockCleanup = jest.fn();
+jest.mock('../../../core/HapticEngine', () => ({
+  HapticEngine: {
+    acceleratingHeartbeat: jest.fn().mockResolvedValue(jest.fn()),
   },
 }));
 
@@ -45,7 +37,7 @@ describe('CovenantPhase', () => {
       const { getByTestId, getByText } = render(<CovenantPhase onComplete={onComplete} />);
 
       expect(getByTestId('covenant-button')).toBeTruthy();
-      expect(getByText('覚悟を決めろ')).toBeTruthy();
+      expect(getByText('ceremony.covenant.title')).toBeTruthy();
     });
 
     it('should display progress ring at 0%', () => {
@@ -58,13 +50,15 @@ describe('CovenantPhase', () => {
   });
 
   describe('Long Press Behavior', () => {
-    it('should trigger heavy haptic on press start', () => {
+    it('should start accelerating heartbeat on press start', async () => {
       const onComplete = jest.fn();
       const { getByTestId } = render(<CovenantPhase onComplete={onComplete} />);
 
       fireEvent(getByTestId('covenant-button'), 'pressIn');
 
-      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
+      await waitFor(() => {
+        expect(HapticEngine.acceleratingHeartbeat).toHaveBeenCalled();
+      });
     });
 
     it('should reset progress when released before 3 seconds', () => {
@@ -79,21 +73,18 @@ describe('CovenantPhase', () => {
       expect(onComplete).not.toHaveBeenCalled();
     });
 
-    it('should setup haptic interval during press', async () => {
+    it('should call acceleratingHeartbeat during press', async () => {
       const onComplete = jest.fn();
       const { getByTestId } = render(<CovenantPhase onComplete={onComplete} />);
 
       fireEvent(getByTestId('covenant-button'), 'pressIn');
 
-      // Initial heavy haptic should be triggered
-      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
-
-      // Verify that setInterval was called (interval is set up)
-      // The actual timing of medium haptics is handled by setInterval
-      // which will trigger every 1000ms in real usage
+      await waitFor(() => {
+        expect(HapticEngine.acceleratingHeartbeat).toHaveBeenCalledTimes(1);
+      });
     });
 
-    it('should complete and trigger success haptic after 3 seconds', async () => {
+    it('should complete with silence (no success haptic) after 3 seconds', async () => {
       const onComplete = jest.fn();
       const { getByTestId } = render(<CovenantPhase onComplete={onComplete} />);
 
@@ -103,9 +94,6 @@ describe('CovenantPhase', () => {
       jest.advanceTimersByTime(3000);
 
       await waitFor(() => {
-        expect(Haptics.notificationAsync).toHaveBeenCalledWith(
-          Haptics.NotificationFeedbackType.Success
-        );
         expect(onComplete).toHaveBeenCalled();
       });
     });
@@ -147,20 +135,24 @@ describe('CovenantPhase', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle haptic errors gracefully', async () => {
-      const onComplete = jest.fn();
-      (Haptics.impactAsync as jest.Mock).mockRejectedValueOnce(new Error('Haptic error'));
+    it('should handle haptic cleanup on early release', async () => {
+      const mockCleanup = jest.fn();
+      (HapticEngine.acceleratingHeartbeat as jest.Mock).mockResolvedValue(mockCleanup);
 
+      const onComplete = jest.fn();
       const { getByTestId } = render(<CovenantPhase onComplete={onComplete} />);
 
       fireEvent(getByTestId('covenant-button'), 'pressIn');
 
-      // Should not crash
-      jest.advanceTimersByTime(3000);
-
       await waitFor(() => {
-        expect(onComplete).toHaveBeenCalled();
+        expect(HapticEngine.acceleratingHeartbeat).toHaveBeenCalled();
       });
+
+      // Release before completion
+      fireEvent(getByTestId('covenant-button'), 'pressOut');
+
+      // Cleanup should be called
+      expect(mockCleanup).toHaveBeenCalled();
     });
   });
 

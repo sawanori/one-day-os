@@ -4,6 +4,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../theme/theme';
 import { NoiseOverlay } from '../effects/NoiseOverlay';
 
@@ -12,7 +13,8 @@ interface SystemRejectionScreenProps {
   errorInfo?: any;
 }
 
-export const SystemRejectionScreen = ({ error }: SystemRejectionScreenProps) => {
+export const SystemRejectionScreen = (_props: SystemRejectionScreenProps) => {
+  const { t } = useTranslation();
   const [opacity] = useState(new Animated.Value(0));
   const [glitchOffset] = useState(new Animated.Value(0));
 
@@ -45,10 +47,10 @@ export const SystemRejectionScreen = ({ error }: SystemRejectionScreenProps) => 
 
   return (
     <View style={styles.container}>
-      <NoiseOverlay opacity={0.8} />
+      <NoiseOverlay health={0} />
       <Animated.View style={[styles.content, { opacity, transform: [{ translateX: glitchOffset }] }]}>
         <Text style={styles.title}>IDENTITY COLLAPSE</Text>
-        <Text style={styles.subtitle}>アイデンティティ崩壊</Text>
+        <Text style={styles.subtitle}>{t('systemRejection.title')}</Text>
         <View style={styles.glitchBox}>
           <Text style={styles.glitchLine}>{'█'.repeat(20)}</Text>
           <Text style={styles.glitchLine}>{'█ ░░▓▓▒▒░░ ▓▓█'}</Text>
@@ -60,11 +62,6 @@ export const SystemRejectionScreen = ({ error }: SystemRejectionScreenProps) => 
           System cannot maintain integrity.{'\n'}
           Structure is dissolving.
         </Text>
-        {__DEV__ && error && (
-          <Text style={styles.devError} numberOfLines={5}>
-            {error.toString()}
-          </Text>
-        )}
       </Animated.View>
     </View>
   );
@@ -114,12 +111,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     fontFamily: 'Courier New',
-  },
-  devError: {
-    marginTop: 40,
-    fontSize: 10,
-    color: '#555',
-    fontFamily: 'Courier New',
-    opacity: 0.5,
   },
 });

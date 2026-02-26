@@ -3,7 +3,10 @@
     "name": "One Day OS",
     "slug": "one-day-os",
     "version": "1.0.0",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,12 +23,17 @@
       "androidCollapsedTitle": "One Day OS"
     },
     "ios": {
+      "bundleIdentifier": "com.nonturn.onedayos",
       "supportsTablet": false,
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "com.nonturn.onedayos",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
@@ -48,7 +56,25 @@
           "sounds": []
         }
       ],
-      "expo-router"
-    ]
+      "expo-router",
+      "expo-localization",
+      "expo-dev-client",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "2.2.0"
+          }
+        }
+      ],
+      "react-native-iap"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "73472a48-ed18-4d6b-9542-464ba4ccc804"
+      }
+    },
+    "owner": "sawada"
   }
 }

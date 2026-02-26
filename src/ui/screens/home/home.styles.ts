@@ -22,6 +22,8 @@ export const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
+    zIndex: 1000,
+    backgroundColor: theme.colors.background,
   },
   appName: {
     fontSize: 14,
@@ -45,12 +47,6 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  debugButton: {
-    padding: 4,
-  },
-  debugButtonText: {
-    fontSize: 18,
-  },
   content: {
     flex: 1,
   },
@@ -62,6 +58,8 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: '#333',
+    zIndex: 1000,
+    backgroundColor: theme.colors.background,
   },
   lensButton: {
     paddingVertical: 12,

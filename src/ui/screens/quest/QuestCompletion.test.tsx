@@ -74,16 +74,16 @@ describe('QuestCompletion', () => {
       const doubtText = getByTestId('doubt-question');
       const displayedText = doubtText.props.children;
 
-      // All possible doubt questions
+      // All possible doubt question keys (t() returns the key itself in tests)
       const doubtQuestions = [
-        '当然だ。だが、次の5分間で君はまた自分を裏切るのではないか？',
-        '完了したか。だが君は本当にそれを達成したのか？',
-        'よくやった。だが、それで君の人生は変わったのか？',
-        'その報告を信じよう。だが、君は次も同じことをする勇気があるか？',
-        '承知した。だが、その成果は一時的なものではないか？',
+        'quest.completion.doubt1',
+        'quest.completion.doubt2',
+        'quest.completion.doubt3',
+        'quest.completion.doubt4',
+        'quest.completion.doubt5',
       ];
 
-      // Should be one of the doubt questions
+      // Should be one of the doubt question keys
       expect(doubtQuestions).toContain(displayedText);
     });
 

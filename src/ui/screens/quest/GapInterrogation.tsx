@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GlitchText } from '../../effects/GlitchText';
 import { ThemedText } from '../../components/ThemedText';
 import { theme } from '../../theme/theme';
@@ -87,6 +88,7 @@ export const GapInterrogation: React.FC<GapInterrogationProps> = ({
   onComplete,
   onInvalid,
 }) => {
+  const { t } = useTranslation();
   const [actionText, setActionText] = useState('');
   const [showInvalid, setShowInvalid] = useState(false);
 
@@ -154,7 +156,7 @@ export const GapInterrogation: React.FC<GapInterrogationProps> = ({
 
       {/* Interrogation question */}
       <ThemedText style={styles.questionText}>
-        もっと『痛み』を伴う、逃げられない具体的行動を再提示せよ
+        {t('quest.gap.question')}
       </ThemedText>
 
       {/* Invalid message with glitch effect */}
@@ -175,7 +177,7 @@ export const GapInterrogation: React.FC<GapInterrogationProps> = ({
           style={styles.input}
           value={actionText}
           onChangeText={setActionText}
-          placeholder="痛みを伴う行動を入力..."
+          placeholder={t('quest.gap.placeholder')}
           placeholderTextColor={theme.colors.ih.low}
           multiline
           textAlignVertical="top"
@@ -189,7 +191,7 @@ export const GapInterrogation: React.FC<GapInterrogationProps> = ({
         onPress={handleSubmit}
         testID="submit-button"
       >
-        <ThemedText style={styles.buttonText}>提示</ThemedText>
+        <ThemedText style={styles.buttonText}>{t('quest.gap.submit')}</ThemedText>
       </TouchableOpacity>
     </View>
   );

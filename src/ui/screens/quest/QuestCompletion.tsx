@@ -8,6 +8,7 @@
  */
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
+import i18n from 'i18next';
 import { ThemedText } from '../../components/ThemedText';
 import { theme } from '../../theme/theme';
 
@@ -16,14 +17,16 @@ export interface QuestCompletionProps {
   onNavigateBack: () => void; // Navigate back to Identity screen after 0.1s
 }
 
-// Doubt questions in Japanese (harsh, questioning tone)
-const DOUBT_QUESTIONS = [
-  '当然だ。だが、次の5分間で君はまた自分を裏切るのではないか？',
-  '完了したか。だが君は本当にそれを達成したのか？',
-  'よくやった。だが、それで君の人生は変わったのか？',
-  'その報告を信じよう。だが、君は次も同じことをする勇気があるか？',
-  '承知した。だが、その成果は一時的なものではないか？',
-] as const;
+/**
+ * Get doubt questions dynamically using i18n
+ */
+const getDoubtQuestions = (): string[] => [
+  i18n.t('quest.completion.doubt1'),
+  i18n.t('quest.completion.doubt2'),
+  i18n.t('quest.completion.doubt3'),
+  i18n.t('quest.completion.doubt4'),
+  i18n.t('quest.completion.doubt5'),
+];
 
 const CLEAR_ANIMATION_MS = 100; // 0.1 seconds
 const MIN_RECOVERY = 1; // +1%
@@ -40,8 +43,9 @@ const generateRecoveryAmount = (): number => {
  * Select random doubt question
  */
 const selectDoubtQuestion = (): string => {
-  const randomIndex = Math.floor(Math.random() * DOUBT_QUESTIONS.length);
-  return DOUBT_QUESTIONS[randomIndex];
+  const questions = getDoubtQuestions();
+  const randomIndex = Math.floor(Math.random() * questions.length);
+  return questions[randomIndex];
 };
 
 export const QuestCompletion: React.FC<QuestCompletionProps> = ({

@@ -8,6 +8,7 @@
 
 import { NotificationScheduler } from './NotificationScheduler';
 import * as Notifications from 'expo-notifications';
+import { getReflectionQuestions } from '@/constants';
 
 // Mock expo-notifications
 jest.mock('expo-notifications', () => ({
@@ -22,13 +23,14 @@ jest.mock('expo-notifications', () => ({
 }));
 
 // Notification schedule based on updated constants/index.ts
+// Note: getReflectionQuestions() returns translation keys like 'reflection.q1', etc.
 const EXPECTED_NOTIFICATION_TIMES = [
-  { hour: 6, minute: 0, question: 'あなたは誰か？' },
-  { hour: 9, minute: 0, question: 'あなたは何をしているか？' },
-  { hour: 12, minute: 0, question: 'なぜそれをしているのか？' },
-  { hour: 15, minute: 0, question: 'それはあなたのアイデンティティと一致しているか？' },
-  { hour: 18, minute: 0, question: '次に何をするか？' },
-  { hour: 21, minute: 0, question: '何を避けようとしているか？' },
+  { hour: 6, minute: 0, question: getReflectionQuestions()[0] },
+  { hour: 9, minute: 0, question: getReflectionQuestions()[1] },
+  { hour: 12, minute: 0, question: getReflectionQuestions()[2] },
+  { hour: 15, minute: 0, question: getReflectionQuestions()[3] },
+  { hour: 18, minute: 0, question: getReflectionQuestions()[4] },
+  { hour: 21, minute: 0, question: getReflectionQuestions()[5] },
 ] as const;
 
 describe('NotificationScheduler', () => {
@@ -69,7 +71,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       const firstCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0];
-      expect(firstCall.content.title).toBe('あなたは誰か？');
+      expect(firstCall.content.title).toBe('reflection.q1');
       expect(firstCall.trigger.hour).toBe(6);
       expect(firstCall.trigger.minute).toBe(0);
       expect(firstCall.trigger.repeats).toBe(true);
@@ -79,7 +81,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       const secondCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[1][0];
-      expect(secondCall.content.title).toBe('あなたは何をしているか？');
+      expect(secondCall.content.title).toBe('reflection.q2');
       expect(secondCall.trigger.hour).toBe(9);
       expect(secondCall.trigger.minute).toBe(0);
       expect(secondCall.trigger.repeats).toBe(true);
@@ -89,7 +91,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       const thirdCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[2][0];
-      expect(thirdCall.content.title).toBe('なぜそれをしているのか？');
+      expect(thirdCall.content.title).toBe('reflection.q3');
       expect(thirdCall.trigger.hour).toBe(12);
       expect(thirdCall.trigger.minute).toBe(0);
       expect(thirdCall.trigger.repeats).toBe(true);
@@ -99,7 +101,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       const fourthCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[3][0];
-      expect(fourthCall.content.title).toBe('それはあなたのアイデンティティと一致しているか？');
+      expect(fourthCall.content.title).toBe('reflection.q4');
       expect(fourthCall.trigger.hour).toBe(15);
       expect(fourthCall.trigger.minute).toBe(0);
       expect(fourthCall.trigger.repeats).toBe(true);
@@ -109,7 +111,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       const fifthCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[4][0];
-      expect(fifthCall.content.title).toBe('次に何をするか？');
+      expect(fifthCall.content.title).toBe('reflection.q5');
       expect(fifthCall.trigger.hour).toBe(18);
       expect(fifthCall.trigger.minute).toBe(0);
       expect(fifthCall.trigger.repeats).toBe(true);
@@ -119,7 +121,7 @@ describe('NotificationScheduler', () => {
       await scheduler.scheduleDailyNotifications();
 
       const sixthCall = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[5][0];
-      expect(sixthCall.content.title).toBe('何を避けようとしているか？');
+      expect(sixthCall.content.title).toBe('reflection.q6');
       expect(sixthCall.trigger.hour).toBe(21);
       expect(sixthCall.trigger.minute).toBe(0);
       expect(sixthCall.trigger.repeats).toBe(true);
@@ -344,14 +346,14 @@ describe('NotificationScheduler', () => {
         [
           {
             identifier: 'YES',
-            buttonTitle: 'はい',
+            buttonTitle: 'notification.buttonYes',
             options: {
               opensAppToForeground: true,
             },
           },
           {
             identifier: 'NO',
-            buttonTitle: 'いいえ',
+            buttonTitle: 'notification.buttonNo',
             options: {
               opensAppToForeground: true,
             },

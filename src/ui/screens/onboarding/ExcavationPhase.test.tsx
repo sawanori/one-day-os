@@ -48,8 +48,8 @@ describe('ExcavationPhase', () => {
     it('should render title and subtitle correctly', () => {
       const { getByText } = render(<ExcavationPhase onComplete={mockOnComplete} />);
 
-      expect(getByText('5年後、最悪の火曜日。')).toBeTruthy();
-      expect(getByText('変わらなかった自分の惨めな日常を3行で書け。')).toBeTruthy();
+      expect(getByText('ceremony.excavation.title')).toBeTruthy();
+      expect(getByText('ceremony.excavation.instruction')).toBeTruthy();
     });
 
     it('should render disabled submit button initially', () => {
@@ -139,7 +139,7 @@ describe('ExcavationPhase', () => {
       });
 
       await waitFor(() => {
-        expect(getByText('停滞は死を意味する')).toBeTruthy();
+        expect(getByText('ceremony.excavation.warning')).toBeTruthy();
       });
     });
 
@@ -330,6 +330,35 @@ describe('ExcavationPhase', () => {
 
       // Should not trigger penalty after unmount
       expect(mockIdentityEngine.applyOnboardingStagnationPenalty).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('IH Display', () => {
+    it('should display initial IH value', async () => {
+      const { getByText } = render(<ExcavationPhase onComplete={mockOnComplete} />);
+
+      await waitFor(() => {
+        expect(getByText('IH: 100%')).toBeTruthy();
+      });
+    });
+
+    it('should update IH display after timeout penalty', async () => {
+      mockIdentityEngine.getCurrentIH.mockResolvedValueOnce(100).mockResolvedValueOnce(95);
+
+      const { getByText } = render(<ExcavationPhase onComplete={mockOnComplete} />);
+
+      await waitFor(() => {
+        expect(getByText('IH: 100%')).toBeTruthy();
+      });
+
+      // Trigger timeout
+      act(() => {
+        jest.advanceTimersByTime(10000);
+      });
+
+      await waitFor(() => {
+        expect(getByText('IH: 95%')).toBeTruthy();
+      });
     });
   });
 });

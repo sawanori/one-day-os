@@ -12,7 +12,8 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Animated } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Animated, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import { GlitchText } from '../../effects/GlitchText';
 import { HapticEngine } from '../../../core/HapticEngine';
@@ -26,9 +27,11 @@ const TIMEOUT_DURATION = 10000; // 10 seconds
 const FLASH_DURATION = 500; // 500ms red flash
 
 export function ExcavationPhase({ onComplete }: ExcavationPhaseProps) {
+  const { t } = useTranslation();
   const [inputText, setInputText] = useState('');
   const [showWarning, setShowWarning] = useState(false);
   const [showFlash, setShowFlash] = useState(false);
+  const [currentIH, setCurrentIH] = useState<number>(100);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flashOpacity = useRef(new Animated.Value(0)).current;
@@ -44,6 +47,10 @@ export function ExcavationPhase({ onComplete }: ExcavationPhaseProps) {
     try {
       const engine = await IdentityEngine.getInstance();
       await engine.applyOnboardingStagnationPenalty();
+
+      // Update IH display
+      const updatedIH = await engine.getCurrentIH();
+      setCurrentIH(updatedIH);
 
       // Trigger haptic feedback
       await HapticEngine.punishFailure();
@@ -117,6 +124,20 @@ export function ExcavationPhase({ onComplete }: ExcavationPhaseProps) {
     onComplete(inputText);
   };
 
+  // Load current IH on mount
+  useEffect(() => {
+    const loadIH = async () => {
+      try {
+        const engine = await IdentityEngine.getInstance();
+        const ih = await engine.getCurrentIH();
+        setCurrentIH(ih);
+      } catch (error) {
+        console.error('Failed to load IH:', error);
+      }
+    };
+    loadIH();
+  }, []);
+
   // Initialize timeout on mount
   useEffect(() => {
     resetTimeout();
@@ -131,7 +152,7 @@ export function ExcavationPhase({ onComplete }: ExcavationPhaseProps) {
 
   return (
     <View style={styles.container}>
-      {/* Red Flash Overlay */}
+      {/* Red Flash Overlay - absolute positioned, stays outside ScrollView */}
       {showFlash && (
         <Animated.View
           testID="flash-overlay"
@@ -144,58 +165,78 @@ export function ExcavationPhase({ onComplete }: ExcavationPhaseProps) {
         />
       )}
 
-      {/* Title */}
-      <View style={styles.titleContainer}>
-        <GlitchText
-          text="5年後、最悪の火曜日。"
-          style={styles.title}
-          severity={showWarning ? 0.5 : 0}
-        />
+      {/* IH Display - absolute positioned, stays outside ScrollView */}
+      <View style={styles.ihContainer}>
+        <Text style={[
+          styles.ihText,
+          currentIH < 80 && { color: theme.colors.accent }
+        ]}>
+          IH: {currentIH}%
+        </Text>
       </View>
 
-      {/* Subtitle */}
-      <Text style={styles.subtitle}>変わらなかった自分の惨めな日常を3行で書け。</Text>
-
-      {/* Text Input */}
-      <TextInput
-        testID="anti-vision-input"
-        style={styles.textInput}
-        multiline
-        numberOfLines={10}
-        value={inputText}
-        onChangeText={handleTextChange}
-        placeholder="例：\n朝起きても何もする気が起きない\n同じ仕事を繰り返すだけの毎日\n夢も希望もない、ただ生きているだけ"
-        placeholderTextColor={theme.colors.warning}
-        cursorColor={theme.colors.accent}
-        autoFocus
-      />
-
-      {/* Warning Message */}
-      {showWarning && (
-        <View style={styles.warningContainer}>
-          <Text style={styles.warningText}>停滞は死を意味する</Text>
-        </View>
-      )}
-
-      {/* Submit Button */}
-      <Pressable
-        testID="submit-button"
-        style={[
-          styles.submitButton,
-          !isValidInput() && styles.submitButtonDisabled,
-        ]}
-        onPress={handleSubmit}
-        disabled={!isValidInput()}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <Text
-          style={[
-            styles.submitButtonText,
-            !isValidInput() && styles.submitButtonTextDisabled,
-          ]}
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: theme.spacing.lg }}
+          keyboardShouldPersistTaps="handled"
         >
-          刻め
-        </Text>
-      </Pressable>
+          {/* Title */}
+          <View style={styles.titleContainer}>
+            <GlitchText
+              text={t('ceremony.excavation.title')}
+              style={styles.title}
+              severity={showWarning ? 0.5 : 0}
+            />
+          </View>
+
+          {/* Subtitle */}
+          <Text style={styles.subtitle}>{t('ceremony.excavation.instruction')}</Text>
+
+          {/* Text Input */}
+          <TextInput
+            testID="anti-vision-input"
+            style={styles.textInput}
+            multiline
+            numberOfLines={10}
+            value={inputText}
+            onChangeText={handleTextChange}
+            placeholder={t('ceremony.excavation.placeholder')}
+            placeholderTextColor={theme.colors.warning}
+            cursorColor={theme.colors.accent}
+            autoFocus
+          />
+
+          {/* Warning Message */}
+          {showWarning && (
+            <View style={styles.warningContainer}>
+              <Text style={styles.warningText}>{t('ceremony.excavation.warning')}</Text>
+            </View>
+          )}
+
+          {/* Submit Button */}
+          <Pressable
+            testID="submit-button"
+            style={[
+              styles.submitButton,
+              !isValidInput() && styles.submitButtonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={!isValidInput()}
+          >
+            <Text
+              style={[
+                styles.submitButtonText,
+                !isValidInput() && styles.submitButtonTextDisabled,
+              ]}
+            >
+              {t('ceremony.excavation.submit')}
+            </Text>
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -204,8 +245,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
-    padding: theme.spacing.lg,
-    justifyContent: 'center',
   },
   flashOverlay: {
     position: 'absolute',
@@ -215,6 +254,18 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: theme.colors.accent,
     zIndex: 1000,
+  },
+  ihContainer: {
+    position: 'absolute',
+    top: 40,
+    right: theme.spacing.lg,
+    zIndex: 1001,
+  },
+  ihText: {
+    fontSize: theme.typography.fontSize.body,
+    fontFamily: theme.typography.fontFamily,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.foreground,
   },
   titleContainer: {
     marginBottom: theme.spacing.md,

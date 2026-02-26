@@ -6,61 +6,66 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../../../theme/theme';
 import { styles } from '../onboarding.styles';
 
 interface MissionStepProps {
   onComplete: (data: { mission: string }) => void;
-  onBack: () => void;
 }
 
-export function MissionStep({ onComplete, onBack }: MissionStepProps) {
+export function MissionStep({ onComplete }: MissionStepProps) {
+  const { t } = useTranslation();
   const [missionText, setMissionText] = useState('');
   const isValid = missionText.trim().length > 0;
 
   return (
-    <View style={styles.stepContainer}>
-      <Text style={styles.heading}>使命</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.stepContainer}>
+      <Text style={styles.heading}>{t('onboarding.mission.heading')}</Text>
 
       {/* Explanation */}
       <View style={styles.explanationBox}>
-        <Text style={styles.explanationTitle}>これは何か:</Text>
+        <Text style={styles.explanationTitle}>{t('onboarding.mission.explanationTitle')}</Text>
         <Text style={styles.explanationText}>
-          今から1年後に達成する目標。{'\n'}
-          アンチビジョンから逃げるための具体的なゴール。
+          {t('onboarding.mission.explanation')}
         </Text>
-        <Text style={styles.exampleTitle}>例:</Text>
+        <Text style={styles.exampleTitle}>{t('onboarding.mission.exampleTitle')}</Text>
         <Text style={styles.exampleText}>
-          「1年後、年収600万円のエンジニアになる」
+          {t('onboarding.mission.example')}
         </Text>
       </View>
 
-      <Text style={styles.prompt}>今年の最重要ミッションは？</Text>
+      <Text style={styles.prompt}>{t('onboarding.mission.prompt')}</Text>
       <TextInput
         testID="mission-input"
         style={styles.textInputMulti}
-        placeholder="入力してください"
+        placeholder={t('onboarding.mission.placeholder')}
         placeholderTextColor={theme.colors.foreground + '80'}
         value={missionText}
         onChangeText={setMissionText}
         multiline
         numberOfLines={4}
       />
-      <View style={styles.buttonRow}>
-        <Pressable testID="back-button" style={styles.buttonSecondary} onPress={onBack}>
-          <Text style={styles.buttonText}>戻る</Text>
-        </Pressable>
-        <Pressable
-          testID="next-button"
-          style={[styles.button, !isValid && styles.buttonDisabled]}
-          onPress={() => isValid && onComplete({ mission: missionText })}
-          disabled={!isValid}
-          accessibilityState={{ disabled: !isValid }}
-        >
-          <Text style={styles.buttonText}>次へ</Text>
-        </Pressable>
-      </View>
-    </View>
+          <Pressable
+            testID="next-button"
+            style={[styles.button, !isValid && styles.buttonDisabled]}
+            onPress={() => isValid && onComplete({ mission: missionText })}
+            disabled={!isValid}
+            accessibilityState={{ disabled: !isValid }}
+          >
+            <Text style={styles.buttonText}>{t('common.next')}</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

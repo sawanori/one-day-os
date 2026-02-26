@@ -13,7 +13,7 @@ jest.mock('../../database/client');
 
 import { OnboardingManager } from './OnboardingManager';
 
-type OnboardingStep = 'welcome' | 'anti-vision' | 'identity' | 'mission' | 'quests' | 'complete';
+type OnboardingStep = 'covenant' | 'excavation' | 'identity' | 'mission' | 'quests' | 'optical_calibration' | 'first_judgment' | 'complete';
 
 interface OnboardingData {
   antiVision: string;
@@ -88,11 +88,13 @@ describe('OnboardingManager', () => {
 
     test('全ステップ完了後にisOnboardingComplete()がtrueを返す', async () => {
       // Complete all steps
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test anti-vision' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
       await manager.completeStep('identity', { identity: 'I am a person who tests' });
       await manager.completeStep('mission', { mission: 'Test mission' });
       await manager.completeStep('quests', { quests: ['Quest 1', 'Quest 2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       const isComplete = await manager.isOnboardingComplete();
       expect(isComplete).toBe(true);
@@ -100,21 +102,23 @@ describe('OnboardingManager', () => {
 
     test('getCurrentStep()で現在のステップを取得できる', async () => {
       const currentStep = await manager.getCurrentStep();
-      expect(currentStep).toBe('welcome');
+      expect(currentStep).toBe('covenant');
     });
 
     test('未完了時にgetCurrentStep()が正しいステップを返す', async () => {
-      await manager.completeStep('welcome', null);
+      await manager.completeStep('covenant', null);
       const currentStep = await manager.getCurrentStep();
-      expect(currentStep).toBe('anti-vision');
+      expect(currentStep).toBe('excavation');
     });
 
     test('完了後にgetCurrentStep()がcompleteを返す', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests: ['Q1', 'Q2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       const currentStep = await manager.getCurrentStep();
       expect(currentStep).toBe('complete');
@@ -122,55 +126,78 @@ describe('OnboardingManager', () => {
   });
 
   describe('ステップ進行テスト', () => {
-    test('Welcome完了後にAnti-Visionステップに進む', async () => {
-      await manager.completeStep('welcome', null);
+    test('Covenant完了後にExcavationステップに進む', async () => {
+      await manager.completeStep('covenant', null);
       const currentStep = await manager.getCurrentStep();
-      expect(currentStep).toBe('anti-vision');
+      expect(currentStep).toBe('excavation');
     });
 
-    test('Anti-Vision完了後にIdentityステップに進む', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test anti-vision' });
+    test('Excavation完了後にIdentityステップに進む', async () => {
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
       const currentStep = await manager.getCurrentStep();
       expect(currentStep).toBe('identity');
     });
 
     test('Identity完了後にMissionステップに進む', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test anti-vision' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
       await manager.completeStep('identity', { identity: 'I am a person who tests' });
       const currentStep = await manager.getCurrentStep();
       expect(currentStep).toBe('mission');
     });
 
     test('Mission完了後にQuestsステップに進む', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test anti-vision' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
       await manager.completeStep('identity', { identity: 'I am a person who tests' });
       await manager.completeStep('mission', { mission: 'Test mission' });
       const currentStep = await manager.getCurrentStep();
       expect(currentStep).toBe('quests');
     });
 
-    test('Quests完了後にcompleteステップに進む', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test anti-vision' });
+    test('Quests完了後にOpticalCalibrationステップに進む', async () => {
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
       await manager.completeStep('identity', { identity: 'I am a person who tests' });
       await manager.completeStep('mission', { mission: 'Test mission' });
       await manager.completeStep('quests', { quests: ['Quest 1', 'Quest 2'] });
       const currentStep = await manager.getCurrentStep();
+      expect(currentStep).toBe('optical_calibration');
+    });
+
+    test('OpticalCalibration完了後にFirstJudgmentステップに進む', async () => {
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
+      await manager.completeStep('identity', { identity: 'I am a person who tests' });
+      await manager.completeStep('mission', { mission: 'Test mission' });
+      await manager.completeStep('quests', { quests: ['Quest 1', 'Quest 2'] });
+      await manager.completeStep('optical_calibration', null);
+      const currentStep = await manager.getCurrentStep();
+      expect(currentStep).toBe('first_judgment');
+    });
+
+    test('FirstJudgment完了後にcompleteステップに進む', async () => {
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test anti-vision' });
+      await manager.completeStep('identity', { identity: 'I am a person who tests' });
+      await manager.completeStep('mission', { mission: 'Test mission' });
+      await manager.completeStep('quests', { quests: ['Quest 1', 'Quest 2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
+      const currentStep = await manager.getCurrentStep();
       expect(currentStep).toBe('complete');
     });
 
-    test('ステップが順序通りに進む（Welcome → AntiVision → Identity → Mission → Quests）', async () => {
+    test('ステップが順序通りに進む（Covenant → Excavation → Identity → Mission → Quests → OpticalCalibration → FirstJudgment）', async () => {
       const steps: OnboardingStep[] = [];
 
-      steps.push(await manager.getCurrentStep()); // welcome
+      steps.push(await manager.getCurrentStep()); // covenant
 
-      await manager.completeStep('welcome', null);
-      steps.push(await manager.getCurrentStep()); // anti-vision
+      await manager.completeStep('covenant', null);
+      steps.push(await manager.getCurrentStep()); // excavation
 
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       steps.push(await manager.getCurrentStep()); // identity
 
       await manager.completeStep('identity', { identity: 'Test' });
@@ -180,24 +207,34 @@ describe('OnboardingManager', () => {
       steps.push(await manager.getCurrentStep()); // quests
 
       await manager.completeStep('quests', { quests: ['Q1', 'Q2'] });
+      steps.push(await manager.getCurrentStep()); // optical_calibration
+
+      await manager.completeStep('optical_calibration', null);
+      steps.push(await manager.getCurrentStep()); // first_judgment
+
+      await manager.completeStep('first_judgment', null);
       steps.push(await manager.getCurrentStep()); // complete
 
       expect(steps).toEqual([
-        'welcome',
-        'anti-vision',
+        'covenant',
+        'excavation',
         'identity',
         'mission',
         'quests',
+        'optical_calibration',
+        'first_judgment',
         'complete',
       ]);
     });
 
     test('最後のステップ完了でオンボーディング終了', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests: ['Q1', 'Q2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       expect(await manager.isOnboardingComplete()).toBe(true);
     });
@@ -206,16 +243,16 @@ describe('OnboardingManager', () => {
   describe('データ保存テスト', () => {
     test('Anti-Visionテキストが保存される', async () => {
       const antiVision = 'Living a meaningless Tuesday 5 years from now';
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision });
 
       expect(mockRunAsync).toHaveBeenCalled();
     });
 
     test('Identityステートメントが保存される', async () => {
       const identity = 'I am a person who takes action';
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity });
 
       expect(mockRunAsync).toHaveBeenCalled();
@@ -223,8 +260,8 @@ describe('OnboardingManager', () => {
 
     test('Missionテキストが保存される', async () => {
       const mission = 'Break the pattern of procrastination';
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission });
 
@@ -233,8 +270,8 @@ describe('OnboardingManager', () => {
 
     test('Questsが保存される', async () => {
       const quests: [string, string] = ['Morning workout', 'Evening meditation'];
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests });
@@ -250,38 +287,40 @@ describe('OnboardingManager', () => {
         quests: ['Quest 1', 'Quest 2'] as [string, string],
       };
 
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: data.antiVision });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: data.antiVision });
       await manager.completeStep('identity', { identity: data.identity });
       await manager.completeStep('mission', { mission: data.mission });
       await manager.completeStep('quests', { quests: data.quests });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       // Verify database operations were called
-      // 4 data saves + 5 persistCurrentStep calls (welcome, anti-vision, identity, mission, quests)
-      expect(mockRunAsync).toHaveBeenCalledTimes(9);
+      // 4 data saves (excavation, identity, mission, quests) + 7 persistCurrentStep calls
+      expect(mockRunAsync).toHaveBeenCalledTimes(11);
     });
   });
 
   describe('バリデーションテスト', () => {
-    test('空のAnti-Visionで進めない', async () => {
-      await manager.completeStep('welcome', null);
+    test('空のExcavation（Anti-Vision）で進めない', async () => {
+      await manager.completeStep('covenant', null);
 
       await expect(
-        manager.completeStep('anti-vision', { antiVision: '' })
+        manager.completeStep('excavation', { antiVision: '' })
       ).rejects.toThrow();
     });
 
-    test('Anti-Visionがnullの場合エラー', async () => {
-      await manager.completeStep('welcome', null);
+    test('Excavation（Anti-Vision）がnullの場合エラー', async () => {
+      await manager.completeStep('covenant', null);
 
       await expect(
-        manager.completeStep('anti-vision', { antiVision: null as any })
+        manager.completeStep('excavation', { antiVision: null as any })
       ).rejects.toThrow();
     });
 
     test('空のIdentityで進めない', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
 
       await expect(
         manager.completeStep('identity', { identity: '' })
@@ -289,8 +328,8 @@ describe('OnboardingManager', () => {
     });
 
     test('Identityがnullの場合エラー', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
 
       await expect(
         manager.completeStep('identity', { identity: null as any })
@@ -298,8 +337,8 @@ describe('OnboardingManager', () => {
     });
 
     test('空のMissionで進めない', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
 
       await expect(
@@ -308,8 +347,8 @@ describe('OnboardingManager', () => {
     });
 
     test('Missionがnullの場合エラー', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
 
       await expect(
@@ -318,8 +357,8 @@ describe('OnboardingManager', () => {
     });
 
     test('Questsが配列でない場合エラー', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
 
@@ -329,8 +368,8 @@ describe('OnboardingManager', () => {
     });
 
     test('Questsが2つでない場合エラー', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
 
@@ -340,8 +379,8 @@ describe('OnboardingManager', () => {
     });
 
     test('Questsのいずれかが空の場合エラー', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
 
@@ -350,11 +389,11 @@ describe('OnboardingManager', () => {
       ).rejects.toThrow();
     });
 
-    test('Welcomeステップはデータ不要', async () => {
-      await expect(manager.completeStep('welcome', null)).resolves.not.toThrow();
+    test('Covenantステップはデータ不要', async () => {
+      await expect(manager.completeStep('covenant', null)).resolves.not.toThrow();
     });
 
-    test('順序を飛ばして進めない（Anti-Visionの前にIdentity）', async () => {
+    test('順序を飛ばして進めない（Excavationの前にIdentity）', async () => {
       await expect(
         manager.completeStep('identity', { identity: 'Test' })
       ).rejects.toThrow();
@@ -364,8 +403,8 @@ describe('OnboardingManager', () => {
   describe('データ取得テスト', () => {
     test('getAntiVision()で保存したテキストを取得', async () => {
       const antiVision = 'Living a meaningless Tuesday';
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision });
 
       mockGetFirstAsync.mockResolvedValueOnce({
         anti_vision: antiVision,
@@ -379,8 +418,8 @@ describe('OnboardingManager', () => {
 
     test('getIdentity()で保存したステートメントを取得', async () => {
       const identity = 'I am a person who takes action';
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity });
 
       mockGetFirstAsync.mockResolvedValueOnce({
@@ -395,8 +434,8 @@ describe('OnboardingManager', () => {
 
     test('getMission()で保存したミッションを取得', async () => {
       const mission = 'Break the pattern of procrastination';
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission });
 
@@ -412,8 +451,8 @@ describe('OnboardingManager', () => {
 
     test('getQuests()で保存したクエストを取得', async () => {
       const quests: [string, string] = ['Morning workout', 'Evening meditation'];
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests });
@@ -442,8 +481,8 @@ describe('OnboardingManager', () => {
         quests: ['Quest 1', 'Quest 2'] as [string, string],
       };
 
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: data.antiVision });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: data.antiVision });
       await manager.completeStep('identity', { identity: data.identity });
       await manager.completeStep('mission', { mission: data.mission });
       await manager.completeStep('quests', { quests: data.quests });
@@ -466,22 +505,24 @@ describe('OnboardingManager', () => {
 
   describe('リセットテスト', () => {
     test('resetOnboarding()で最初からやり直し', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
 
       await manager.resetOnboarding();
 
       const currentStep = await manager.getCurrentStep();
-      expect(currentStep).toBe('welcome');
+      expect(currentStep).toBe('covenant');
     });
 
     test('リセット後にオンボーディング未完了状態になる', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests: ['Q1', 'Q2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       await manager.resetOnboarding();
 
@@ -489,8 +530,8 @@ describe('OnboardingManager', () => {
     });
 
     test('リセット後に保存データがクリアされる', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
 
       await manager.resetOnboarding();
 
@@ -502,18 +543,20 @@ describe('OnboardingManager', () => {
 
     test('Wipe後のオンボーディング再開', async () => {
       // Complete onboarding once
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Old' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Old' });
       await manager.completeStep('identity', { identity: 'Old' });
       await manager.completeStep('mission', { mission: 'Old' });
       await manager.completeStep('quests', { quests: ['Old1', 'Old2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       // Trigger wipe
       await manager.resetOnboarding();
 
       // Start new onboarding
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'New' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'New' });
 
       mockGetFirstAsync.mockResolvedValueOnce({
         anti_vision: 'New',
@@ -526,8 +569,8 @@ describe('OnboardingManager', () => {
     });
 
     test('リセット後にDBの状態が初期化される', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
 
       await manager.resetOnboarding();
 
@@ -544,22 +587,24 @@ describe('OnboardingManager', () => {
     });
 
     test('完了済みステップを再度完了しようとした場合の挙動', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
 
-      // Try to complete welcome again
+      // Try to complete covenant again
       await expect(
-        manager.completeStep('welcome', null)
+        manager.completeStep('covenant', null)
       ).rejects.toThrow();
     });
 
     test('getCurrentStep()が常に有効なステップを返す', async () => {
       const validSteps: OnboardingStep[] = [
-        'welcome',
-        'anti-vision',
+        'covenant',
+        'excavation',
         'identity',
         'mission',
         'quests',
+        'optical_calibration',
+        'first_judgment',
         'complete',
       ];
 
@@ -568,20 +613,20 @@ describe('OnboardingManager', () => {
     });
 
     test('データベースエラー時に適切なエラーをスロー', async () => {
-      await manager.completeStep('welcome', null);
+      await manager.completeStep('covenant', null);
 
       mockRunAsync.mockRejectedValueOnce(new Error('Database error'));
 
       await expect(
-        manager.completeStep('anti-vision', { antiVision: 'Test' })
+        manager.completeStep('excavation', { antiVision: 'Test' })
       ).rejects.toThrow('Database error');
     });
   });
 
   describe('状態永続化テスト', () => {
     test('アプリ再起動後もオンボーディング進捗が保持される', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
 
       // Simulate app restart
       const newManager = await OnboardingManager.getInstance();
@@ -595,11 +640,13 @@ describe('OnboardingManager', () => {
     });
 
     test('オンボーディング完了状態がアプリ再起動後も保持される', async () => {
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests: ['Q1', 'Q2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       // Simulate app restart
       const newManager = await OnboardingManager.getInstance();
@@ -615,11 +662,13 @@ describe('OnboardingManager', () => {
       const onComplete = jest.fn();
       manager.onComplete(onComplete);
 
-      await manager.completeStep('welcome', null);
-      await manager.completeStep('anti-vision', { antiVision: 'Test' });
+      await manager.completeStep('covenant', null);
+      await manager.completeStep('excavation', { antiVision: 'Test' });
       await manager.completeStep('identity', { identity: 'Test' });
       await manager.completeStep('mission', { mission: 'Test' });
       await manager.completeStep('quests', { quests: ['Q1', 'Q2'] });
+      await manager.completeStep('optical_calibration', null);
+      await manager.completeStep('first_judgment', null);
 
       expect(onComplete).toHaveBeenCalledWith({
         timestamp: expect.any(Number),
@@ -636,11 +685,11 @@ describe('OnboardingManager', () => {
       const onStepChange = jest.fn();
       manager.onStepChange(onStepChange);
 
-      await manager.completeStep('welcome', null);
+      await manager.completeStep('covenant', null);
 
       expect(onStepChange).toHaveBeenCalledWith({
-        from: 'welcome',
-        to: 'anti-vision',
+        from: 'covenant',
+        to: 'excavation',
         timestamp: expect.any(Number),
       });
     });

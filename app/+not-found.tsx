@@ -4,14 +4,17 @@
 
 import { View, Text, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 export default function NotFoundScreen() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>404</Text>
-      <Text style={styles.message}>画面が見つかりません</Text>
+      <Text style={styles.message}>{t('notFound.message')}</Text>
       <Link href="/" style={styles.link}>
-        <Text style={styles.linkText}>ホームへ戻る</Text>
+        <Text style={styles.linkText}>{t('notFound.goHome')}</Text>
       </Link>
     </View>
   );

@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { GlitchText } from '../../effects/GlitchText';
 import { ThemedText } from '../../components/ThemedText';
 import { theme } from '../../theme/theme';
@@ -34,6 +35,7 @@ export const MirrorInterrogation: React.FC<MirrorInterrogationProps> = ({
   onComplete,
   onHealthDrain,
 }) => {
+  const { t } = useTranslation();
   const [habitText, setHabitText] = useState('');
   const [isDraining, setIsDraining] = useState(false);
 
@@ -128,8 +130,7 @@ export const MirrorInterrogation: React.FC<MirrorInterrogationProps> = ({
 
       {/* Interrogation question */}
       <ThemedText style={styles.questionText}>
-        今の君の行動は、その醜悪な自分を肯定している。{'\n'}
-        今日殺すべき『古い習慣』を一つだけ差し出せ
+        {t('quest.mirror.question')}
       </ThemedText>
 
       {/* Input field with flash effect when draining */}
@@ -138,7 +139,7 @@ export const MirrorInterrogation: React.FC<MirrorInterrogationProps> = ({
           style={styles.input}
           value={habitText}
           onChangeText={handleTextChange}
-          placeholder="殺すべき習慣を入力..."
+          placeholder={t('quest.mirror.placeholder')}
           placeholderTextColor={theme.colors.ih.low}
           multiline
           textAlignVertical="top"
@@ -164,7 +165,7 @@ export const MirrorInterrogation: React.FC<MirrorInterrogationProps> = ({
         accessibilityState={{ disabled: !isSubmitEnabled }}
         testID="submit-button"
       >
-        <ThemedText style={styles.buttonText}>刻め</ThemedText>
+        <ThemedText style={styles.buttonText}>{t('quest.mirror.submit')}</ThemedText>
       </TouchableOpacity>
 
       {/* Warning text if draining */}

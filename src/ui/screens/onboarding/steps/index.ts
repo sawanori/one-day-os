@@ -1,11 +1,9 @@
 /**
  * One Day OS - Onboarding Step Components
  *
- * Re-exports all step components for the onboarding flow.
+ * Re-exports step components for the unified onboarding flow.
  */
 
-export { WelcomeStep } from './WelcomeStep';
-export { AntiVisionStep } from './AntiVisionStep';
 export { IdentityStep } from './IdentityStep';
 export { MissionStep } from './MissionStep';
 export { QuestsStep } from './QuestsStep';

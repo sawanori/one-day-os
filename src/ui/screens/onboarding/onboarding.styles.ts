@@ -19,6 +19,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
+    paddingHorizontal: theme.spacing.lg,
   },
   title: {
     fontSize: theme.typography.fontSize.title,
@@ -88,20 +89,11 @@ export const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.foreground,
     borderRadius: 0,
-    padding: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.xl,
     alignItems: 'center',
-    flex: 1,
-    marginLeft: theme.spacing.sm,
-  },
-  buttonSecondary: {
-    backgroundColor: theme.colors.background,
-    borderWidth: 2,
-    borderColor: theme.colors.foreground,
-    borderRadius: 0,
-    padding: theme.spacing.md,
-    alignItems: 'center',
-    flex: 1,
-    marginRight: theme.spacing.sm,
+    justifyContent: 'center',
+    minHeight: 56,
   },
   buttonDisabled: {
     opacity: 0.5,
@@ -109,13 +101,9 @@ export const styles = StyleSheet.create({
   buttonText: {
     color: theme.colors.foreground,
     fontFamily: theme.typography.fontFamily,
-    fontSize: theme.typography.fontSize.body,
+    fontSize: 18,
     fontWeight: theme.typography.fontWeight.bold,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing.md,
+    lineHeight: 24,
   },
   explanationBox: {
     borderWidth: 2,

@@ -3,6 +3,8 @@
  * Core constants for Identity Health (IH) calculations and notifications
  */
 
+import i18n from 'i18next';
+
 // Identity Health (IH) Constants
 export const IH_CONSTANTS = {
   // Penalties
@@ -32,14 +34,15 @@ export const NOTIFICATION_SCHEDULE = {
 } as const;
 
 // Reflection Questions for Notifications (6 questions, one per daily notification)
-export const REFLECTION_QUESTIONS = [
-  "あなたは誰か？",
-  "あなたは何をしているか？",
-  "なぜそれをしているのか？",
-  "それはあなたのアイデンティティと一致しているか？",
-  "次に何をするか？",
-  "何を避けようとしているか？",
-] as const;
+// Dynamic getter for reflection questions (i18n-aware)
+export const getReflectionQuestions = (): string[] => [
+  i18n.t('reflection.q1'),
+  i18n.t('reflection.q2'),
+  i18n.t('reflection.q3'),
+  i18n.t('reflection.q4'),
+  i18n.t('reflection.q5'),
+  i18n.t('reflection.q6'),
+];
 
 // Phase Time Ranges
 export const PHASE_TIMES = {
@@ -55,6 +58,10 @@ export const DB_TABLES = {
   QUESTS: 'quests',
   NOTIFICATIONS: 'notifications',
   DAILY_STATE: 'daily_state',
+  JUDGMENT_LOG: 'judgment_log',
+  JUDGMENT_SCHEDULE: 'daily_judgment_schedule',
+  IDENTITY_BACKUP: 'identity_backup',
+  INSURANCE_PURCHASES: 'insurance_purchases',
 } as const;
 
 // App States
@@ -62,4 +69,39 @@ export const APP_STATES = {
   ONBOARDING: 'onboarding',
   ACTIVE: 'active',
   DESPAIR: 'despair',
+} as const;
+
+// Judgment System Constants
+export const JUDGMENT_CONSTANTS = {
+  ACTIVE_HOURS: { start: 6, end: 22 },
+  COUNT_PER_DAY: 5,
+  MIN_INTERVAL_MINUTES: 60,
+  MAX_INTERVAL_MINUTES: 240,
+  IN_APP_TIMEOUT_SECONDS: 5,
+  OS_NOTIFICATION_TIMEOUT_MINUTES: 5,
+  ANTI_VISION_FRAGMENT_MIN_LENGTH: 50,
+  /** Seconds user has to open the app after summons notification */
+  SUMMONS_TIMEOUT_SECONDS: 180,
+  /** IH penalty for not opening app within SUMMONS_TIMEOUT_SECONDS */
+  SUMMONS_MISSED_PENALTY: 5,
+  /** IH penalty for 5-second in-app timeout (silence = defeat) */
+  JUDGMENT_TIMEOUT_PENALTY: 25,
+  /** Minutes after scheduled time before a judgment is considered expired (auto-resolve) */
+  SUMMONS_EXPIRY_MINUTES: 30,
+} as const;
+
+// Judgment Categories
+export type JudgmentCategory = 'EVASION' | 'OBSERVER' | 'DISSONANCE' | 'ANTI_VISION' | 'SURVIVAL';
+
+// Judgment Response (distinct from NotificationResponse for clarity)
+export type JudgmentResponse = 'YES' | 'NO' | 'TIMEOUT' | 'IGNORED' | 'SUMMONS_EXPIRED';
+
+// Insurance System Constants
+export const INSURANCE_CONSTANTS = {
+  OFFER_TIMEOUT_SECONDS: 10,
+  REVIVAL_IH: 10,
+  WIPE_PAUSE_PERCENT: 95,
+  PRODUCT_ID_IOS: 'com.nonturn.onedayos.identity_insurance',
+  PRODUCT_ID_ANDROID: 'identity_insurance',
+  PRICE_DISPLAY: '¥1,500',
 } as const;

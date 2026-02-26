@@ -1,0 +1,227 @@
+{
+  "common": {
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "完了",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "phase": {
+    "morning": {
+      "name": "モーニング",
+      "timeRange": "06:00 - 12:00"
+    },
+    "afternoon": {
+      "name": "アフタヌーン",
+      "timeRange": "12:00 - 18:00"
+    },
+    "evening": {
+      "name": "イブニング",
+      "timeRange": "18:00 - 24:00"
+    },
+    "night": {
+      "name": "ナイト",
+      "timeRange": "00:00 - 06:00"
+    },
+    "guard": {
+      "accessDenied": "アクセス不可",
+      "availableTime": "利用可能時間:",
+      "currentTime": "現在時刻:",
+      "layerTitle": "{{phase}}レイヤー"
+    }
+  },
+  "reflection": {
+    "q1": "あなたは誰か？",
+    "q2": "あなたは何をしているか？",
+    "q3": "なぜそれをしているのか？",
+    "q4": "それはあなたのアイデンティティと一致しているか？",
+    "q5": "次に何をするか？",
+    "q6": "何を避けようとしているか？"
+  },
+  "notification": {
+    "buttonYes": "はい",
+    "buttonNo": "いいえ",
+    "body": "5分以内に回答。無応答でIH -20%"
+  },
+  "onboarding": {
+    "identity": {
+      "heading": "アイデンティティ",
+      "explanationTitle": "これは何か:",
+      "explanation": "あなたが目指す理想の自分。\nアンチビジョンの対極にある存在。",
+      "exampleTitle": "例:",
+      "example": "「私は、約束を守り、常に自分の限界に挑戦する人間だ」",
+      "prompt": "どんな人間になりたいか？",
+      "placeholderTemplate": "私は〜な人間だ",
+      "placeholder": "入力してください"
+    },
+    "mission": {
+      "heading": "使命",
+      "explanationTitle": "これは何か:",
+      "explanation": "今から1年後に達成する目標。\nアンチビジョンから逃げるための具体的なゴール。",
+      "exampleTitle": "例:",
+      "example": "「1年後、年収600万円のエンジニアになる」",
+      "prompt": "今年の最重要ミッションは？",
+      "placeholder": "入力してください"
+    },
+    "quests": {
+      "heading": "クエスト",
+      "explanationTitle": "これは何か:",
+      "explanation": "今日一日で達成すべき具体的なタスク。\n2つのクエストを設定してください。",
+      "exampleTitle": "例:",
+      "example": "「朝6時に起きる」\n「コーディング3時間」",
+      "prompt": "毎日達成するクエストを2つ設定",
+      "placeholder1": "クエスト1",
+      "placeholder2": "クエスト2"
+    }
+  },
+  "ceremony": {
+    "covenant": {
+      "title": "覚悟を決めろ",
+      "hint": "覚悟ができたら長押し"
+    },
+    "excavation": {
+      "title": "5年後、最悪の火曜日。",
+      "instruction": "変わらなかった自分の惨めな日常を3行で書け。",
+      "placeholder": "例：\n朝起きても何もする気が起きない\n同じ仕事を繰り返すだけの毎日\n夢も希望もない、ただ生きているだけ",
+      "warning": "停滞は死を意味する",
+      "submit": "刻め"
+    },
+    "judgment": {
+      "question": "最悪の未来を逃れる\n覚悟はできたか？",
+      "instruction": "5秒以内に答えろ",
+      "warning": "覚悟なき者に再構築の資格なし",
+      "timeout": "TIME OVER"
+    },
+    "lensSync": {
+      "mission": {
+        "label": "MISSION",
+        "description": "この焦点距離は、1年後の自分を映す。\nなぜここにいる。何を成し遂げる。\n使命を見失うな。"
+      },
+      "identity": {
+        "label": "IDENTITY",
+        "description": "この焦点距離は、今の自分を映す。\nお前は誰だ。何者だ。\nその問いから逃げるな。"
+      },
+      "quest": {
+        "label": "QUEST",
+        "description": "この焦点距離は、今日やるべきことを映す。\n壮大なビジョンは、日々の行動でしか実現しない。\n今日、何をする。"
+      },
+      "tapToContinue": "タップして次へ",
+      "pinchHint": "ピンチで拡大"
+    },
+    "flow": {
+      "restart": "最初からやり直せ"
+    }
+  },
+  "quest": {
+    "completion": {
+      "doubt1": "当然だ。だが、次の5分間で君はまた自分を裏切るのではないか？",
+      "doubt2": "完了したか。だが君は本当にそれを達成したのか？",
+      "doubt3": "よくやった。だが、それで君の人生は変わったのか？",
+      "doubt4": "その報告を信じよう。だが、君は次も同じことをする勇気があるか？",
+      "doubt5": "承知した。だが、その成果は一時的なものではないか？"
+    },
+    "mirror": {
+      "question": "今の君の行動は、その醜悪な自分を肯定しているのではないか？それを認め、殺すべき習慣を一つ宣言しろ。",
+      "placeholder": "殺すべき習慣を入力...",
+      "submit": "刻め"
+    },
+    "gap": {
+      "title": "断絶の宣告",
+      "question": "もっと『痛み』を伴う、逃げられない具体的行動を再提示せよ",
+      "placeholder": "痛みを伴う行動を入力...",
+      "submit": "提示"
+    }
+  },
+  "death": {
+    "title": "お前は死んだ。",
+    "sentencing": "構造の維持に失敗した。",
+    "void": "元の自分に戻れ。",
+    "wiping": "ワイプ実行中..."
+  },
+  "despair": {
+    "title": "お前は死んだ。"
+  },
+  "insurance": {
+    "title": "アイデンティティ保険",
+    "copy": "君のこれまでの戦いを、無価値なゴミとして今すぐ消去するか？ それとも、金で時間を買い戻すか？",
+    "buyLabel": "私は弱い",
+    "buy": "今すぐ購入",
+    "accept": "死を受け入れる",
+    "postPurchase": {
+      "label": "金で買った自分",
+      "comment": "命拾いしたな。だが忘れるな、君の覚悟は{{price}}で売られていたということだ。",
+      "serialCoward": "常習的臆病者"
+    },
+    "error": {
+      "purchaseFailed": "決済失敗。削除を再開する。",
+      "timeout": "時間切れ。削除を再開する。"
+    }
+  },
+  "systemRejection": {
+    "title": "アイデンティティ崩壊"
+  },
+  "notFound": {
+    "message": "画面が見つかりません",
+    "goHome": "ホームへ戻る"
+  },
+  "lens": {
+    "identity": {
+      "title": "あなたの理想の状態",
+      "subtitle": "これが自然な状態。努力は不要。"
+    },
+    "mission": {
+      "title": "あなたが想定する最悪の未来"
+    },
+    "quest": {
+      "title": "これだけが重要。他は無視。"
+    }
+  },
+  "web": {
+    "notSupported": {
+      "title": "WEB NOT SUPPORTED",
+      "message": "One Day OS is a mobile-only application.",
+      "instruction": "Please open this app on your mobile device (iOS or Android)."
+    }
+  },
+  "error": {
+    "boundary": {
+      "title": "エラーが発生しました",
+      "retry": "再試行"
+    }
+  },
+  "judgment": {
+    "screen": {
+      "title": "審判",
+      "label": "即時応答必須",
+      "hint": "躊躇は敗北",
+      "silenceIsDefeat": "沈黙は敗北と同義だ",
+      "todayComplete": "本日の審判は終了",
+      "nextEstimate": "推定: {{min}}〜{{max}}分後",
+      "judgmentLog": "審判記録",
+      "totalLoss": "累計損失: {{delta}}%",
+      "nextJudgment": "次の審判"
+    },
+    "evasion": {
+      "q1": "「{{quest_1}}」は完了したか。まだなら、今何をしている？",
+      "q2": "重要でないふりをしている最重要のことは何だ？"
+    },
+    "observer": {
+      "q1": "今の君を5分間観察した他人は、何を目指す人間だと結論づけるか？",
+      "q2": "{{identity}}と名乗る人間が、今この行動をしている。矛盾を説明しろ。"
+    },
+    "dissonance": {
+      "q1": "{{identity}} — これは今も真実か？",
+      "q2": "今の行動は、君が定義した理想と一致しているか？YESと言えるか？"
+    },
+    "anti_vision": {
+      "q1": "{{anti_vision_fragment}} — この未来に1分近づいたか、1分遠ざかったか？",
+      "q2": "1年後、最悪の火曜日。今の1分がその日を確定させていないか？"
+    },
+    "survival": {
+      "q1": "沈黙は死だ。君はまだ自分を諦めていないか？",
+      "q2": "応答せよ。さもなくば、覚悟はその程度だ。"
+    }
+  }
+}

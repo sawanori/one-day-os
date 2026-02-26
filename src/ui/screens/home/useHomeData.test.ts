@@ -176,10 +176,10 @@ describe('useHomeData', () => {
         await result.current.toggleQuest(1);
       });
 
-      // DB should be called with toggled value (0 → 1)
+      // DB should set is_completed=1 with COALESCE to preserve existing completed_at
       expect(mockRunAsync).toHaveBeenCalledWith(
-        'UPDATE quests SET is_completed = ?, completed_at = ? WHERE id = ?',
-        [1, expect.any(String), 1]
+        'UPDATE quests SET is_completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
+        [expect.any(String), 1]
       );
     });
 
@@ -194,11 +194,34 @@ describe('useHomeData', () => {
         await result.current.toggleQuest(2);
       });
 
-      // DB should be called with toggled value (1 → 0)
+      // DB should only toggle is_completed, keeping completed_at as evidence
       expect(mockRunAsync).toHaveBeenCalledWith(
-        'UPDATE quests SET is_completed = ?, completed_at = ? WHERE id = ?',
-        [0, null, 2]
+        'UPDATE quests SET is_completed = 0 WHERE id = ?',
+        [2]
       );
+    });
+
+    it('should NOT restore health on re-completion (toggle exploit prevention)', async () => {
+      // Quest 3: uncompleted but was completed before (completed_at is set)
+      const questsWithPriorCompletion = [
+        ...mockQuests,
+        { id: 3, quest_text: 'Quest C', is_completed: 0, created_at: '2026-01-01', completed_at: '2026-01-01T08:00:00Z' },
+      ];
+      mockGetAllAsync.mockResolvedValue([...questsWithPriorCompletion]);
+
+      const { result } = renderHook(() => useHomeData());
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      // Re-complete quest 3 (completed_at already set = was completed before)
+      await act(async () => {
+        await result.current.toggleQuest(3);
+      });
+
+      // Should NOT restore health because quest was already completed before
+      expect(mockRestoreHealth).not.toHaveBeenCalled();
     });
 
     it('should restore health when quest is completed', async () => {

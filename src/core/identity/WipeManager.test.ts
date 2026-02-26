@@ -306,6 +306,39 @@ describe('WipeManager - Integration Tests', () => {
     });
   });
 
+  describe('Insurance integration', () => {
+    test('identity_backup table is included in cleared tables', async () => {
+      const result = await wipeManager.executeWipe('IH_ZERO', 0);
+      expect(result.success).toBe(true);
+      expect(result.tablesCleared).toContain('identity_backup');
+    });
+
+    test('app_state is updated to reset insurance and increment life_number', async () => {
+      const result = await wipeManager.executeWipe('IH_ZERO', 0);
+      expect(result.success).toBe(true);
+
+      // Verify the UPDATE query was called with correct SQL
+      expect(mockRunAsync).toHaveBeenCalledWith(
+        'UPDATE app_state SET has_used_insurance = 0, life_number = life_number + 1 WHERE id = 1'
+      );
+    });
+
+    test('tablesCleared includes all 5 core tables', async () => {
+      const result = await wipeManager.executeWipe('IH_ZERO', 0);
+      expect(result.success).toBe(true);
+      expect(result.tablesCleared).toEqual(
+        expect.arrayContaining([
+          'identity',
+          'quests',
+          'notifications',
+          'daily_state',
+          'identity_backup',
+        ])
+      );
+      expect(result.tablesCleared).toHaveLength(5);
+    });
+  });
+
   describe('Wipe理由のバリエーション', () => {
     test('IH_ZEROでWipeを実行できる', async () => {
       const result = await wipeManager.executeWipe('IH_ZERO', 0);

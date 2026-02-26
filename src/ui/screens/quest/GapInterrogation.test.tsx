@@ -64,7 +64,7 @@ describe('GapInterrogation', () => {
     );
 
     expect(
-      getByText(/もっと『痛み』を伴う、逃げられない具体的行動を再提示せよ/)
+      getByText('quest.gap.question')
     ).toBeTruthy();
   });
 
@@ -78,8 +78,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     // Input too short (19 characters)
     fireEvent.changeText(input, '短い行動12345678901234');
@@ -100,8 +100,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     // Very similar to previous action
     fireEvent.changeText(input, 'I will work much harder on my projects');
@@ -122,8 +122,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     // Vague expression: only contains "頑張る"
     fireEvent.changeText(input, '今日から本当に頑張る');
@@ -143,8 +143,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     // Invalid input
     fireEvent.changeText(input, '短い');
@@ -164,8 +164,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     // Initially no Invalid text
     expect(queryByText('Invalid')).toBeNull();
@@ -189,8 +189,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     const validAction = 'Wake up at 5am every day and write 2000 words before breakfast';
     fireEvent.changeText(input, validAction);
@@ -210,8 +210,8 @@ describe('GapInterrogation', () => {
       />
     );
 
-    const input = getByPlaceholderText('痛みを伴う行動を入力...');
-    const button = getByText('提示');
+    const input = getByPlaceholderText('quest.gap.placeholder');
+    const button = getByText('quest.gap.submit');
 
     // Trigger Invalid (too short)
     fireEvent.changeText(input, '短い');

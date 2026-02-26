@@ -74,18 +74,26 @@ export class WipeManager {
         DELETE FROM quests;
         DELETE FROM notifications;
         DELETE FROM daily_state;
+        DELETE FROM identity_backup;
       `);
 
-      tablesCleared.push('identity', 'quests', 'notifications', 'daily_state');
-
-      // Run VACUUM to reclaim space
-      await this.db.execAsync('VACUUM;');
+      tablesCleared.push('identity', 'quests', 'notifications', 'daily_state', 'identity_backup');
 
       // Log the wipe event
       await this.db.runAsync(
         'INSERT INTO wipe_log (wiped_at, reason, final_ih_value) VALUES (?, ?, ?)',
         [timestamp, reason, finalIH]
       );
+
+      // Reset insurance state and increment life number
+      await this.db.runAsync(
+        'UPDATE app_state SET has_used_insurance = 0, life_number = life_number + 1 WHERE id = 1'
+      );
+
+      // Non-blocking VACUUM to prevent UI thread blocking
+      setTimeout(() => {
+        this.db.execAsync('VACUUM;').catch(e => console.warn('VACUUM failed:', e));
+      }, 100);
 
       // Create success result
       const result: WipeResult = {

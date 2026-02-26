@@ -26,13 +26,13 @@ describe('DespairScreen', () => {
     expect(getAllByText('Welcome back to the old you.').length).toBeGreaterThan(0);
   });
 
-  it('should render subtext "お前は死んだ。"', () => {
+  it('should render subtext "despair.title"', () => {
     const { getAllByText } = render(
       <DespairScreen remainingLockoutMs={86400000} onLockoutEnd={jest.fn()} />
     );
 
     // GlitchText renders multiple text layers, so we use getAllByText
-    expect(getAllByText('お前は死んだ。').length).toBeGreaterThan(0);
+    expect(getAllByText('despair.title').length).toBeGreaterThan(0);
   });
 
   it('should display countdown in HH:MM:SS format', () => {

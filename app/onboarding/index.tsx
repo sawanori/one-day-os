@@ -1,8 +1,8 @@
 /**
  * One Day OS - Onboarding Screen Entry Point
- * Routes to the 5-step onboarding flow
+ * Routes to the unified 7-step onboarding flow
  */
 
-import { OnboardingFlow } from '../../src/ui/screens/onboarding/OnboardingFlow';
+import { UnifiedOnboardingFlow } from '../../src/ui/screens/onboarding/UnifiedOnboardingFlow';
 
-export default OnboardingFlow;
+export default UnifiedOnboardingFlow;

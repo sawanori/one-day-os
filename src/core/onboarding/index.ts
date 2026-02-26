@@ -13,4 +13,4 @@ export type {
   OnboardingCompleteEvent,
   StepChangeEvent,
 } from './types';
-export { STEP_ORDER } from './types';
+export { STEP_ORDER, CEREMONY_STEPS } from './types';

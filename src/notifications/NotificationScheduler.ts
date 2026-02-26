@@ -5,7 +5,8 @@
 
 import * as Notifications from 'expo-notifications';
 import type { CalendarTriggerInput } from 'expo-notifications';
-import { REFLECTION_QUESTIONS, NOTIFICATION_SCHEDULE } from '../constants';
+import i18n from 'i18next';
+import { getReflectionQuestions, NOTIFICATION_SCHEDULE } from '../constants';
 
 const CATEGORY_IDENTIFIER = 'IDENTITY_QUESTION';
 
@@ -32,14 +33,14 @@ export class NotificationScheduler {
       [
         {
           identifier: 'YES',
-          buttonTitle: 'はい',
+          buttonTitle: i18n.t('notification.buttonYes'),
           options: {
             opensAppToForeground: true,
           },
         },
         {
           identifier: 'NO',
-          buttonTitle: 'いいえ',
+          buttonTitle: i18n.t('notification.buttonNo'),
           options: {
             opensAppToForeground: true,
           },
@@ -97,12 +98,12 @@ export class NotificationScheduler {
     // Schedule each of the 6 daily notifications
     for (let i = 0; i < NOTIFICATION_SCHEDULE.TIMES.length; i++) {
       const { hour, minute } = NOTIFICATION_SCHEDULE.TIMES[i];
-      const question = REFLECTION_QUESTIONS[i];
+      const question = getReflectionQuestions()[i];
 
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title: question,
-          body: '5分以内に回答。無応答でIH -20%',
+          body: i18n.t('notification.body'),
           categoryIdentifier: CATEGORY_IDENTIFIER,
         },
         trigger: {

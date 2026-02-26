@@ -107,7 +107,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -125,7 +125,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -140,7 +140,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -155,7 +155,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -173,7 +173,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'QUEST_FAIL',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -294,7 +294,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -316,7 +316,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -347,7 +347,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -387,7 +387,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -406,7 +406,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -435,7 +435,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -472,7 +472,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -507,7 +507,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -566,7 +566,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -588,7 +588,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -617,7 +617,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -633,7 +633,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;
@@ -654,7 +654,7 @@ describe('DespairModeManager - TDD Tests', () => {
         success: true,
         timestamp: Date.now(),
         reason: 'IH_ZERO',
-        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state'],
+        tablesCleared: ['identity', 'quests', 'notifications', 'daily_state', 'identity_backup'],
         nextScreen: 'onboarding',
       });
       wipeManager.executeWipe = mockExecuteWipe;

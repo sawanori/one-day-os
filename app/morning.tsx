@@ -7,6 +7,7 @@ import { theme } from '../src/ui/theme/theme';
 import { IdentityEngine } from '../src/core/identity/IdentityEngine';
 import { getDB } from '../src/database/client';
 import { StressContainer } from '../src/ui/layout/StressContainer';
+import { PhaseGuard } from '../src/ui/components/PhaseGuard';
 
 export default function MorningExcavation() {
     const router = useRouter();
@@ -36,14 +37,13 @@ export default function MorningExcavation() {
 
     const saveMorningData = async () => {
         const db = getDB();
-        const today = new Date().toISOString().split('T')[0];
 
         // Save Quests
         if (quests.quest1) {
-            await db.runAsync('INSERT INTO quests (date, title, type) VALUES (?, ?, ?)', [today, quests.quest1, 'BOSS']);
+            await db.runAsync('INSERT INTO quests (quest_text, is_completed, created_at) VALUES (?, 0, datetime(\'now\'))', [quests.quest1]);
         }
         if (quests.quest2) {
-            await db.runAsync('INSERT INTO quests (date, title, type) VALUES (?, ?, ?)', [today, quests.quest2, 'MINION']);
+            await db.runAsync('INSERT INTO quests (quest_text, is_completed, created_at) VALUES (?, 0, datetime(\'now\'))', [quests.quest2]);
         }
 
         // Morning ritual completed
@@ -171,21 +171,23 @@ export default function MorningExcavation() {
 
     return (
         <StressContainer>
-            <View style={styles.container}>
-                <ScrollView contentContainerStyle={styles.content}>
-                    {renderStep()}
-                </ScrollView>
+            <PhaseGuard phase="MORNING">
+                <View style={styles.container}>
+                    <ScrollView contentContainerStyle={styles.content}>
+                        {renderStep()}
+                    </ScrollView>
 
-                <TouchableOpacity
-                    style={[styles.button, (step === 0 && !canProceed) && styles.disabledButton]}
-                    onPress={handleNext}
-                    disabled={step === 0 && !canProceed}
-                >
-                    <ThemedText style={styles.buttonText}>
-                        {step === 0 && !canProceed ? "WAIT..." : step === 5 ? "START DAY" : "NEXT"}
-                    </ThemedText>
-                </TouchableOpacity>
-            </View>
+                    <TouchableOpacity
+                        style={[styles.button, (step === 0 && !canProceed) && styles.disabledButton]}
+                        onPress={handleNext}
+                        disabled={step === 0 && !canProceed}
+                    >
+                        <ThemedText style={styles.buttonText}>
+                            {step === 0 && !canProceed ? "WAIT..." : step === 5 ? "START DAY" : "NEXT"}
+                        </ThemedText>
+                    </TouchableOpacity>
+                </View>
+            </PhaseGuard>
         </StressContainer>
     );
 }

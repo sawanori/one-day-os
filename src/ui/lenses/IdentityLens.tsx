@@ -1,20 +1,83 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ThemedText } from '../components/ThemedText';
 import { GlitchText } from '../effects/GlitchText';
 import { theme } from '../theme/theme';
 import { IdentityEngine } from '../../core/identity/IdentityEngine';
+import { JudgmentEngine } from '../../core/judgment';
+import type { JudgmentLogRecord } from '../../core/judgment';
+import { InsuranceManager } from '../../core/insurance';
+
+interface GhostText {
+    id: number;
+    text: string;
+    color: string;
+    opacity: number;
+    top: number;
+    left: number;
+    fontSize: number;
+}
+
+function buildGhostTexts(records: JudgmentLogRecord[]): GhostText[] {
+    const gridPositions = 12;
+    const noCount = records.filter(r => r.response === 'NO').length;
+    const highDensity = noCount >= 3;
+
+    return records.map((record, index) => {
+        const isNo = record.response === 'NO';
+        const posIndex = record.id % gridPositions;
+        const row = Math.floor(posIndex / 4);
+        const col = posIndex % 4;
+
+        return {
+            id: record.id,
+            text: isNo ? 'NO' : '...',
+            color: isNo ? theme.colors.error : theme.colors.secondary,
+            opacity: isNo ? 0.08 : 0.12,
+            top: 10 + row * 30 + ((record.id * 7) % 20),
+            left: 5 + col * 25 + ((record.id * 13) % 15),
+            fontSize: highDensity ? 14 + (record.id % 10) : 18 + (record.id % 14),
+        };
+    });
+}
 
 export function IdentityLens() {
+    const { t } = useTranslation();
     const [identity, setIdentity] = useState<string>('I am a person who executes without hesitation.');
     const [health, setHealth] = useState(100);
+    const [ghostTexts, setGhostTexts] = useState<GhostText[]>([]);
+    const ghostTextsRef = useRef<GhostText[]>([]);
+    const [purchaseCount, setPurchaseCount] = useState(0);
+
+    useEffect(() => {
+        InsuranceManager.getTotalPurchaseCount()
+            .then(setPurchaseCount)
+            .catch(() => setPurchaseCount(0));
+    }, []);
 
     useEffect(() => {
         const checkHealth = async () => {
             const engine = await IdentityEngine.getInstance();
             const status = await engine.checkHealth();
             setHealth(status.health);
+
+            // Fetch ghost text data (piggyback on health check interval)
+            try {
+                const judgmentEngine = await JudgmentEngine.getInstance();
+                const failedJudgments = await judgmentEngine.getRecentFailedJudgments();
+                const newGhosts = buildGhostTexts(failedJudgments);
+                // Only update if the data actually changed (by comparing IDs)
+                const currentIds = ghostTextsRef.current.map(g => g.id).join(',');
+                const newIds = newGhosts.map(g => g.id).join(',');
+                if (currentIds !== newIds) {
+                    ghostTextsRef.current = newGhosts;
+                    setGhostTexts(newGhosts);
+                }
+            } catch {
+                // Judgment engine may not be initialized yet
+            }
         };
         checkHealth();
 
@@ -27,7 +90,36 @@ export function IdentityLens() {
 
     return (
         <View style={styles.container}>
-            <ThemedText type="subtitle" style={styles.label}>LENS: 1.0x [IDENTITY - あなたの理想の状態]</ThemedText>
+            {/* Ghost text layer - behind everything */}
+            {ghostTexts.map((ghost) => (
+                <ThemedText
+                    key={`ghost-${ghost.id}`}
+                    style={[
+                        styles.ghostText,
+                        {
+                            top: `${ghost.top}%`,
+                            left: `${ghost.left}%`,
+                            color: ghost.color,
+                            opacity: ghost.opacity,
+                            fontSize: ghost.fontSize,
+                        },
+                    ]}
+                >
+                    {ghost.text}
+                </ThemedText>
+            ))}
+
+            <ThemedText type="subtitle" style={styles.label}>LENS: 1.0x [IDENTITY - {t('lens.identity.title')}]</ThemedText>
+
+            {purchaseCount > 0 && (
+                <View style={paidStyles.container}>
+                    <ThemedText style={paidStyles.label}>
+                        {t('insurance.postPurchase.label', { defaultValue: 'PAID IDENTITY' })}
+                        {purchaseCount > 1 && ` \u00D7${purchaseCount}`}
+                        {purchaseCount >= 3 && ` \u2014 ${t('insurance.postPurchase.serialCoward', { defaultValue: 'SERIAL COWARD' })}`}
+                    </ThemedText>
+                </View>
+            )}
 
             <View style={styles.card}>
                 <ThemedText style={styles.prefix}>I AM A PERSON WHO...</ThemedText>
@@ -39,7 +131,7 @@ export function IdentityLens() {
             </View>
 
             <ThemedText style={styles.subtext}>
-                これが自然な状態。努力は不要。
+                {t('lens.identity.subtitle')}
             </ThemedText>
         </View>
     );
@@ -85,5 +177,31 @@ const styles = StyleSheet.create({
         marginTop: 24,
         textAlign: 'center',
         fontSize: 12,
+    },
+    ghostText: {
+        position: 'absolute',
+        fontFamily: theme.typography.fontFamily,
+        fontWeight: '700',
+        zIndex: -1,
+    },
+});
+
+const paidStyles = StyleSheet.create({
+    container: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderWidth: 1,
+        borderColor: theme.colors.accent,
+        marginBottom: 16,
+        alignSelf: 'stretch',
+    },
+    label: {
+        color: theme.colors.accent,
+        fontSize: 12,
+        fontWeight: 'bold',
+        fontFamily: theme.typography.fontFamily,
+        letterSpacing: 3,
+        textAlign: 'center',
+        textTransform: 'uppercase',
     },
 });

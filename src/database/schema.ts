@@ -1,5 +1,6 @@
 
 import * as SQLite from 'expo-sqlite';
+import { migrate001Insurance } from './migrations/001_insurance';
 
 export const dbResult = SQLite.openDatabaseSync('onedayos.db');
 
@@ -72,5 +73,59 @@ export const initDatabase = async () => {
       question TEXT NOT NULL,
       response TEXT CHECK(response IN ('yes', 'no', 'ignored', 'pending')) DEFAULT 'pending'
     );
+
+    -- Judgment Log table (records all judgment responses)
+    CREATE TABLE IF NOT EXISTS judgment_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      schedule_id INTEGER,
+      category TEXT NOT NULL,
+      question_key TEXT NOT NULL,
+      question_rendered TEXT,
+      response TEXT NOT NULL,
+      ih_before INTEGER NOT NULL,
+      ih_after INTEGER NOT NULL,
+      response_time_ms INTEGER,
+      scheduled_at TEXT NOT NULL,
+      responded_at TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (schedule_id) REFERENCES daily_judgment_schedule(id)
+    );
+
+    -- Daily Judgment Schedule table (pre-scheduled random judgment times)
+    CREATE TABLE IF NOT EXISTS daily_judgment_schedule (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      scheduled_date TEXT NOT NULL,
+      scheduled_time TEXT NOT NULL,
+      category TEXT NOT NULL,
+      notification_id TEXT,
+      is_fired INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    -- Identity backup (temporary, for insurance recovery)
+    CREATE TABLE IF NOT EXISTS identity_backup (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      anti_vision TEXT NOT NULL,
+      identity_statement TEXT NOT NULL,
+      one_year_mission TEXT NOT NULL,
+      original_ih INTEGER NOT NULL,
+      backed_up_at TEXT NOT NULL
+    );
+
+    -- Insurance purchases history (permanent, survives wipe)
+    CREATE TABLE IF NOT EXISTS insurance_purchases (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      transaction_id TEXT NOT NULL,
+      product_id TEXT NOT NULL,
+      price_amount REAL,
+      price_currency TEXT,
+      life_number INTEGER NOT NULL DEFAULT 1,
+      purchased_at TEXT NOT NULL,
+      ih_before INTEGER NOT NULL,
+      ih_after INTEGER NOT NULL
+    );
   `);
+
+  // Run migrations
+  await migrate001Insurance(dbResult);
 };

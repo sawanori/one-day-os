@@ -6,52 +6,76 @@
 import { OnboardingValidator } from './OnboardingValidator';
 
 describe('OnboardingValidator', () => {
-  describe('welcome step', () => {
+  describe('covenant step', () => {
     test('accepts null data', () => {
-      expect(() => OnboardingValidator.validate('welcome', null)).not.toThrow();
+      expect(() => OnboardingValidator.validate('covenant', null)).not.toThrow();
     });
 
     test('rejects non-null data', () => {
       expect(() =>
-        OnboardingValidator.validate('welcome', { antiVision: 'test' })
-      ).toThrow('Welcome step does not require data');
+        OnboardingValidator.validate('covenant', { antiVision: 'test' })
+      ).toThrow('covenant step does not require data');
     });
   });
 
-  describe('anti-vision step', () => {
+  describe('optical_calibration step', () => {
+    test('accepts null data', () => {
+      expect(() => OnboardingValidator.validate('optical_calibration', null)).not.toThrow();
+    });
+
+    test('rejects non-null data', () => {
+      expect(() =>
+        OnboardingValidator.validate('optical_calibration', { antiVision: 'test' })
+      ).toThrow('optical_calibration step does not require data');
+    });
+  });
+
+  describe('first_judgment step', () => {
+    test('accepts null data', () => {
+      expect(() => OnboardingValidator.validate('first_judgment', null)).not.toThrow();
+    });
+
+    test('rejects non-null data', () => {
+      expect(() =>
+        OnboardingValidator.validate('first_judgment', { antiVision: 'test' })
+      ).toThrow('first_judgment step does not require data');
+    });
+  });
+
+  describe('excavation step', () => {
     test('accepts valid anti-vision data', () => {
       expect(() =>
-        OnboardingValidator.validate('anti-vision', { antiVision: 'Living a meaningless Tuesday' })
+        OnboardingValidator.validate('excavation', { antiVision: 'Living a meaningless Tuesday' })
       ).not.toThrow();
     });
 
     test('rejects null data', () => {
-      expect(() => OnboardingValidator.validate('anti-vision', null)).toThrow(
-        'Anti-vision step requires antiVision data'
+      expect(() => OnboardingValidator.validate('excavation', null)).toThrow(
+        'Excavation step requires antiVision data'
       );
     });
 
     test('rejects missing antiVision field', () => {
       expect(() =>
-        OnboardingValidator.validate('anti-vision', { identity: 'wrong field' } as any)
-      ).toThrow('Anti-vision step requires antiVision data');
+        OnboardingValidator.validate('excavation', { identity: 'wrong field' } as any)
+      ).toThrow('Excavation step requires antiVision data');
     });
 
     test('rejects empty string', () => {
       expect(() =>
-        OnboardingValidator.validate('anti-vision', { antiVision: '' })
+        OnboardingValidator.validate('excavation', { antiVision: '' })
       ).toThrow('Anti-vision cannot be empty');
     });
 
     test('rejects whitespace-only string', () => {
       expect(() =>
-        OnboardingValidator.validate('anti-vision', { antiVision: '   ' })
+        OnboardingValidator.validate('excavation', { antiVision: '   ' })
       ).toThrow('Anti-vision cannot be empty');
     });
 
     test('rejects null value for antiVision field', () => {
       expect(() =>
-        OnboardingValidator.validate('anti-vision', { antiVision: null as any })
+        OnboardingValidator.validate('excavation', { antiVision: null as any })
       ).toThrow('Anti-vision cannot be empty');
     });
   });

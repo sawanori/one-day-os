@@ -1,25 +1,28 @@
 /**
  * One Day OS - Onboarding Types
- * Type definitions and constants for the onboarding flow
+ * Type definitions and constants for the unified 7-step onboarding flow
  */
 
 /**
- * Onboarding step types
+ * Onboarding step types - unified 7-step flow
  */
 export type OnboardingStep =
-  | 'welcome'
-  | 'anti-vision'
+  | 'covenant'
+  | 'excavation'
   | 'identity'
   | 'mission'
   | 'quests'
+  | 'optical_calibration'
+  | 'first_judgment'
   | 'complete';
 
 /**
  * Step data types for each step
+ * Ceremony steps (covenant, optical_calibration, first_judgment) use null
  */
 export type StepData =
-  | null // welcome step
-  | { antiVision: string } // anti-vision step
+  | null // covenant, optical_calibration, first_judgment steps
+  | { antiVision: string } // excavation step
   | { identity: string } // identity step
   | { mission: string } // mission step
   | { quests: [string, string] }; // quests step
@@ -52,13 +55,24 @@ export interface StepChangeEvent {
 }
 
 /**
- * Step order definition
+ * Step order definition - unified 7-step flow
  */
 export const STEP_ORDER: OnboardingStep[] = [
-  'welcome',
-  'anti-vision',
+  'covenant',
+  'excavation',
   'identity',
   'mission',
   'quests',
+  'optical_calibration',
+  'first_judgment',
   'complete',
+];
+
+/**
+ * Ceremony steps that don't save data to DB
+ */
+export const CEREMONY_STEPS: OnboardingStep[] = [
+  'covenant',
+  'optical_calibration',
+  'first_judgment',
 ];

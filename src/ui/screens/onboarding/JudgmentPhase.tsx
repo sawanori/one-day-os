@@ -14,6 +14,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, Animated } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { theme } from '../../theme/theme';
 import { GlitchText } from '../../effects/GlitchText';
 import { HapticEngine } from '../../../core/HapticEngine';
@@ -27,6 +28,7 @@ const COUNTDOWN_DURATION = 5; // 5 seconds
 const FAILURE_ANIMATION_DURATION = 2000; // 2 seconds
 
 export function JudgmentPhase({ onComplete, onFail }: JudgmentPhaseProps) {
+  const { t } = useTranslation();
   const [countdown, setCountdown] = useState(COUNTDOWN_DURATION);
   const [isFailed, setIsFailed] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -141,20 +143,20 @@ export function JudgmentPhase({ onComplete, onFail }: JudgmentPhaseProps) {
         <View style={styles.titleContainer}>
           {isFailed ? (
             <GlitchText
-              text="あなたは誰か？"
+              text={t('ceremony.judgment.question')}
               style={styles.title}
               severity={0.8}
             />
           ) : (
-            <Text style={styles.title}>あなたは誰か？</Text>
+            <Text style={styles.title}>{t('ceremony.judgment.question')}</Text>
           )}
         </View>
 
         {/* Subtitle or Failure Message */}
         {isFailed ? (
-          <Text style={styles.failureText}>覚悟なき者に再構築の資格なし</Text>
+          <Text style={styles.failureText}>{t('ceremony.judgment.warning')}</Text>
         ) : (
-          <Text style={styles.subtitle}>5秒以内に回答せよ</Text>
+          <Text style={styles.subtitle}>{t('ceremony.judgment.instruction')}</Text>
         )}
 
         {/* Countdown Timer */}
@@ -217,14 +219,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   titleContainer: {
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.sm,
   },
   title: {
-    fontSize: theme.typography.fontSize.heading,
+    fontSize: 24,
     fontFamily: theme.typography.fontFamily,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.foreground,
     textAlign: 'center',
+    lineHeight: 36,
   },
   subtitle: {
     fontSize: theme.typography.fontSize.body,
@@ -253,15 +257,18 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.foreground,
     borderRadius: theme.borderRadius.none,
-    paddingVertical: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
     paddingHorizontal: theme.spacing.lg,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 56,
   },
   yesButtonText: {
-    fontSize: theme.typography.fontSize.body,
+    fontSize: 20,
     fontFamily: theme.typography.fontFamily,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.foreground,
+    lineHeight: 28,
   },
   noButton: {
     flex: 1,
@@ -269,15 +276,18 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.accent,
     borderRadius: theme.borderRadius.none,
-    paddingVertical: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
     paddingHorizontal: theme.spacing.lg,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 56,
   },
   noButtonText: {
-    fontSize: theme.typography.fontSize.body,
+    fontSize: 20,
     fontFamily: theme.typography.fontFamily,
     fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.accent,
+    lineHeight: 28,
   },
   failureText: {
     fontSize: theme.typography.fontSize.body,

@@ -53,3 +53,12 @@ npm-list-*.txt
 
 # Serena MCP
 .serena/
+
+# EAS Build
+credentials/
+google-services.json
+google-service-account.json
+*.keystore
+
+# EAS local builds
+.eas/

@@ -12,6 +12,22 @@ jest.mock('../../core/HapticEngine', () => ({
   },
 }));
 
+// Mock GlitchText to render plain text for testing
+jest.mock('../effects/GlitchText', () => ({
+  GlitchText: ({ text, style }: { text: string; style?: any }) => {
+    const { Text } = require('react-native');
+    return <Text testID="glitch-text">{text}</Text>;
+  },
+}));
+
+// Mock NoiseOverlay
+jest.mock('../effects/NoiseOverlay', () => ({
+  NoiseOverlay: ({ opacity }: { opacity: number }) => {
+    const { View } = require('react-native');
+    return <View testID="noise-overlay" />;
+  },
+}));
+
 describe('InsuranceModal', () => {
   const mockOnPurchase = jest.fn();
   const mockOnDecline = jest.fn();
@@ -20,8 +36,84 @@ describe('InsuranceModal', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly when visible', () => {
+  it('renders title "IDENTITY INSURANCE" via GlitchText', () => {
     const { getByText } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText('IDENTITY INSURANCE')).toBeTruthy();
+  });
+
+  it('renders "I AM WEAK" shame label text', () => {
+    const { getByText } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText('I AM WEAK')).toBeTruthy();
+  });
+
+  it('renders "PURCHASE NOW" purchase button', () => {
+    const { getByText } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText('PURCHASE NOW')).toBeTruthy();
+  });
+
+  it('renders "ACCEPT DEATH" decline button', () => {
+    const { getByText } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText('ACCEPT DEATH')).toBeTruthy();
+  });
+
+  it('shows countdown with zero-padded format', () => {
+    const { getByText } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={5}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText('05')).toBeTruthy();
+  });
+
+  it('shows countdown updating on rerender', () => {
+    const { getByText, rerender } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText('10')).toBeTruthy();
+
+    rerender(
       <InsuranceModal
         visible={true}
         countdownSeconds={3}
@@ -30,23 +122,20 @@ describe('InsuranceModal', () => {
       />
     );
 
-    expect(getByText('Identity Insurance - ¥1,500')).toBeTruthy();
-    expect(getByText('3')).toBeTruthy();
-    expect(getByText('今すぐ購入')).toBeTruthy();
-    expect(getByText('死を受け入れる')).toBeTruthy();
+    expect(getByText('03')).toBeTruthy();
   });
 
   it('calls onPurchase when purchase button pressed', () => {
     const { getByText } = render(
       <InsuranceModal
         visible={true}
-        countdownSeconds={3}
+        countdownSeconds={10}
         onPurchase={mockOnPurchase}
         onDecline={mockOnDecline}
       />
     );
 
-    fireEvent.press(getByText('今すぐ購入'));
+    fireEvent.press(getByText('PURCHASE NOW'));
     expect(mockOnPurchase).toHaveBeenCalledTimes(1);
   });
 
@@ -54,41 +143,17 @@ describe('InsuranceModal', () => {
     const { getByText } = render(
       <InsuranceModal
         visible={true}
-        countdownSeconds={3}
+        countdownSeconds={10}
         onPurchase={mockOnPurchase}
         onDecline={mockOnDecline}
       />
     );
 
-    fireEvent.press(getByText('死を受け入れる'));
+    fireEvent.press(getByText('ACCEPT DEATH'));
     expect(mockOnDecline).toHaveBeenCalledTimes(1);
   });
 
-  it('displays countdown seconds', () => {
-    const { getByText, rerender } = render(
-      <InsuranceModal
-        visible={true}
-        countdownSeconds={3}
-        onPurchase={mockOnPurchase}
-        onDecline={mockOnDecline}
-      />
-    );
-
-    expect(getByText('3')).toBeTruthy();
-
-    rerender(
-      <InsuranceModal
-        visible={true}
-        countdownSeconds={2}
-        onPurchase={mockOnPurchase}
-        onDecline={mockOnDecline}
-      />
-    );
-
-    expect(getByText('2')).toBeTruthy();
-  });
-
-  it('triggers haptic feedback when countdown reaches 1', () => {
+  it('triggers punishFailure haptic at countdown <= 1', () => {
     const { HapticEngine } = require('../../core/HapticEngine');
 
     render(
@@ -101,5 +166,46 @@ describe('InsuranceModal', () => {
     );
 
     expect(HapticEngine.punishFailure).toHaveBeenCalled();
+  });
+
+  it('does not trigger haptic when countdown > 1', () => {
+    const { HapticEngine } = require('../../core/HapticEngine');
+
+    render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={5}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(HapticEngine.punishFailure).not.toHaveBeenCalled();
+  });
+
+  it('renders NoiseOverlay for atmosphere', () => {
+    const { getByTestId } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByTestId('noise-overlay')).toBeTruthy();
+  });
+
+  it('renders copy text', () => {
+    const { getByText } = render(
+      <InsuranceModal
+        visible={true}
+        countdownSeconds={10}
+        onPurchase={mockOnPurchase}
+        onDecline={mockOnDecline}
+      />
+    );
+
+    expect(getByText(/Will you erase everything/)).toBeTruthy();
   });
 });

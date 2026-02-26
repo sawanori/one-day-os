@@ -34,9 +34,14 @@ export const useLensGesture = (
 
   const panResponder = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: (event: GestureResponderEvent) => {
+        // 2点同時タッチ時にレスポンダーを即取得（シミュレータ対応）
+        return (event.nativeEvent.touches?.length ?? 0) >= 2;
+      },
+
       onMoveShouldSetPanResponder: (_, gestureState) => {
         // 2点タッチでピンチジェスチャー開始
-        return gestureState.numberActiveTouches === 2;
+        return gestureState.numberActiveTouches >= 2;
       },
 
       onPanResponderGrant: (event: GestureResponderEvent) => {

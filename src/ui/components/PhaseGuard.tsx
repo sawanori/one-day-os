@@ -7,28 +7,16 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { PHASE_TIMES } from '../../constants';
+import { useTranslation } from 'react-i18next';
+import { PhaseManager } from '../../core/phase/PhaseManager';
+import { Phase } from '../../core/phase/types';
 import { GlitchText } from '../effects/GlitchText';
 import { theme } from '../theme/theme';
-
-// Type definitions
-type Phase = 'MORNING' | 'EVENING';
 
 interface PhaseGuardProps {
   phase: Phase;
   children: React.ReactNode;
 }
-
-/**
- * Gets current hour and minute
- */
-const getCurrentTime = (): { hour: number; minute: number } => {
-  const now = new Date();
-  return {
-    hour: now.getHours(),
-    minute: now.getMinutes(),
-  };
-};
 
 /**
  * Formats time as HH:MM
@@ -38,44 +26,13 @@ const formatTime = (hour: number, minute: number = 0): string => {
 };
 
 /**
- * Checks if current time is within the phase time range
- */
-const isWithinPhaseTime = (phase: Phase): boolean => {
-  const { hour } = getCurrentTime();
-  const phaseTime = PHASE_TIMES[phase];
-
-  // Check if hour is within range [start, end)
-  return hour >= phaseTime.start && hour < phaseTime.end;
-};
-
-/**
- * Gets phase display name in Japanese
- */
-const getPhaseDisplayName = (phase: Phase): string => {
-  switch (phase) {
-    case 'MORNING':
-      return 'モーニング';
-    case 'EVENING':
-      return 'イブニング';
-    default:
-      return phase;
-  }
-};
-
-/**
- * Gets phase time range as string
- */
-const getPhaseTimeRange = (phase: Phase): string => {
-  const phaseTime = PHASE_TIMES[phase];
-  return `${formatTime(phaseTime.start)} - ${formatTime(phaseTime.end)}`;
-};
-
-/**
  * PhaseGuard Component
  *
- * Enforces time-based access restrictions:
+ * Enforces time-based access restrictions for all 4 phases:
  * - MORNING: Accessible 6:00-12:00
+ * - AFTERNOON: Accessible 12:00-18:00
  * - EVENING: Accessible 18:00-24:00
+ * - NIGHT: Accessible 0:00-6:00
  *
  * Shows error screen with:
  * - Phase name (red glitched text)
@@ -84,7 +41,9 @@ const getPhaseTimeRange = (phase: Phase): string => {
  * - Current time
  */
 export const PhaseGuard: React.FC<PhaseGuardProps> = ({ phase, children }) => {
-  const isAccessible = isWithinPhaseTime(phase);
+  const { t } = useTranslation();
+  const currentPhase = PhaseManager.calculateCurrentPhase();
+  const isAccessible = currentPhase === phase;
 
   // If within phase time, render children
   if (isAccessible) {
@@ -92,34 +51,34 @@ export const PhaseGuard: React.FC<PhaseGuardProps> = ({ phase, children }) => {
   }
 
   // Otherwise, show error screen
-  const { hour, minute } = getCurrentTime();
-  const phaseName = getPhaseDisplayName(phase);
-  const timeRange = getPhaseTimeRange(phase);
-  const currentTime = formatTime(hour, minute);
+  const now = new Date();
+  const phaseName = PhaseManager.getPhaseDisplayName(phase);
+  const timeRange = PhaseManager.getPhaseTimeRange(phase);
+  const currentTime = formatTime(now.getHours(), now.getMinutes());
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         {/* Phase name with glitch effect */}
         <GlitchText
-          text={`${phaseName}レイヤー`}
+          text={t('phase.guard.layerTitle', { phase: phaseName })}
           severity={1}
           health={0}
           style={styles.phaseTitle}
         />
 
         {/* Access denied message */}
-        <Text style={styles.deniedText}>アクセス不可</Text>
+        <Text style={styles.deniedText}>{t('phase.guard.accessDenied')}</Text>
 
         {/* Available time range */}
         <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>利用可能時間:</Text>
+          <Text style={styles.infoLabel}>{t('phase.guard.availableTime')}</Text>
           <Text style={styles.infoValue}>{timeRange}</Text>
         </View>
 
         {/* Current time */}
         <View style={styles.infoContainer}>
-          <Text style={styles.infoLabel}>現在時刻:</Text>
+          <Text style={styles.infoLabel}>{t('phase.guard.currentTime')}</Text>
           <Text style={styles.infoValue}>{currentTime}</Text>
         </View>
       </View>

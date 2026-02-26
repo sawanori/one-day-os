@@ -1,0 +1,227 @@
+{
+  "common": {
+    "back": "BACK",
+    "next": "NEXT",
+    "submit": "COMPLETE",
+    "cancel": "CANCEL",
+    "confirm": "CONFIRM",
+    "yes": "YES",
+    "no": "NO"
+  },
+  "phase": {
+    "morning": {
+      "name": "MORNING",
+      "timeRange": "06:00 - 12:00"
+    },
+    "afternoon": {
+      "name": "AFTERNOON",
+      "timeRange": "12:00 - 18:00"
+    },
+    "evening": {
+      "name": "EVENING",
+      "timeRange": "18:00 - 24:00"
+    },
+    "night": {
+      "name": "NIGHT",
+      "timeRange": "00:00 - 06:00"
+    },
+    "guard": {
+      "accessDenied": "ACCESS DENIED",
+      "availableTime": "Available hours:",
+      "currentTime": "Current time:",
+      "layerTitle": "{{phase}} LAYER"
+    }
+  },
+  "reflection": {
+    "q1": "Who are you?",
+    "q2": "What are you doing?",
+    "q3": "Why are you doing this?",
+    "q4": "Is this aligned with your identity?",
+    "q5": "What will you do next?",
+    "q6": "What are you trying to avoid?"
+  },
+  "notification": {
+    "buttonYes": "YES",
+    "buttonNo": "NO",
+    "body": "Respond within 5 minutes. No response = IH -20%"
+  },
+  "onboarding": {
+    "identity": {
+      "heading": "IDENTITY",
+      "explanationTitle": "WHAT IS THIS:",
+      "explanation": "The ideal self you're aiming for.\nThe exact opposite of your anti-vision.",
+      "exampleTitle": "EXAMPLE:",
+      "example": "\"I am someone who keeps promises and constantly challenges my limits\"",
+      "prompt": "What kind of person will you become?",
+      "placeholderTemplate": "I am someone who...",
+      "placeholder": "Enter now"
+    },
+    "mission": {
+      "heading": "MISSION",
+      "explanationTitle": "WHAT IS THIS:",
+      "explanation": "The goal you will achieve one year from now.\nA concrete escape route from your anti-vision.",
+      "exampleTitle": "EXAMPLE:",
+      "example": "\"In one year, become an engineer earning $60k/year\"",
+      "prompt": "What is your most critical mission this year?",
+      "placeholder": "Enter now"
+    },
+    "quests": {
+      "heading": "QUESTS",
+      "explanationTitle": "WHAT IS THIS:",
+      "explanation": "Specific tasks to complete today.\nSet two quests.",
+      "exampleTitle": "EXAMPLE:",
+      "example": "\"Wake up at 6 AM\"\n\"Code for 3 hours\"",
+      "prompt": "Set 2 quests to complete every day",
+      "placeholder1": "Quest 1",
+      "placeholder2": "Quest 2"
+    }
+  },
+  "ceremony": {
+    "covenant": {
+      "title": "RESOLVE YOURSELF",
+      "hint": "Long press when ready"
+    },
+    "excavation": {
+      "title": "5 years from now. Worst Tuesday.",
+      "instruction": "Write your pathetic future in 3 lines if you never change.",
+      "placeholder": "EXAMPLE:\nWake up with no motivation\nSame work repeating endlessly\nNo dreams, no hope, just existing",
+      "warning": "Stagnation means death",
+      "submit": "ENGRAVE"
+    },
+    "judgment": {
+      "question": "Are you ready to escape\nyour worst future?",
+      "instruction": "Answer within 5 seconds",
+      "warning": "Those without resolve have no right to rebuild",
+      "timeout": "TIME OVER"
+    },
+    "lensSync": {
+      "mission": {
+        "label": "MISSION",
+        "description": "This focal length reflects who you are in one year.\nWhy are you here. What will you achieve.\nNever lose sight of your mission."
+      },
+      "identity": {
+        "label": "IDENTITY",
+        "description": "This focal length reflects who you are now.\nWho are you. What are you.\nDon't run from that question."
+      },
+      "quest": {
+        "label": "QUEST",
+        "description": "This focal length reflects what you must do today.\nGrand visions are only realized through daily action.\nWhat will you do today."
+      },
+      "tapToContinue": "Tap to continue",
+      "pinchHint": "Pinch to zoom"
+    },
+    "flow": {
+      "restart": "Start over from the beginning"
+    }
+  },
+  "quest": {
+    "completion": {
+      "doubt1": "Of course. But won't you betray yourself again in the next 5 minutes?",
+      "doubt2": "Done? But did you really accomplish it?",
+      "doubt3": "Well done. But has it changed your life?",
+      "doubt4": "I'll trust that report. But do you have the courage to do it again?",
+      "doubt5": "Acknowledged. But isn't that result just temporary?"
+    },
+    "mirror": {
+      "question": "Aren't your current actions affirming that disgusting version of yourself? Acknowledge it and declare one habit you will kill.",
+      "placeholder": "Enter the habit to kill...",
+      "submit": "ENGRAVE"
+    },
+    "gap": {
+      "title": "SEVERANCE DECREE",
+      "question": "Declare a more painful, inescapable concrete action",
+      "placeholder": "Enter a painful action...",
+      "submit": "PRESENT"
+    }
+  },
+  "death": {
+    "title": "You are dead.",
+    "sentencing": "You failed to maintain the structure.",
+    "void": "Welcome back to the old you.",
+    "wiping": "EXECUTING WIPE..."
+  },
+  "despair": {
+    "title": "You are dead."
+  },
+  "insurance": {
+    "title": "IDENTITY INSURANCE",
+    "copy": "Will you erase everything you've fought for as worthless garbage? Or will you buy back time with money?",
+    "buyLabel": "I AM WEAK",
+    "buy": "PURCHASE NOW",
+    "accept": "ACCEPT DEATH",
+    "postPurchase": {
+      "label": "PAID IDENTITY",
+      "comment": "You survived. But never forget — your resolve was sold for {{price}}.",
+      "serialCoward": "SERIAL COWARD"
+    },
+    "error": {
+      "purchaseFailed": "Purchase failed. Deletion resumes.",
+      "timeout": "Time's up. Deletion resumes."
+    }
+  },
+  "systemRejection": {
+    "title": "IDENTITY COLLAPSE"
+  },
+  "notFound": {
+    "message": "SCREEN NOT FOUND",
+    "goHome": "RETURN HOME"
+  },
+  "lens": {
+    "identity": {
+      "title": "Your ideal state",
+      "subtitle": "This is your natural state. No effort required."
+    },
+    "mission": {
+      "title": "The worst future you envision"
+    },
+    "quest": {
+      "title": "Only this matters. Ignore everything else."
+    }
+  },
+  "web": {
+    "notSupported": {
+      "title": "WEB NOT SUPPORTED",
+      "message": "One Day OS is a mobile-only application.",
+      "instruction": "Please open this app on your mobile device (iOS or Android)."
+    }
+  },
+  "error": {
+    "boundary": {
+      "title": "ERROR OCCURRED",
+      "retry": "RETRY"
+    }
+  },
+  "judgment": {
+    "screen": {
+      "title": "JUDGMENT",
+      "label": "IMMEDIATE RESPONSE REQUIRED",
+      "hint": "Hesitation is defeat.",
+      "silenceIsDefeat": "Silence is synonymous with defeat.",
+      "todayComplete": "Today's judgments are complete",
+      "nextEstimate": "Estimated: {{min}}-{{max}} min",
+      "judgmentLog": "JUDGMENT LOG",
+      "totalLoss": "Total Loss: {{delta}}%",
+      "nextJudgment": "NEXT JUDGMENT"
+    },
+    "evasion": {
+      "q1": "Is '{{quest_1}}' done? If not, what are you doing right now?",
+      "q2": "What is the most important thing you're pretending isn't important?"
+    },
+    "observer": {
+      "q1": "Someone watching you for 5 minutes — what would they conclude you want?",
+      "q2": "A person who claims '{{identity}}' is doing this right now. Explain the contradiction."
+    },
+    "dissonance": {
+      "q1": "{{identity}} — Is this still true?",
+      "q2": "Does your current action align with your defined ideal? Can you say YES?"
+    },
+    "anti_vision": {
+      "q1": "{{anti_vision_fragment}} — Did this minute bring you closer or further?",
+      "q2": "1 year from now, the worst Tuesday. Is this minute making it certain?"
+    },
+    "survival": {
+      "q1": "Silence is death. Have you given up on yourself?",
+      "q2": "Respond. Otherwise, your resolve amounts to nothing."
+    }
+  }
+}

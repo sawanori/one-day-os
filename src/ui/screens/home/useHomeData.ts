@@ -42,7 +42,7 @@ export const useHomeData = () => {
           return;
         }
 
-        const questsData = await db.getAllAsync<Quest>('SELECT * FROM quests WHERE DATE(created_at) = DATE("now")');
+        const questsData = await db.getAllAsync<Quest>('SELECT * FROM quests');
 
         setMission(identityData.one_year_mission || '');
         setAntiVision(identityData.anti_vision || '');
@@ -65,16 +65,31 @@ export const useHomeData = () => {
       if (!quest) return;
 
       const newCompleted = quest.is_completed === 0 ? 1 : 0;
-      await db.runAsync(
-        'UPDATE quests SET is_completed = ?, completed_at = ? WHERE id = ?',
-        [newCompleted, newCompleted === 1 ? new Date().toISOString() : null, id]
-      );
+      const wasAlreadyCompletedBefore = quest.completed_at !== null;
 
-      // Update local state
-      setQuests(prev => prev.map(q => q.id === id ? { ...q, is_completed: newCompleted } : q));
-
-      // Restore health on completion
       if (newCompleted === 1) {
+        // Completing: set completed_at only if never completed before (COALESCE preserves existing value)
+        await db.runAsync(
+          'UPDATE quests SET is_completed = 1, completed_at = COALESCE(completed_at, ?) WHERE id = ?',
+          [new Date().toISOString(), id]
+        );
+      } else {
+        // Uncompleting: toggle is_completed but KEEP completed_at as evidence of prior completion
+        await db.runAsync(
+          'UPDATE quests SET is_completed = 0 WHERE id = ?',
+          [id]
+        );
+      }
+
+      // Update local state (never clear completed_at - it serves as "was ever completed" evidence)
+      setQuests(prev => prev.map(q => q.id === id ? {
+        ...q,
+        is_completed: newCompleted,
+        completed_at: newCompleted === 1 ? (q.completed_at || new Date().toISOString()) : q.completed_at,
+      } : q));
+
+      // Restore health only on FIRST completion (never completed before today)
+      if (newCompleted === 1 && !wasAlreadyCompletedBefore) {
         const engine = await IdentityEngine.getInstance();
         await engine.restoreHealth(5);
       }
