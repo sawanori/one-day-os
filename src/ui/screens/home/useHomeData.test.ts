@@ -110,13 +110,7 @@ describe('useHomeData', () => {
       expect(result.current.quests).toEqual([]);
     });
 
-    it('should query quests with today date filter', async () => {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const todayString = `${year}-${month}-${day}`;
-
+    it('should query all quests ordered by id (no date filter)', async () => {
       mockGetFirstAsync.mockResolvedValue({
         identity_statement: 'I am a builder',
         anti_vision: 'Waste',
@@ -128,26 +122,7 @@ describe('useHomeData', () => {
 
       await waitFor(() => {
         expect(mockGetAllAsync).toHaveBeenCalledWith(
-          expect.stringContaining('WHERE DATE(created_at) = ?'),
-          [todayString]
-        );
-      });
-    });
-
-    it('should include ORDER BY id ASC in quest query', async () => {
-      mockGetFirstAsync.mockResolvedValue({
-        identity_statement: 'I am a builder',
-        anti_vision: 'Waste',
-        one_year_mission: 'Ship it',
-      });
-      mockGetAllAsync.mockResolvedValue([]);
-
-      renderHook(() => useHomeData());
-
-      await waitFor(() => {
-        expect(mockGetAllAsync).toHaveBeenCalledWith(
-          expect.stringContaining('ORDER BY id ASC'),
-          expect.any(Array)
+          'SELECT * FROM quests ORDER BY id ASC'
         );
       });
     });

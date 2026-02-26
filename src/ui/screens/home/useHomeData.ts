@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { IdentityEngine } from '../../../core/identity/IdentityEngine';
 import { getDB } from '../../../database/client';
-import { getTodayString } from '../../../utils/date';
 
 export interface Quest {
   id: number;
@@ -42,11 +41,10 @@ export const useHomeData = () => {
         return;
       }
 
-      // Filter quests to today only so stale quests from prior days never appear
-      const today = getTodayString();
+      // DailyManager.resetDailyQuests() deletes stale quests on date change,
+      // so no date filter needed here. Avoids UTC/local mismatch with legacy data.
       const questsData = await db.getAllAsync<Quest>(
-        'SELECT * FROM quests WHERE DATE(created_at) = ? ORDER BY id ASC',
-        [today]
+        'SELECT * FROM quests ORDER BY id ASC'
       );
 
       setMission(identityData.one_year_mission || '');
